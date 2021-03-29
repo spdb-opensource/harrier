@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="uds_server">
+
+	<resultMap type="com.spdb.uds.db.bean.UdsServerBean"
+		id="UdsServerBean">
+		<id property="server_name" column="server_name" />
+		<result property="order" column="order" />
+		<result property="ip" column="ip" />
+		<result property="port" column="port" />
+		<result property="agent_port" column="agent_port" />
+		<result property="http_port" column="http_port" />
+		<result property="server_type" column="server_type" />
+		<result property="performance_ratio" column="performance_ratio" />
+		<result property="is_enable" column="is_enable" />
+		<result property="last_start" column="last_start" />
+		<result property="last_end" column="last_end" />
+		<result property="location" column="location" />
+		<result property="tags" column="tags" />
+	</resultMap>
+
+	<select id="getUdsServerS" resultMap="UdsServerBean">
+		<![CDATA[
+			SELECT `order`,server_name,ip,port,agent_port,http_port,max_job_num,server_type,tags
+			,performance_ratio,is_enable,last_start,last_end,location FROM uds_server WHERE is_enable=1;
+		]]>
+	</select>
+
+	<select id="getUdsServerByServerName" parameterType="String"
+		resultMap="UdsServerBean">
+		<![CDATA[
+			SELECT server_name,`order`,ip,port,agent_port,http_port,max_job_num,server_type,tags
+			,performance_ratio,is_enable,last_start,last_end,location FROM uds_server WHERE server_name=#{server_name};
+		]]>
+	</select>
+
+	<select id="getUdsServerByServerIp" parameterType="String"
+		resultMap="UdsServerBean">
+		<![CDATA[
+			SELECT server_name,`order`,ip,port,agent_port,http_port,max_job_num,server_type,tags
+			,performance_ratio,is_enable,last_start,last_end,location FROM uds_server WHERE ip=#{ip};
+		]]>
+	</select>
+
+	<update id="updateUdsServerStartTime" parameterType="String">
+		<![CDATA[
+			update uds_server set last_start=now() where server_name=#{server_name};
+		]]>
+	</update>
+
+	<update id="updateUdsServerEndTime" parameterType="String">
+		<![CDATA[
+			update uds_server set last_end=now() where server_name=#{server_name};
+		]]>
+	</update>
+
+
+	<!-- 存在就更新，不存在则插入 -->
+	<insert id="insertUdsServer"
+		parameterType="com.spdb.uds.db.bean.UdsServerBean">
+		<![CDATA[
+			INSERT INTO uds_server (server_name,oreder,ip,port,agent_port,server_type,max_job_num,performance_ratio,last_start,last_end,location) 
+			VALUES(#{server_name},#{order},#{ip},#{port},#{agent_port},#{server_type},#{max_job_num},#{performance_ratio},#{last_start},#{last_end},#{location}) 
+			ON DUPLICATE KEY UPDATE 
+			ip=#{ip},order=#{order},port=#{port},agent_port=#{agent_port},server_type=#{server_type},max_job_num=#{max_job_num},performance_ratio=#{performance_ratio},
+			last_start=#{last_start},last_end=#{last_end},location=#{location};
+		]]>
+	</insert>
+
+	<select id="getUdsConstant" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		<![CDATA[
+			SELECT `key`,`value` FROM uds_constant;
+		]]>
+	</select>
+
+
+	<update id="updateUdsServer" parameterType="java.util.Map">
+		<![CDATA[
+			UPDATE uds_server SET max_job_num=#{max_job_num},performance_ratio=#{performance_ratio},is_enable=#{is_enable} 
+			,location=#{location}
+			WHERE server_name=#{server_name};
+		]]>
+	</update>
+	<update id="updateUdsServerTags" parameterType="java.util.Map">
+		<![CDATA[
+			UPDATE uds_server SET tags=#{tags}
+			WHERE server_name=#{server_name};
+		]]>
+	</update>
+
+</mapper>

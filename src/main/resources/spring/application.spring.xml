@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+
+	<!-- 指定要被扫描的包 -->
+	<context:component-scan base-package="com.spdb.uds"
+		annotation-config="true" />
+
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+
+	<bean class="com.spdb.uds.utils.EncryptPropertyPlaceholderConfigurer">
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+		<property name="locations">
+			<value>file:./config/uds.configuration.properties</value>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="order" value="1" />
+	</bean>
+
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<!-- 数据库驱动 -->
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<!-- 相应驱动的jdbcUrl,你懂的 -->
+		<property name="url" value="${jdbc.url}" />
+		<!-- 数据库的用户名 -->
+		<property name="username" value="${jdbc.username}" />
+		<!-- 数据库的密码 -->
+		<property name="password" value="${jdbc.password}" />
+
+		<!-- 初始连接数量 -->
+		<property name="initialSize" value="1" />
+		<!-- 每个分区最小的连接数 -->
+		<property name="minIdle" value="1" />
+		<!-- 每个分区最大的连接数 -->
+		<property name="maxActive" value="100" />
+		<!-- 连接超时报错 -->
+		<property name="maxWait" value="30000" />
+		<!-- 配置关闭空闲连接的检测时间 单位毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		<!-- 配置一个连接在连接池中的最小生存时间 -->
+		<property name="minEvictableIdleTimeMillis" value="30000" />
+		<property name="validationQuery" value="select 1" />
+		<property name="testWhileIdle" value="true" />
+		<!-- 防止连接不可用 -->
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+
+		<property name="removeAbandoned" value="true" />
+		<property name="removeAbandonedTimeout" value="900" />
+		<property name="logAbandoned" value="true" />
+
+	</bean>
+
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath:./db/map/*.xml" />
+	</bean>
+
+	<bean id="DBManager" class=" com.spdb.uds.db.DBManager">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+
+
+	<bean id="SystemOutAndErrPrintStream" class=" com.spdb.uds.db.DBManager">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 事务配置 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- 事务拦截 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="*" propagation="REQUIRED" rollback-for="Exception" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 被拦截类配置 -->
+	<aop:config>
+		<aop:pointcut id="daoOperation"
+			expression="execution(* com.spdb.uds.db.dao..*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="daoOperation" />
+	</aop:config>
+
+</beans>

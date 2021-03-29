@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="uds_job_base">
+
+	<resultMap type="com.spdb.uds.db.bean.UdsJobBean"
+		id="UdsJobBean">
+		<id property="job" column="job" />
+		<result property="platform" column="platform" />
+		<result property="system" column="system" />
+		<result property="server_name" column="server_name" />
+		<result property="job_type" column="job_type" />
+		<result property="last_status" column="last_status" />
+		<result property="job_date" column="job_date" />
+		<result property="virtual_enable" column="virtual_enable" />
+		<result property="last_script_name" column="last_script_name" />
+		<result property="timewindow" column="timewindow" />
+		<result property="check_frequency" column="check_frequency" />
+		<result property="check_time_trigger"
+			column="check_time_trigger" />
+		<result property="batch" column="batch" />
+		<result property="priority" column="priority" />
+		<result property="num_times" column="num_times" />
+		<result property="start_time" column="start_time" />
+		<result property="pending_time" column="pending_time" />
+		<result property="end_time" column="end_time" />
+		<result property="dispatcher_time" column="dispatcher_time" />
+		<result property="call_again_max_num"
+			column="call_again_max_num" />
+		<result property="call_again_num" column="call_again_num" />
+		<result property="check_file_stream" column="check_file_stream" />
+		<result property="ignore_error" column="ignore_error" />
+		<result property="location" column="location" />
+		<result property="check_weight" column="check_weight" />
+	</resultMap>
+
+
+	<resultMap type="com.spdb.uds.db.bean.UdsJobStepBean"
+		id="UdsJobStepBean">
+		<id property="job" column="job" />
+		<result property="platform" column="platform" />
+		<result property="system" column="system" />
+		<result property="setp_num" column="setp_num" />
+		<result property="oper_cmd" column="oper_cmd" />
+		<result property="script_dir" column="script_dir" />
+		<result property="script_name" column="script_name" />
+		<result property="parameter" column="parameter" />
+		<result property="step_type" column="step_type" />
+		<result property="environments" column="environments" />
+		<result property="work_dir" column="work_dir" />
+	</resultMap>
+
+	<!-- 作业名获取信号文件名 -->
+	<select id="getSignFileKeyByJob" parameterType="String"
+		resultType="String">
+		<![CDATA[
+			SELECT src_signal FROM uds_job_source WHERE job=#{job};
+		]]>
+	</select>
+
+	<!-- 信号文件命获取作业信息 -->
+	<select id="getUdsJobBeanBySource" parameterType="String"
+		resultMap="UdsJobBean">
+		<![CDATA[
+			SELECT platform,system,job,server_name,job_type,last_status,job_date
+			,last_script_name,timewindow,virtual_enable,check_frequency,check_time_trigger,check_weight,
+			batch,priority,num_times,pending_time,dispatcher_time,start_time,end_time
+			,call_again_max_num,call_again_num,location,check_file_stream,ignore_error
+			 FROM uds_job WHERE job IN(
+			SELECT job FROM uds_job_source WHERE src_signal=#{src_signal}
+			) AND is_enable=1;
+		]]>
+	</select>
+
+	<!-- 信号文件命获取作业信息 -->
+	<select id="getUdsJobBeanBySourceAndLoaction"
+		parameterType="java.util.Map" resultMap="UdsJobBean">
+		<![CDATA[
+			SELECT platform,system,job,server_name,job_type,last_status,job_date
+			,last_script_name,timewindow,virtual_enable,check_frequency,check_time_trigger,check_weight,
+			batch,priority,num_times,pending_time,dispatcher_time,start_time,end_time
+			,call_again_max_num,call_again_num,location,check_file_stream,ignore_error
+			 FROM uds_job WHERE job IN(
+			SELECT job FROM uds_job_source WHERE src_signal=#{src_signal}
+			) AND is_enable=1 AND location&#{location}>0;
+		]]>
+	</select>
+
+	<!-- 作业名获取作业信息 -->
+	<select id="getUdsJobBeanByJob" parameterType="String"
+		resultMap="UdsJobBean">
+		<![CDATA[
+			SELECT platform,system,job,server_name,job_type,last_status,job_date
+			,last_script_name,timewindow,virtual_enable,check_frequency,check_time_trigger,check_weight,
+			batch,priority,num_times,pending_time,dispatcher_time,start_time,end_time
+			,call_again_max_num,call_again_num,location,check_file_stream,ignore_error
+			 FROM uds_job WHERE job =#{job} AND is_enable=1;
+		]]>
+	</select>
+
+	<!-- 作业名获取转换后信号文件名 -->
+	<select id="getConvSignalByJob" parameterType="java.util.Map"
+		resultType="String">
+		<![CDATA[
+			SELECT conv_signal FROM uds_job_source 
+			WHERE  platform=#{platform} AND system=#{system} AND job=#{job} ;
+		]]>
+	</select>
+
+	<!-- 按照平台系统获取 -->
+	<select id="checkPendingJobByPlatform"
+		parameterType="java.util.Map" resultMap="UdsJobBean">
+		<![CDATA[
+			SELECT platform,system,job,server_name,job_type,last_status,job_date
+			,last_script_name,timewindow,virtual_enable,check_frequency,check_time_trigger,check_weight,
+			batch,priority,num_times,pending_time,dispatcher_time,start_time,end_time
+			,call_again_max_num,call_again_num,location,check_file_stream,ignore_error
+			 FROM uds_job WHERE last_status=#{last_status} AND is_enable=1 AND
+			platform=#{platform} 
+			ORDER BY priority DESC LIMIT #{max_job_num};
+		]]>
+	</select>
+
+	<!-- 一次性获取 -->
+	<select id="checkPendingJob" parameterType="java.util.Map"
+		resultMap="UdsJobBean">
+		<![CDATA[
+			SELECT platform,system,job,server_name,job_type,last_status,job_date
+			,last_script_name,timewindow,virtual_enable,check_frequency,check_time_trigger,check_weight,
+			batch,priority,num_times,pending_time,dispatcher_time,start_time,end_time
+			,call_again_max_num,call_again_num,location,check_file_stream,ignore_error
+			 FROM uds_job WHERE last_status=#{last_status} AND is_enable=1 
+			ORDER BY priority DESC LIMIT #{max_job_num};
+		]]>
+	</select>
+
+	<!-- 分页获取 -->
+	<select id="checkPendingJobOrder" parameterType="java.util.Map"
+		resultMap="UdsJobBean">
+		<![CDATA[
+			SELECT platform,system,job,server_name,job_type,last_status,job_date
+			,last_script_name,timewindow,virtual_enable,check_frequency,check_time_trigger,check_weight,
+			batch,priority,num_times,pending_time,dispatcher_time,start_time,end_time
+			,call_again_max_num,call_again_num,location,check_file_stream,ignore_error
+			 FROM uds_job WHERE last_status=#{last_status} AND is_enable=1 
+			ORDER BY priority DESC LIMIT #{init_num},#{max_job_num};
+		]]>
+	</select>
+
+	<!-- 分页获取 -->
+	<select id="checkPendingJobByPlatformOrder"
+		parameterType="java.util.Map" resultMap="UdsJobBean">
+		<![CDATA[
+			SELECT platform,system,job,server_name,job_type,last_status,job_date
+			,last_script_name,timewindow,virtual_enable,check_frequency,check_time_trigger,check_weight,
+			batch,priority,num_times,pending_time,dispatcher_time,start_time,end_time
+			,call_again_max_num,call_again_num,location,check_file_stream,ignore_error
+			 FROM uds_job WHERE last_status=#{last_status} AND is_enable=1 AND platform=#{platform}
+			AND #{location}&location>0
+			ORDER BY priority DESC LIMIT #{init_num},#{max_job_num};
+		]]>
+	</select>
+
+	<select id="getUdsJobStepBean" parameterType="java.util.Map"
+		resultMap="UdsJobStepBean">
+		<![CDATA[
+			SELECT platform,system,job,setp_num,oper_cmd,script_dir,script_name
+			,parameter,step_type,environments,work_dir FROM uds_job_step 
+			WHERE  platform=#{platform} AND system=#{system} 
+			AND job=#{job} AND is_enable=1 ORDER BY setp_num ASC;
+		]]>
+	</select>
+
+	<select id="checkCallAgainJob" parameterType="java.util.Map"
+		resultMap="UdsJobBean">
+		<![CDATA[
+			SELECT platform,system,job,server_name,job_type,last_status,job_date
+			,last_script_name,timewindow,virtual_enable,check_frequency,check_time_trigger,check_weight,
+			batch,priority,num_times,pending_time,dispatcher_time,start_time,end_time
+			,call_again_max_num,call_again_num,location,check_file_stream,ignore_error
+			 FROM uds_job WHERE is_enable=1 AND #{location}&location>0 AND ( 
+			(call_again_max_num>call_again_num AND last_status=#{failed_status} ) 
+			);
+		]]>
+		<!--OR (last_status=#{dispatcher_status} AND now()-dispatcher_time>#{over_time}) -->
+	</select>
+
+	<select id="getJobStatusDispatcherOverTime"
+		resultMap="UdsJobBean">
+		<![CDATA[
+			 SELECT platform,system,job,server_name,job_type,last_status,job_date
+			,last_script_name,timewindow,virtual_enable,check_frequency,check_time_trigger,check_weight,
+			batch,priority,num_times,pending_time,dispatcher_time,start_time,end_time
+			,call_again_max_num,call_again_num,location,check_file_stream,ignore_error
+			 FROM uds_job WHERE is_enable=1 AND
+			 last_status=#{dispatcher_status} AND now()-dispatcher_time>#{over_time}
+			 AND #{location}&location>0;
+		]]>
+	</select>
+
+	<update id="updateJobStatus" parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET last_status=#{last_status} 
+			 WHERE  platform=#{platform} AND system=#{system} AND job=#{job};
+		]]>
+	</update>
+
+
+	<update id="updateJobPending" parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET last_status=#{last_status},pending_time=NOW(), 
+			 batch=#{batch}, job_date=#{job_date} 
+			 WHERE  platform=#{platform} AND system=#{system} AND job=#{job} 
+			 AND (last_status=#{done_status} OR last_status=#{ready_status});
+		]]>
+	</update>
+
+	<!-- 作业触发批量修改触发作业 ,单批次 -->
+	<update id="updateJobOnlyTriggerByStatusPending"
+		parameterType="java.util.Map">
+		UPDATE uds_job SET last_status=#{last_status},pending_time=NOW(),
+		batch=#{batch}, job_date=#{job_date}
+		WHERE (last_status=#{done_status}
+		OR last_status=#{ready_status})
+		AND batch = 0
+		AND job IN
+		<foreach collection="jobList" item="item" index="index"
+			open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		;
+	</update>
+
+	<!-- 作业触发批量修改触发作业 ，多批次 -->
+	<update id="updateJobManyTriggerByStatusPending"
+		parameterType="java.util.Map">
+		UPDATE uds_job SET last_status=#{last_status},pending_time=NOW(),
+		batch=#{batch}, job_date=#{job_date}
+		WHERE (last_status=#{done_status}
+		OR last_status=#{ready_status})
+		AND batch > 0
+		AND job IN
+		<foreach collection="jobList" item="item" index="index"
+			open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		;
+	</update>
+
+
+	<!--时间触发修改作业 -->
+	<update id="updateDateTriggerJobStartTime"
+		parameterType="java.util.Map">
+		<![CDATA[
+			UPDATE uds_job_date_trigger A,uds_job B SET A.start_time= #{start_time}, 
+			B.job_date=#{job_date},B.batch=#{batch},
+			B.last_status=#{last_status},B.pending_time= NOW() 
+			WHERE B.job=A.job AND A.id=#{id} 
+			AND (B.last_status=#{done_status} OR B.last_status=#{ready_status});
+		]]>
+	</update>
+
+	<!--时间触发修改开始时间 -->
+	<update id="updateDateTriggerStartTime"
+		parameterType="java.util.Map">
+		<![CDATA[
+			UPDATE uds_job_date_trigger SET start_time= #{start_time} 
+			WHERE  id=#{id};
+		]]>
+	</update>
+
+	<update id="retryDistributByStatusPending"
+		parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET last_status=#{last_status} 
+			 WHERE  platform=#{platform} AND system=#{system} AND job=#{job} 
+	         AND last_status<> #{runing_status};
+		]]>
+	</update>
+
+	<update id="callAgainJobByStatusPending"
+		parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET last_status=#{last_status},call_again_num= call_again_num+1 
+			 WHERE  platform=#{platform} AND system=#{system} AND job=#{job} 
+	         AND last_status<> #{runing_status} AND call_again_max_num>call_again_num;
+		]]>
+	</update>
+
+
+	<update id="updateAllJobStatusDispatcher"
+		parameterType="java.util.Map">
+		UPDATE uds_job SET last_status=#{last_status},dispatcher_time=NOW()
+		WHERE last_status=#{old_status} AND job IN
+		<foreach collection="jobList" item="item" index="index"
+			open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateJobServerNameByLastStatus"
+		parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET server_name=#{server_name} 
+			 WHERE  platform=#{platform} AND system=#{system} AND job=#{job}
+			 AND last_status=#{last_status};
+		]]>
+	</update>
+
+	<update id="updateJobDispatcher" parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET last_status=#{last_status},dispatcher_time=NOW(), 
+			 server_name=#{server_name} 
+			 WHERE  platform=#{platform} AND system=#{system} AND job=#{job} 
+			 AND  last_status=#{old_status};
+		]]>
+	</update>
+
+	<update id="updateJobRuningByForceStart"
+		parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET last_status=#{last_status},server_name=#{server_name},
+			 batch=#{batch}, job_date=#{job_date},start_time=NOW(),
+			 num_times=num_times+1,pending_time=NOW(),dispatcher_time=NOW() 
+			 WHERE  platform=#{platform} AND system=#{system} AND job=#{job} ;
+		]]>
+	</update>
+
+	<update id="updateJobServerName" parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET server_name=#{server_name} 
+			 WHERE  platform=#{platform} AND system=#{system} AND job=#{job} ;
+		]]>
+	</update>
+
+	<update id="updateJobRuning" parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET last_status=#{last_status},start_time=NOW(),
+			 num_times=num_times+1 
+			 WHERE platform=#{platform} AND system=#{system} AND job=#{job}  
+			 AND server_name=#{server_name} AND last_status=#{old_status} 
+			 AND #{location}&location>0;
+		]]>
+	</update>
+
+	<update id="updateJobDone" parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET last_status=#{last_status},end_time=NOW(), 
+			 server_name=#{server_name},call_again_num=#{call_again_num},
+			 last_script_name=#{last_script_name} 
+			 WHERE  platform=#{platform} AND system=#{system} AND job=#{job} 
+			 AND (last_status=#{last_runing} or last_status=#{last_unknown}) ;
+		]]>
+	</update>
+
+	<update id="updateJobFailed" parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET last_status=#{last_status},end_time=NOW(), 
+			 server_name=#{server_name},last_script_name=#{last_script_name} 
+			 WHERE  platform=#{platform} AND system=#{system} AND job=#{job} ;
+		]]>
+	</update>
+
+	<update id="updateChildJobStatus" parameterType="java.util.Map">
+		<![CDATA[
+			UPDATE uds_job SET last_status=#{last_status} 
+			WHERE server_name=#{server_name} AND last_status=#{old_status};
+		]]>
+	</update>
+
+
+
+</mapper>
