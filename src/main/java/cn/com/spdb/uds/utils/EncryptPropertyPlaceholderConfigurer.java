@@ -6,7 +6,7 @@ public class EncryptPropertyPlaceholderConfigurer extends PropertyPlaceholderCon
 
 	@Override
 	protected String convertProperty(String propertyName, String propertyValue) {
-		if (propertyName.contains("password")&&propertyValue.length()==16&&propertyValue.matches("[0-9a-z]+")) {
+		if (propertyName.contains("password")&&propertyValue.matches("[0-9a-z]+")) {
 			IceKey ikey = new IceKey(0);
 			/**解密*/
 			propertyValue = ikey.decode(propertyValue, propertyName);

@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="uds_job_control">
 
-	<resultMap type="cn.com.spdb.uds.db.bean.UdsJobBean"
+	<resultMap type="com.spdb.uds.db.bean.UdsJobBean"
 		id="UdsJobBean">
 		<id property="job" column="job" />
 		<result property="platform" column="platform" />
@@ -37,7 +37,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 
 	<resultMap
-		type="cn.com.spdb.uds.db.bean.UdsJobDateFrequencyBean"
+		type="com.spdb.uds.db.bean.UdsJobDateFrequencyBean"
 		id="UdsJobDateFrequencyBean">
 		<id property="job" column="job" />
 		<result property="id" column="id" />
@@ -51,7 +51,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="year" column="year" />
 	</resultMap>
 
-	<resultMap type="cn.com.spdb.uds.db.bean.UdsJobDateTriggerBean"
+	<resultMap type="com.spdb.uds.db.bean.UdsJobDateTriggerBean"
 		id="UdsJobDateTriggerBean">
 		<id property="job" column="job" />
 		<result property="id" column="id" />
@@ -75,7 +75,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 
-	<resultMap type="cn.com.spdb.uds.db.bean.UdsSystemBean"
+	<resultMap type="com.spdb.uds.db.bean.UdsSystemBean"
 		id="UdsSystemBean">
 		<id property="system" column="system" />
 		<result property="platform" column="platform" />
@@ -197,7 +197,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<update id="updateUdsSystem"
-		parameterType="cn.com.spdb.uds.db.bean.UdsSystemBean">
+		parameterType="com.spdb.uds.db.bean.UdsSystemBean">
 		<![CDATA[
 			UPDATE uds_system SET max_run_job=#{max_run_job},strategy=#{strategy},use_platform=#{use_platform},strategy_pro=#{strategy_pro} 
 			WHERE platform=#{platform} AND system=#{system};
