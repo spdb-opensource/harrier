@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="uds_job_tages">
 
-	<resultMap type="com.spdb.uds.db.bean.UdsJobTagBean"
+	<resultMap type="cn.com.spdb.uds.db.bean.UdsJobTagBean"
 		id="UdsJobTagBean">
 		<id property="id" column="id" />
 		<result property="platform" column="platform" />

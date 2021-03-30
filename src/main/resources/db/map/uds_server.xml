@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="uds_server">
 
-	<resultMap type="com.spdb.uds.db.bean.UdsServerBean"
+	<resultMap type="cn.com.spdb.uds.db.bean.UdsServerBean"
 		id="UdsServerBean">
 		<id property="server_name" column="server_name" />
 		<result property="order" column="order" />
@@ -59,7 +59,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<!-- 存在就更新，不存在则插入 -->
 	<insert id="insertUdsServer"
-		parameterType="com.spdb.uds.db.bean.UdsServerBean">
+		parameterType="cn.com.spdb.uds.db.bean.UdsServerBean">
 		<![CDATA[
 			INSERT INTO uds_server (server_name,oreder,ip,port,agent_port,server_type,max_job_num,performance_ratio,last_start,last_end,location) 
 			VALUES(#{server_name},#{order},#{ip},#{port},#{agent_port},#{server_type},#{max_job_num},#{performance_ratio},#{last_start},#{last_end},#{location}) 
