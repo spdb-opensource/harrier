@@ -4,7 +4,7 @@
 
 2020年浦发银行大数据中心创立Data Ocean数据品牌体系，旨在面向金融行业各类业务主题和数据应用场景，为新业态下的金融业务发展和金融数据生态提供丰富的数据服务与解决方案。目前整个D品牌下涵盖各类基础数据平台、金融数据服务产品、数据治理服务产品，形成了从基础数据环境建设到各类业务场景赋能的全套解决方案和实施方法论。
 
-harrier海鹞为Data Ocean品牌体系下的调度工具类产品，由Java开发，支持Linux,Windows,AIX环境部署，支持各类异构数据计算平台的作业调度（Hive,Spark,Teradata,Oracke,DB2,DataStage等），支持各类自定义任务作业调度（Java,Shell,Python,Perl等）。
+harrier海鹞为Data Ocean品牌体系下的调度工具类产品，由Java开发，支持Linux,Windows,AIX环境部署，支持各类异构数据计算平台的作业调度（Hive,Spark,Teradata,Oracle,DB2,DataStage等），支持各类自定义任务作业调度（Java,Shell,Python,Perl等）。
 
 ------
 
