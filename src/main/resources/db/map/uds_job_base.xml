@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="uds_job_base">
 
-	<resultMap type="com.spdb.uds.db.bean.UdsJobBean"
+	<resultMap type="cn.com.spdb.uds.db.bean.UdsJobBean"
 		id="UdsJobBean">
 		<id property="job" column="job" />
 		<result property="platform" column="platform" />
@@ -36,7 +36,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 
-	<resultMap type="com.spdb.uds.db.bean.UdsJobStepBean"
+	<resultMap type="cn.com.spdb.uds.db.bean.UdsJobStepBean"
 		id="UdsJobStepBean">
 		<id property="job" column="job" />
 		<result property="platform" column="platform" />
