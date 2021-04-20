@@ -128,7 +128,7 @@ harrier调度系统支持单机部署以及（一主多子）集群部署,详见
 [Apache License 2.0](./LICENSE)
 
 ### 联系反馈
-luzl2@spdb.com.cn;zhangsh12@spdb.com.cn;liur25@spdb.com.cn;guon2@spdb.com.cn;zhoub11@spdb.com.cn;zhangzh12@spdb.com.cn
+luzl2@spdb.com.cn;zhangsh12@spdb.com.cn;
 
 
 ##### 
