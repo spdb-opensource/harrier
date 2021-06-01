@@ -44,13 +44,13 @@ public class SchedulerManager {
 		scheduleWithFixedDelay("UDS_LOGGER_ERROR_DB", new Runnable() {
 			@Override
 			public void run() {
-				try {					
+				try {
 					UdsLogger.updateMapErrorDb();
 				} catch (Exception e) {
-					UdsLogger.error(e.getMessage());
+					e.printStackTrace();
 				}
 			}
-		}, 30 * DateUtils.TIME_MILLSECOND_OF_SECOND, 2*DateUtils.TIME_MILLSECOND_OF_MINUTE);
+		}, 30 * DateUtils.TIME_MILLSECOND_OF_SECOND, 2 * DateUtils.TIME_MILLSECOND_OF_MINUTE);
 	}
 
 	private void addSchedulerMap(String key, ScheduledFuture<?> future) {
@@ -66,14 +66,10 @@ public class SchedulerManager {
 	/**
 	 * 加载入定时管理器
 	 * 
-	 * @param key
-	 *            组名唯一变量 是NULL不加入管理
-	 * @param task
-	 *            任务
-	 * @param delay
-	 *            延时
-	 * @param period
-	 *            间隔循环执行时间
+	 * @param key    组名唯一变量 是NULL不加入管理
+	 * @param task   任务
+	 * @param delay  延时
+	 * @param period 间隔循环执行时间
 	 * @return
 	 */
 	public ScheduledFuture<?> scheduleAtFixedRate(String key, Runnable task, long delay, long period) {
@@ -91,15 +87,13 @@ public class SchedulerManager {
 		}
 		return future;
 	}
+
 	/**
 	 * 加载入定时管理器
 	 * 
-	 * @param key
-	 *            组名唯一变量 是NULL不加入管理
-	 * @param task
-	 *            任务
-	 * @param delay
-	 *            延时时间
+	 * @param key   组名唯一变量 是NULL不加入管理
+	 * @param task  任务
+	 * @param delay 延时时间
 	 * @return
 	 */
 	public ScheduledFuture<?> schedule(String key, Runnable task, long delay) {

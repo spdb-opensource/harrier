@@ -3,6 +3,10 @@ package cn.com.spdb.uds.db.bean;
 import java.sql.Timestamp;
 import java.util.HashMap;
 
+import com.baidu.jprotobuf.pbrpc.utils.StringUtils;
+
+import cn.com.spdb.uds.UdsConstant;
+
 public class UdsJobBean {
 
 	private String platform;
@@ -40,6 +44,24 @@ public class UdsJobBean {
 	private byte check_weight;
 
 	private HashMap<Integer, Integer> weightConfMap;
+
+	private String platfromSytemKey;
+
+	public String getPlatfromSytemKey() {
+		if (platfromSytemKey != null) {
+			return platfromSytemKey;
+		} else {
+			UdsSystemBean udsSystemBean = UdsConstant.getUdsSystemBean(platform, system);
+			if (udsSystemBean == null) {
+				return null;
+			}
+			String key = UdsConstant.getUdsSystemBeanKey(udsSystemBean.getPlatform(), udsSystemBean.getSystem());
+			if (StringUtils.isBlank(key)) {
+				return null;
+			}
+			return platfromSytemKey = key;
+		}
+	}
 
 	public int getLocation() {
 		return location;
@@ -224,7 +246,9 @@ public class UdsJobBean {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (null==obj)
+		if (this == obj)
+			return true;
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -276,6 +300,5 @@ public class UdsJobBean {
 	public void setWeightConfMap(HashMap<Integer, Integer> weightConfMap) {
 		this.weightConfMap = weightConfMap;
 	}
-
 
 }

@@ -40,8 +40,6 @@ public class DistributionJobHandler implements ServerRpcEventCallBack, ServerRpc
 						bean.getSystem());
 				// 权重归还
 				MasterManager.getInstance().subWeight(callBackEvent.getSourceId(), jobName);
-				// 重新分发
-				// MasterManager.getInstance().addJobToDispatcherWaitMap(bean);
 			}
 		}
 	}
@@ -70,8 +68,9 @@ public class DistributionJobHandler implements ServerRpcEventCallBack, ServerRpc
 			}
 			// 成功回调
 			if (sucess) {
-				callbackEvent.addAttribute(RpcAttrKey.CODE, RpcResultCode.SUCCESS);
-				return callbackEvent;
+				UdsLogger.logEvent(LogEvent.CHILD_DISPATCHER, "job to DISPATCHER", udsJobBean.getJob(),
+						udsJobBean.getLast_status());
+				return null;
 			}
 			UdsLogger.logEvent(LogEvent.CHILD_DISPATCHER, "job not DISPATCHER", udsJobBean.getJob(),
 					udsJobBean.getLast_status());

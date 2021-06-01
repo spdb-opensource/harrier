@@ -29,7 +29,7 @@ import com.alibaba.fastjson.JSON;
 
 public class HttpClient {
 
-	private static final String IP = "127.0.0.1";
+	private static final String IP = "10.129.62.126";
 	private static final int PROT = 7878;
 
 	private static URIBuilder URIBUILDER = null;

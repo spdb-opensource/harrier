@@ -14,23 +14,22 @@ public class KillJobRuning implements InterfaceConsoleCommand {
 
 	@Override
 	public String hanlder(String param, PrintWriter pw) {
-		if (UdsConstant.IS_PRIMARY_SERVER) {
+		if (UdsConstant.IS_PRIMARY_SERVER && UdsConstant.SEND_LOCATE == 0) {
+			if (pw != null) {
+				pw.print("server is master");
+			}
 			return "server is master";
-		} else {
-			String job = param.trim();
-			UdsJobBaseDao baseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
-			UdsJobBean udsjobbean = baseDao.getUdsJobBeanByJob(job);
-			if (udsjobbean == null) {
-				if (pw != null) {
-					pw.print("job is null please check job name");
-				}
-				return "job is null please check job name";
-			}
-			if (UdsConstant.IS_PRIMARY_SERVER) {
-				pw.print("servre is master");
-			}
-			ChildManager.getInstance().killJobRun(job);
 		}
+		String job = param.trim();
+		UdsJobBaseDao baseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
+		UdsJobBean udsjobbean = baseDao.getUdsJobBeanByJob(job);
+		if (udsjobbean == null) {
+			if (pw != null) {
+				pw.print("job is null please check job name");
+			}
+			return "job is null please check job name";
+		}
+		ChildManager.getInstance().killJobRun(job);
 		return HttpResultCode.SUCCESS;
 	}
 

@@ -1,6 +1,11 @@
 package cn.com.spdb.uds.core.rpc.client;
 
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.NettyRuntime;
+
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.aspectj.apache.bcel.classfile.ExceptionTable;
 
 import com.baidu.jprotobuf.pbrpc.client.ProtobufRpcProxy;
 import com.baidu.jprotobuf.pbrpc.transport.RpcClient;
@@ -14,8 +19,6 @@ import cn.com.spdb.uds.core.rpc.transfer.TransferRpc;
 import cn.com.spdb.uds.db.bean.UdsServerBean;
 import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.DateUtils;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.NettyRuntime;
 
 public class UdsRpcClient implements Comparable<UdsRpcClient> {
 
@@ -30,8 +33,6 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 	private ProtobufRpcProxy<TransferRpc> transferRpcProxy;
 	/** 创建时间 */
 	private long createMillisTime = 0;
-	/** 使用时间 */
-	private long useMillisTime = 0;
 	/** 心跳 */
 	private Heartbeat heartbeat = new Heartbeat();
 
@@ -68,7 +69,6 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 		UdsRpcEvent call = null;
 		try {
 			call = transerRpc.transferEventConcurrent(udsRpcEvent);
-			useMillisTime = System.currentTimeMillis();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -79,7 +79,6 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 	public void write(UdsRpcEvent udsRpcEvent) {
 		try {
 			transerRpc.transferEvent(udsRpcEvent);
-			useMillisTime = System.currentTimeMillis();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -87,11 +86,12 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 
 	private void doConnect() {
 		shutDown();
+
 		RpcClientOptions options = new RpcClientOptions();
 		/***
 		 * 代理线程数目
 		 */
-		int size = NettyRuntime.availableProcessors() > 16 ? 16 : NettyRuntime.availableProcessors();
+		int size = UdsConstant.AVAILABLE_PROCESSORS_SIZE > 16 ? 16 : UdsConstant.AVAILABLE_PROCESSORS_SIZE;
 		options.setThreadPoolSize(size);
 		options.setWorkGroupThreadSize(size);
 
@@ -106,7 +106,6 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 			shutDown();
 			throw e;
 		}
-
 	}
 
 	public void shutDown() {
@@ -114,6 +113,10 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 			if (transferRpcProxy != null) {
 				transferRpcProxy.close();
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
 			if (rpcClient != null) {
 				rpcClient.shutdown();
 			}
@@ -227,11 +230,11 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 		return result;
 	}
 
-
-
 	@Override
 	public boolean equals(Object obj) {
-		if (null == obj)
+		if (this == obj)
+			return true;
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -264,14 +267,6 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 		this.heartbeat = heartbeat;
 	}
 
-	public long getUseMillisTime() {
-		return useMillisTime;
-	}
-
-	public void setUseMillisTime(long useMillisTime) {
-		this.useMillisTime = useMillisTime;
-	}
-
 	/** 更新心跳 */
 	public void updateMillisTime() {
 		if (!heartbeat.getAndSetStatus(true)) {
@@ -297,10 +292,12 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 		/** 是否存活 */
 		private AtomicBoolean status = new AtomicBoolean(false);
 
-		private final static int MAX_TIME_OUT = 20 * DateUtils.TIME_MILLSECOND_OF_SECOND;
+		private final static int MAX_TIME_OUT = 30 * DateUtils.TIME_MILLSECOND_OF_SECOND;
+
+		private final static int MIN_TIME_OUT = 10 * DateUtils.TIME_MILLSECOND_OF_SECOND;
 
 		/** 超时判断 */
-		public boolean checkOverTime() {
+		public boolean checkOverMaxTime() {
 			if (this.status.get() == false) {
 				return true;
 			}
@@ -310,6 +307,12 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 				return true;
 			}
 			return false;
+		}
+
+		/** 发送 */
+		public boolean checkOverMinTime() {
+			long time = System.currentTimeMillis() - updateMillisTime;
+			return time > MIN_TIME_OUT;
 		}
 
 		/**
@@ -338,6 +341,15 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 		public boolean getAndSetStatus(boolean newValue) {
 			return status.getAndSet(newValue);
 		}
+
+		public static int getMaxTimeOut() {
+			return MAX_TIME_OUT;
+		}
+
+		public static int getMinTimeOut() {
+			return MIN_TIME_OUT;
+		}
+
 	}
 
 	public int getLocation() {

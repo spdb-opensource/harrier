@@ -97,7 +97,7 @@ public class HttpServer {
 		httpExecutorService.submit(new Runnable() {
 			@Override
 			public void run() {
-				int size = NettyRuntime.availableProcessors() > 32 ? 32 : NettyRuntime.availableProcessors();
+				int size = UdsConstant.AVAILABLE_PROCESSORS_SIZE > 32 ? 32 : UdsConstant.AVAILABLE_PROCESSORS_SIZE;
 				EventLoopGroup bossGroup = new NioEventLoopGroup(size);
 				EventLoopGroup workGroup = new NioEventLoopGroup(size);
 				ServerBootstrap bootstrap = new ServerBootstrap();

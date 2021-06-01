@@ -1,8 +1,8 @@
 package cn.com.spdb.uds.core.bean;
 
 public enum JobStatus {
-	READY("Ready", "准备"), PENDING("Pending", "等待"), DISPATCHER("Dispatcher", "分发"),RUNING("Running", "运行"), DONE(
-			"Done", "完成"), FAILED("Failed", "失败"),UNKNOWN("Unknown","未知");
+	READY("Ready", "准备"), PENDING("Pending", "等待"), DISPATCHER("Dispatcher", "分发"), RUNING("Running", "运行"),
+	DONE("Done", "完成"), FAILED("Failed", "失败"), UNKNOWN("Unknown", "未知");
 
 	private String id;
 

@@ -71,25 +71,59 @@ public class HttpSystemConcurrentHandler extends AbstractHttpPostBodyWorkHandler
 		if (!AbstractDispatcherPlan.isExistDispatcherPlan(strategy)) {
 			return "策略不存在";
 		}
-
-		if (strategy == 0) {
+		if (StringUtil.isNullOrEmpty(strategyPro)) {
 			bean.setStrategy_pro("");
-			bean.setStrategy((short) 0);
-		} else if (strategy == 1) {
-			if (StringUtil.isNullOrEmpty(strategyPro)) {
-				bean.setStrategy_pro("");
-			} else if (strategyPro.contains(Symbol.DOU_HAO) || strategyPro.contains(Symbol.GAN_TAN_HAO)) {
+		}
+		switch (strategy) {
+		case 0:
+		case 3: {
+			bean.setStrategy((short) strategy);
+		}
+			break;
+		case 1: {
+			if (strategyPro.contains(Symbol.DOU_HAO) || strategyPro.contains(Symbol.GAN_TAN_HAO)) {
 				String[] names = strategyPro.split(Symbol.DOU_HAO + "|" + Symbol.GAN_TAN_HAO);
 				for (String name : names) {
 					name = name.trim();
 					UdsRpcClient client = UdsRpcClientManager.getInstance().getUdsRpcClient(name);
 					if (client == null) {
-						UdsLogger.logEvent(LogEvent.HTTP_ERROR, "UdsRpcClient IS NULL", name);
+						UdsLogger.logEvent(LogEvent.HTTP_ERROR, "UdsRpcClient IS NULL", strategy, name);
 					}
 				}
 				bean.setStrategy_pro(strategyPro);
 			}
-			bean.setStrategy((short) 1);
+			bean.setStrategy((short) strategy);
+		}
+			break;
+		case 2: {
+			if (!strategyPro.matches("^[0-9,!]+$")) {
+				UdsLogger.logEvent(LogEvent.HTTP_ERROR, "strategyPro error", strategy, strategyPro);
+				return "存在配置序号不是数字";
+			}
+			if (strategyPro.contains(Symbol.DOU_HAO) || strategyPro.contains(Symbol.GAN_TAN_HAO)) {
+				String[] orderStrs = strategyPro.split(Symbol.DOU_HAO + "|" + Symbol.GAN_TAN_HAO);
+				for (String orderStr : orderStrs) {
+					orderStr = orderStr.trim();
+					short order;
+					try {
+						order = Short.parseShort(orderStr);
+					} catch (NumberFormatException e) {
+						e.printStackTrace();
+						UdsLogger.logEvent(LogEvent.HTTP_ERROR, "orderStr isnot short", strategy, orderStr);
+						return "配置序号不是机器";
+					}
+					UdsRpcClient client = UdsRpcClientManager.getInstance().getUdsRpcClient(order);
+					if (client == null) {
+						UdsLogger.logEvent(LogEvent.HTTP_ERROR, "UdsRpcClient IS NULL", strategy, order);
+					}
+				}
+				bean.setStrategy_pro(strategyPro);
+			}
+			bean.setStrategy((short) strategy);
+		}
+			break;
+		default:
+			return "策略没有配置";
 		}
 
 		UdsJobControlDao UdsJobControlDao = DBManager.getInstance().getDao(UdsJobControlDao.class);

@@ -11,12 +11,12 @@
 
 
 	<!-- 指定要被扫描的包 -->
-	<context:component-scan base-package="cn.com.spdb.uds"
+	<context:component-scan base-package="com.spdb.uds"
 		annotation-config="true" />
 
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 
-	<bean class="cn.com.spdb.uds.utils.EncryptPropertyPlaceholderConfigurer">
+	<bean class="com.spdb.uds.utils.EncryptPropertyPlaceholderConfigurer">
 		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
 		<property name="locations">
 			<value>file:./config/uds.configuration.properties</value>
@@ -37,11 +37,11 @@
 		<property name="password" value="${jdbc.password}" />
 
 		<!-- 初始连接数量 -->
-		<property name="initialSize" value="1" />
+		<property name="initialSize" value="5" />
 		<!-- 每个分区最小的连接数 -->
-		<property name="minIdle" value="1" />
+		<property name="minIdle" value="5" />
 		<!-- 每个分区最大的连接数 -->
-		<property name="maxActive" value="100" />
+		<property name="maxActive" value="200" />
 		<!-- 连接超时报错 -->
 		<property name="maxWait" value="30000" />
 		<!-- 配置关闭空闲连接的检测时间 单位毫秒 -->
@@ -66,12 +66,12 @@
 		<property name="mapperLocations" value="classpath:./db/map/*.xml" />
 	</bean>
 
-	<bean id="DBManager" class=" cn.com.spdb.uds.db.DBManager">
+	<bean id="DBManager" class=" com.spdb.uds.db.DBManager">
 		<constructor-arg index="0" ref="sqlSessionFactory" />
 	</bean>
 
 
-	<bean id="SystemOutAndErrPrintStream" class=" cn.com.spdb.uds.db.DBManager">
+	<bean id="SystemOutAndErrPrintStream" class=" com.spdb.uds.db.DBManager">
 		<constructor-arg index="0" ref="sqlSessionFactory" />
 	</bean>
 
@@ -92,7 +92,7 @@
 	<!-- 被拦截类配置 -->
 	<aop:config>
 		<aop:pointcut id="daoOperation"
-			expression="execution(* cn.com.spdb.uds.db.dao..*(..))" />
+			expression="execution(* com.spdb.uds.db.dao..*(..))" />
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="daoOperation" />
 	</aop:config>
 

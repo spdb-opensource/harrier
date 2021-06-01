@@ -340,7 +340,7 @@ public class UdsJobBaseDao extends AbstractBaseDao {
 	public List<UdsJobBean> getJobStatusDispatcherOverTime() {
 		HashMap<Object, Object> map = new HashMap<Object, Object>();
 		map.put("dispatcher_status", JobStatus.DISPATCHER.status());
-		map.put("over_time", 100 * UdsConstant.DISPATCHER_OVER_MINUTE);// 3分钟
+		map.put("over_time", 100 * UdsConstant.DISPATCHER_OVER_MINUTE);// 分钟
 		map.put("location", UdsConstant.LOCATION);// 地域
 		List<UdsJobBean> list = selectList("uds_job_base.getJobStatusDispatcherOverTime", map);
 		if (list == null) {

@@ -5,7 +5,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="uds_job_record">
 
 
-	<resultMap type="cn.com.spdb.uds.db.bean.UdsJobStepRecord"
+	<resultMap type="com.spdb.uds.db.bean.UdsJobStepRecord"
 		id="udsJobStepRecord">
 		<id property="id" column="id" />
 		<result property="job" column="job" />
@@ -34,7 +34,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		COALESCE(max(id)+1,1),#{code},#{msg_level},now(),#{msg_par},#{msg} from uds_error; -->
 
 	<insert id="insertUdsError"
-		parameterType="cn.com.spdb.uds.db.bean.UdsErrorBean">
+		parameterType="com.spdb.uds.db.bean.UdsErrorBean">
 		<![CDATA[
 			insert into uds_error(code,msg_level,msg_time,msg_par,msg) 
 			VALUES( #{code},#{msg_level},now(),#{msg_par},#{msg} );
@@ -64,7 +64,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</insert>
 
 	<update id="updateJobStepRecordById"
-		parameterType="cn.com.spdb.uds.db.bean.UdsJobStepRecord">
+		parameterType="com.spdb.uds.db.bean.UdsJobStepRecord">
 		<![CDATA[
 		UPDATE uds_job_step_record SET return_code=#{return_code},end_time=#{end_time} 
 		WHERE id=#{id};
@@ -72,7 +72,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 
 	<update id="updateJobStepRecord"
-		parameterType="cn.com.spdb.uds.db.bean.UdsJobStepRecord">
+		parameterType="com.spdb.uds.db.bean.UdsJobStepRecord">
 		<![CDATA[
 		UPDATE uds_job_step_record SET return_code=#{return_code},end_time=#{end_time} 
 		WHERE platform=#{platform} AND system=#{system} AND job=#{job} AND setp_num=#{setp_num} AND num_times=#{num_times};
@@ -80,7 +80,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 
 	<insert id="insertJobStepRecord"
-		parameterType="cn.com.spdb.uds.db.bean.UdsJobStepRecord">
+		parameterType="com.spdb.uds.db.bean.UdsJobStepRecord">
 		<![CDATA[
 		INSERT INTO uds_job_step_record (id,platform,system,job,setp_num,return_code,
 		num_times,start_time,server_name,end_time,job_date,script_name,log_path,log_name,virtual_enable) 

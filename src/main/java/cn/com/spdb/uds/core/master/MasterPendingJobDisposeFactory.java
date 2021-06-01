@@ -29,6 +29,7 @@ import cn.com.spdb.uds.utils.Symbol;
  * @author T-luzl
  *
  */
+@Deprecated
 public class MasterPendingJobDisposeFactory {
 	/** 等待作业过滤 */
 	private List<AbstractPendingFilter> jobPendingFilterList = new ArrayList<AbstractPendingFilter>();
@@ -96,16 +97,13 @@ public class MasterPendingJobDisposeFactory {
 				}
 				if (pass) {
 					MasterManager.getInstance().transfromDealToDispatcher(udsJobBean);
-				} 
+				}
 			} finally {
 				MasterManager.getInstance().removeDeal(udsJobBean);
 			}
 		}
 	}
 
-	
-	
-	
 	public ThreadPoolExecutor getExecutor() {
 		return executor;
 	}

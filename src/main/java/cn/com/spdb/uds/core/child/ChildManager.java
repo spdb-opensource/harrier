@@ -3,7 +3,6 @@ package cn.com.spdb.uds.core.child;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,8 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.baidu.jprotobuf.pbrpc.utils.StringUtils;
 
@@ -65,8 +65,7 @@ public class ChildManager {
 		return instance;
 	}
 
-	private ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(UdsConstant.MAX_JOB_NUM + 1,
-			new NameThreadFactory("ChildManager"));
+	private ThreadPoolExecutor executor;
 
 	public void setExecutorMaxJob() {
 		if (UdsConstant.MAX_JOB_NUM <= 0) {
@@ -79,6 +78,9 @@ public class ChildManager {
 	}
 
 	public void init() {
+		int maxNUm = UdsConstant.MAX_JOB_NUM > 0 ? UdsConstant.MAX_JOB_NUM : 1;
+		executor = new ThreadPoolExecutor(maxNUm, maxNUm, 10000L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<Runnable>(), new NameThreadFactory(ChildManager.class.getSimpleName()));
 		jobStreamFilterList.add(new JobStreamFilter());
 		jobStreamFilterList.add(new JobStreamFrequencyFilter());
 	}
@@ -165,7 +167,7 @@ public class ChildManager {
 				}
 			}
 			List<String> cmdList = new ArrayList<String>();
-			String[] strCmd= jobStepBean.getOper_cmd().split(Symbol.KONG_GE);
+			String[] strCmd = jobStepBean.getOper_cmd().split(Symbol.KONG_GE);
 			cmdList.addAll(Arrays.asList(strCmd));
 			String file = jobStepBean.getScript_dir().replace(UdsConstant.SCRIPT_PATH_PERFIX, UdsConstant.AUTO_HOME)
 					+ File.separator + jobStepBean.getScript_name();
@@ -200,6 +202,7 @@ public class ChildManager {
 			jobStepInfo.setStepType(jobStepBean.getStep_type());
 			jobStepInfo.setLogDir(logDirBuffer.toString());
 			jobStepInfo.setLogName(logNameBuffer.toString());
+			jobStepInfo.setScript_dir(jobStepBean.getScript_dir().replace(UdsConstant.SCRIPT_PATH_PERFIX, UdsConstant.AUTO_HOME));
 			jobStepInfo.setScript_name(jobStepBean.getScript_name());
 			jobStepInfos.add(jobStepInfo);
 		}

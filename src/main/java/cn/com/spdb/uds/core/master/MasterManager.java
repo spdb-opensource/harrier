@@ -68,11 +68,14 @@ public class MasterManager {
 	// 接受目录作业过滤
 	private List<AbstractReceiverFilter> jobReceiverFilterList = new ArrayList<AbstractReceiverFilter>();
 	// 等待作业过滤
+	@Deprecated
 	private List<AbstractPendingFilter> jobPendingFilterList = new ArrayList<AbstractPendingFilter>();
 	// 子节点机器运行作业数
-	private ConcurrentHashMap<String, ChildServerInfo> childServerJobMap = new ConcurrentHashMap<String, ChildServerInfo>();
-
+	private volatile ConcurrentHashMap<String, ChildServerInfo> childServerJobMap = new ConcurrentHashMap<String, ChildServerInfo>();
+	@Deprecated
 	private MasterPendingJobDisposeFactory pendingJobDisposeFactory = new MasterPendingJobDisposeFactory();
+
+	private MasterFactory masterFactory = new MasterFactory();
 
 	/**
 	 * 获取一个系统目前运行的数量
@@ -81,7 +84,7 @@ public class MasterManager {
 	 *            {@link UdsConstant#getUdsSystemBean(String, String)}
 	 * @return
 	 */
-	public int getSystemJobNum(String platfrom, String system) {
+	public int getChildServerSystemSum(String platfrom, String system) {
 		int num = 0;
 		for (Entry<String, ChildServerInfo> entry : childServerJobMap.entrySet()) {
 			ChildServerInfo childServerInfo = entry.getValue();
@@ -133,6 +136,8 @@ public class MasterManager {
 		new AppointOrderDispatcher();
 		new AppointTagsDispatcher();
 
+		masterFactory.start();
+
 		SchedulerManager.getInstance().scheduleWithFixedDelay("MASTERMANAGER_CHECKRECEIVERDIR", new Runnable() {
 
 			@Override
@@ -144,49 +149,48 @@ public class MasterManager {
 					e.printStackTrace();
 				}
 			}
-		}, 20 * DateUtils.TIME_MILLSECOND_OF_SECOND, 20 * DateUtils.TIME_MILLSECOND_OF_SECOND);
+		}, 20 * DateUtils.TIME_MILLSECOND_OF_SECOND, 5 * DateUtils.TIME_MILLSECOND_OF_SECOND);
 
-		
 		SchedulerManager.getInstance().scheduleWithFixedDelay("MASTERMANAGER_CHECKDBSCHEDULERJOB", new Runnable() {
-		  
-			@Override 
-			public void run() { 
-				try { 
-				  checkDbSchedulerJob();
-				} catch (Exception e) { 
-					UdsLogger.logEvent(LogEvent.ERROR, "checkDbSchedulerJob",e.getMessage()); 
-					e.printStackTrace(); 
-				} 
-			} 
-		}, 10 * DateUtils.TIME_MILLSECOND_OF_SECOND + 5 * DateUtils.TIME_MILLSECOND_OF_SECOND, 20 * DateUtils.TIME_MILLSECOND_OF_SECOND);
-		 
+
+			@Override
+			public void run() {
+				try {
+					checkDbSchedulerJob();
+				} catch (Exception e) {
+					UdsLogger.logEvent(LogEvent.ERROR, "checkDbSchedulerJob", e.getMessage());
+					e.printStackTrace();
+				}
+			}
+		}, 10 * DateUtils.TIME_MILLSECOND_OF_SECOND + 5 * DateUtils.TIME_MILLSECOND_OF_SECOND,
+				20 * DateUtils.TIME_MILLSECOND_OF_SECOND);
 
 		SchedulerManager.getInstance().scheduleWithFixedDelay("MASTERMANAGER_CHECKDBPENDING", new Runnable() {
 			@Override
 			public void run() {
 				try {
-					checkDbPendingToFactory();
+					masterFactory.checkDbToPending();
 				} catch (Exception e) {
 					UdsLogger.logEvent(LogEvent.ERROR, "checkDbPending", e.getMessage());
 					e.printStackTrace();
 				}
 			}
-		}, 10 * DateUtils.TIME_MILLSECOND_OF_SECOND + 10 * DateUtils.TIME_MILLSECOND_OF_SECOND,
-				20 * DateUtils.TIME_MILLSECOND_OF_SECOND);
+		}, 10 * DateUtils.TIME_MILLSECOND_OF_SECOND + 8 * DateUtils.TIME_MILLSECOND_OF_SECOND,
+				10 * DateUtils.TIME_MILLSECOND_OF_SECOND);
 
 		SchedulerManager.getInstance().scheduleWithFixedDelay("CHECKPENDING_FACTORYTODISPATCHER", new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					checkPendingFactoryToDispatcher();
+					masterFactory.checkPendingToDispatcher();
 				} catch (Exception e) {
 					UdsLogger.logEvent(LogEvent.ERROR, "checkPendingFactoryToDispatcher", e.getMessage());
 					e.printStackTrace();
 				}
 			}
-		}, 10 * DateUtils.TIME_MILLSECOND_OF_SECOND + 10 * DateUtils.TIME_MILLSECOND_OF_SECOND,
-				20 * DateUtils.TIME_MILLSECOND_OF_SECOND);
+		}, 10 * DateUtils.TIME_MILLSECOND_OF_SECOND + 3 * DateUtils.TIME_MILLSECOND_OF_SECOND,
+				10 * DateUtils.TIME_MILLSECOND_OF_SECOND);
 
 		SchedulerManager.getInstance().scheduleWithFixedDelay("MASTERMANAGER_CHECKCALLAGAINJOB", new Runnable() {
 
@@ -322,11 +326,13 @@ public class MasterManager {
 		}
 	}
 
+	@Deprecated
 	private HashMap<String, PlatformConterBean> platformConterBeanMap = new HashMap<String, PlatformConterBean>();
 
 	/**
 	 * 检测等待分发的作业,提交到工厂处理
 	 */
+	@Deprecated
 	public void checkDbPendingToFactory() {
 		if (!isCheckRecive()) {
 			return;
@@ -371,6 +377,7 @@ public class MasterManager {
 		}
 	}
 
+	@Deprecated
 	public void transfromDealToDispatcher(UdsJobBean bean) {
 		PlatformConterBean conterBean = platformConterBeanMap.get(bean.getPlatform());
 		if (conterBean != null) {
@@ -378,6 +385,7 @@ public class MasterManager {
 		}
 	}
 
+	@Deprecated
 	public void removeDeal(UdsJobBean bean) {
 		PlatformConterBean conterBean = platformConterBeanMap.get(bean.getPlatform());
 		if (conterBean != null) {
@@ -385,6 +393,7 @@ public class MasterManager {
 		}
 	}
 
+	@Deprecated
 	public void addJobToDispatcherWaitMap(UdsJobBean bean) {
 		PlatformConterBean conterBean = platformConterBeanMap.get(bean.getPlatform());
 		if (conterBean != null) {
@@ -392,6 +401,7 @@ public class MasterManager {
 		}
 	}
 
+	@Deprecated
 	public void removeDispatcherJob(UdsJobBean bean) {
 		PlatformConterBean conterBean = platformConterBeanMap.get(bean.getPlatform());
 		conterBean.removeDispatcherJob(bean);
@@ -401,8 +411,10 @@ public class MasterManager {
 	 * 从工厂提货准备分发
 	 * 
 	 */
+	@Deprecated
 	private int checkDBDispatcherNum = 0;
 
+	@Deprecated
 	public void checkPendingFactoryToDispatcher() {
 		UdsJobBaseDao udsJobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
 		if (!isCheckRecive()) {
@@ -486,6 +498,7 @@ public class MasterManager {
 		}
 	}
 
+	@Deprecated
 	public boolean dispatcherJob(UdsJobBean udsJobBean) {
 		UdsSystemBean udsSystemBean = UdsConstant.getUdsSystemBean(udsJobBean.getPlatform(), udsJobBean.getSystem());
 		if (udsSystemBean == null) {
@@ -495,6 +508,7 @@ public class MasterManager {
 	}
 
 	// 分发作业
+	@Deprecated
 	private boolean dispatcherJob(UdsJobBean udsJobBean, UdsSystemBean udsSystemBean) {
 		// 该平台应用最大并行数
 		int max = udsSystemBean.getMax_run_job();
@@ -504,7 +518,8 @@ public class MasterManager {
 			return false;
 		}
 		// 当前运行数
-		int num = MasterManager.getInstance().getSystemJobNum(udsSystemBean.getPlatform(), udsSystemBean.getSystem());
+		int num = MasterManager.getInstance().getChildServerSystemSum(udsSystemBean.getPlatform(),
+				udsSystemBean.getSystem());
 		if (num >= max) {
 			return false;
 		}
@@ -676,6 +691,9 @@ public class MasterManager {
 	public void subWeight(String serverName, String jobName) {
 		UdsJobBaseDao jobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
 		UdsJobBean udsJobBean = jobBaseDao.getUdsJobBeanByJob(jobName);
+		if (udsJobBean.getCheck_weight() == UdsConstant.FALSE_NUM) {
+			return;
+		}
 		HashMap<Integer, Integer> weightMap = udsJobBean.getWeightConfMap();
 		if (weightMap == null) {
 			UdsJobWeightDao udsJobWeightDao = DBManager.getInstance().getDao(UdsJobWeightDao.class);
@@ -685,6 +703,12 @@ public class MasterManager {
 		}
 		ChildServerInfo childServerInfo = childServerJobMap.get(serverName);
 		childServerInfo.subWeightValueMap(weightMap);
+	}
+
+	public void offerDispatcherSignlaQueue(String platform, String system) {
+		UdsSystemBean udsSystemBean = UdsConstant.getUdsSystemBean(platform, system);
+		String signla = udsSystemBean.getPlatformAndSystemKey();
+		masterFactory.offerDispatcherSignlaQueue(signla);
 	}
 
 	public boolean isCheckRecive() {
@@ -703,10 +727,12 @@ public class MasterManager {
 		this.jobReceiverFilterList = jobReceiverFilterList;
 	}
 
+	@Deprecated
 	public List<AbstractPendingFilter> getJobPendingFilterList() {
 		return jobPendingFilterList;
 	}
 
+	@Deprecated
 	public void setJobPendingFilterList(List<AbstractPendingFilter> jobPendingFilterList) {
 		this.jobPendingFilterList = jobPendingFilterList;
 	}
@@ -719,12 +745,22 @@ public class MasterManager {
 		this.childServerJobMap = childServerJobMap;
 	}
 
+	@Deprecated
 	public MasterPendingJobDisposeFactory getPendingJobDisposeFactory() {
 		return pendingJobDisposeFactory;
 	}
 
+	@Deprecated
 	public void setPendingJobDisposeFactory(MasterPendingJobDisposeFactory pendingJobDisposeFactory) {
 		this.pendingJobDisposeFactory = pendingJobDisposeFactory;
+	}
+
+	public MasterFactory getMasterFactory() {
+		return masterFactory;
+	}
+
+	public void setMasterFactory(MasterFactory masterFactory) {
+		this.masterFactory = masterFactory;
 	}
 
 }

@@ -2,11 +2,15 @@ package cn.com.spdb.uds.core.child.job;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -157,7 +161,7 @@ public class JobRunable implements Runnable {
 							DateUtils.getDateTime(new Date(), DateUtils.PATTERN_NORMAL), batch);
 				}
 			}
-		} catch (Exception e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			ChildManager.getInstance().removeJobPool(job);
@@ -168,6 +172,7 @@ public class JobRunable implements Runnable {
 			event.addAttribute("platform", platform);
 			event.addAttribute("system", system);
 			event.addAttribute("job", job);
+			event.addAttribute("check_weight", check_weight);
 			UdsRpcClientManager.getInstance().sendBroadcastMessage(event, null, true);
 		}
 	}
@@ -508,7 +513,7 @@ public class JobRunable implements Runnable {
 			}
 		}
 	}
-
+	
 	public JobRunable(UdsJobBean udsJobBean, List<JobStepInfo> tmplist) {
 		Collections.sort(tmplist);
 		this.jobStepList = new ArrayList<JobStepInfo>();

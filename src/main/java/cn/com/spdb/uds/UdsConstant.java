@@ -7,13 +7,19 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.aspectj.weaver.patterns.HasMemberTypePattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +34,8 @@ import cn.com.spdb.uds.db.dao.UdsJobControlDao;
 import cn.com.spdb.uds.db.dao.UdsJobWeightDao;
 import cn.com.spdb.uds.db.dao.UdsServerDao;
 import cn.com.spdb.uds.utils.Symbol;
+import io.netty.util.NettyRuntime;
+import io.netty.util.internal.ConcurrentSet;
 
 /**
  * UDS常量配置表 final 修饰不可改变
@@ -38,7 +46,7 @@ import cn.com.spdb.uds.utils.Symbol;
 public class UdsConstant {
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(UdsConstant.class);
-	public final static String Version = "1.0.3_20191118";
+	public final static String Version = "2.2.1";
 
 	public final static int TRUE_NUM = 1;
 	public final static int FALSE_NUM = 0;
@@ -79,6 +87,8 @@ public class UdsConstant {
 	// 是否启用自动清除脚本日志
 	public static int CLEAR_JOB_LOG = 0;
 
+	public static int TRANSFER_STEP_UTF8 = 0;
+
 	// -----------------服务器配置常量信息-----------------------//
 
 	// 本机是否为主节点
@@ -110,6 +120,8 @@ public class UdsConstant {
 
 	public static byte SEND_LOCATE = 0;
 
+	public static int AVAILABLE_PROCESSORS_SIZE = NettyRuntime.availableProcessors();
+
 	// 经过几次轮询获取数据库中分发的数据
 	public static int CHECK_DB_DISPATCHER_NUM = 10;
 
@@ -125,7 +137,7 @@ public class UdsConstant {
 	public static byte SIGNAL_FILE_NAME_PREFIX_LONG = 4;
 	public static String SIGNAL_FILE_NAME_PREFIX = "dir.";
 	public static int CHECK_DB_PENDING_LIMIT_NUM = 3000;
-	public static int CHECK_PENDING_LIMIT_NUM = CHECK_DB_PENDING_LIMIT_NUM / 3;
+	public static int CHECK_PENDING_LIMIT_NUM = CHECK_DB_PENDING_LIMIT_NUM / 5;
 	public static int CHECK_PENDING_DEAL_OVER_ITMES = 30;
 	public static int UDS_LOGGER_ERROR_MAX = 10000;
 
@@ -278,8 +290,9 @@ public class UdsConstant {
 		try {
 			fileInputStream= new FileInputStream(file);
 			properties.load(fileInputStream);
+
 		} catch (IOException e1) {
-			
+			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}finally {
 			try {
@@ -288,6 +301,7 @@ public class UdsConstant {
 				e.printStackTrace();
 			}
 		}
+
 		LOGGER.info("Properties load start");
 		// 加载配置常量
 		for (Entry<Object, Object> entry : properties.entrySet()) {
@@ -389,8 +403,44 @@ public class UdsConstant {
 		MAP_SYSTEM_JOB = map;
 	}
 
+	public static UdsSystemBean getUdsSystemBean(String platformSystemKey) {
+		UdsSystemBean bean = MAP_SYSTEM_JOB.get(platformSystemKey);
+		if (bean != null) {
+			return bean;
+		}
+		if (StringUtils.isBlank(platformSystemKey)) {
+			return null;
+		}
+		String[] tmp = platformSystemKey.split(Symbol.XIA_HUA_XIAN);
+		if (tmp.length < 2) {
+			return null;
+		}
+		String platform = tmp[0];
+		String system = tmp[1];
+		String key = platform + Symbol.XIA_HUA_XIAN + system;
+		if (bean == null) {
+			UdsJobControlDao controlDao = DBManager.getInstance().getDao(UdsJobControlDao.class);
+			bean = controlDao.getUdsSystemBean(platform, system);
+			if (bean == null) {
+				return bean;
+			}
+			MAP_SYSTEM_JOB.put(key, bean);
+		}
+		if (bean != null && bean.getUse_platform() == TRUE_NUM) {
+			bean = MAP_SYSTEM_JOB.get(platform + Symbol.XIA_HUA_XIAN + Symbol.XING_HAO);
+			if (bean == null) {
+				UdsJobControlDao controlDao = DBManager.getInstance().getDao(UdsJobControlDao.class);
+				bean = controlDao.getUdsSystemBean(platform, Symbol.XING_HAO);
+				if (bean == null) {
+					return bean;
+				}
+			}
+		}
+		return bean;
+	}
+
 	public static UdsSystemBean getUdsSystemBean(String platform, String system) {
-		String key = platform + "_" + system;
+		String key = platform + Symbol.XIA_HUA_XIAN + system;
 		UdsSystemBean bean = MAP_SYSTEM_JOB.get(key);
 		if (bean == null) {
 			UdsJobControlDao controlDao = DBManager.getInstance().getDao(UdsJobControlDao.class);
@@ -401,7 +451,7 @@ public class UdsConstant {
 			MAP_SYSTEM_JOB.put(key, bean);
 		}
 		if (bean != null && bean.getUse_platform() == TRUE_NUM) {
-			bean = MAP_SYSTEM_JOB.get(platform + "_" + Symbol.XING_HAO);
+			bean = MAP_SYSTEM_JOB.get(platform + Symbol.XIA_HUA_XIAN + Symbol.XING_HAO);
 			if (bean == null) {
 				UdsJobControlDao controlDao = DBManager.getInstance().getDao(UdsJobControlDao.class);
 				bean = controlDao.getUdsSystemBean(platform, Symbol.XING_HAO);
@@ -414,7 +464,7 @@ public class UdsConstant {
 	}
 
 	public static String getUdsSystemBeanKey(String platform, String system) {
-		String key = platform + "_" + system;
+		String key = platform + Symbol.XIA_HUA_XIAN + system;
 		UdsSystemBean bean = MAP_SYSTEM_JOB.get(key);
 		if (bean == null) {
 			UdsJobControlDao controlDao = DBManager.getInstance().getDao(UdsJobControlDao.class);
@@ -425,7 +475,7 @@ public class UdsConstant {
 			MAP_SYSTEM_JOB.put(key, bean);
 		}
 		if (bean != null && bean.getUse_platform() == TRUE_NUM) {
-			return platform + "_" + Symbol.XING_HAO;
+			return platform + Symbol.XIA_HUA_XIAN + Symbol.XING_HAO;
 		}
 		return key;
 	}

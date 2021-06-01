@@ -2,6 +2,9 @@ package cn.com.spdb.uds.core.rpc.client;
 
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +28,7 @@ import cn.com.spdb.uds.db.dao.UdsServerDao;
 import cn.com.spdb.uds.log.LogEvent;
 import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.DateUtils;
+import cn.com.spdb.uds.utils.NameThreadFactory;
 import cn.com.spdb.uds.utils.UdsUtils;
 
 public class UdsRpcClientManager {
@@ -49,30 +53,45 @@ public class UdsRpcClientManager {
 	private ConcurrentHashMap<String, UdsRpcClient> RPC_CLIENT_MAP = new ConcurrentHashMap<String, UdsRpcClient>();
 
 	/**
+	 * 心跳服务
+	 */
+	private ScheduledExecutorService scheduledService = Executors.newScheduledThreadPool(1,
+			new NameThreadFactory(this.getClass().getSimpleName()));
+
+	/**
 	 * 启动连接客户端的心跳
 	 */
 	public void startHeartbeat() {
 		/***
 		 * 启动心跳
 		 */
-		SchedulerManager.getInstance().scheduleAtFixedRate("RPC_SERVER_HEARTBEAT_START", new TimerTask() {
+		scheduledService.scheduleAtFixedRate(new TimerTask() {
 
+			/**
+			 *
+			 */
 			@Override
 			public void run() {
 				try {
 					for (UdsRpcClient rpcClient : RPC_CLIENT_MAP.values()) {
+
+						// 发送心跳
+						if (rpcClient.getHeartbeat().checkOverMinTime()) {
+							UdsRpcEvent event = UdsRpcEvent.buildBroadcastEvent(RpcCommand.SERVER_HEARTBEAT);
+							event.setTargetId(rpcClient.getServerName());
+							UdsRpcClientManager.getInstance().sendMessage(rpcClient, event, null);
+						}
 						// 心跳超时检测
-						rpcClient.getHeartbeat().checkOverTime();
+						rpcClient.getHeartbeat().checkOverMaxTime();
 						// 主节点检测竞争和机器死亡检测
 						UdsRpcClientManager.getInstance().checkUdsRpcClient(rpcClient);
 					}
-					// 发送心跳广播
-					UdsRpcClientManager.getInstance().sendBroadcastMessage(RpcCommand.SERVER_HEARTBEAT, null);
 				} catch (Exception e) {
-					UdsLogger.error(e.getMessage());
+					e.printStackTrace();
 				}
+
 			}
-		}, 15 * DateUtils.TIME_MILLSECOND_OF_SECOND, 5 * DateUtils.TIME_MILLSECOND_OF_SECOND);
+		}, 15 * DateUtils.TIME_MILLSECOND_OF_SECOND, 10 * DateUtils.TIME_MILLSECOND_OF_SECOND, TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -84,6 +103,15 @@ public class UdsRpcClientManager {
 	public UdsRpcClient getUdsRpcClient(String serverName) {
 		UdsRpcClient client = RPC_CLIENT_MAP.get(serverName);
 		return client;
+	}
+
+	public UdsRpcClient getUdsRpcClient(short order) {
+		for (UdsRpcClient udsRpcClient : RPC_CLIENT_MAP.values()) {
+			if (udsRpcClient.getOrder() == order) {
+				return udsRpcClient;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -225,6 +253,15 @@ public class UdsRpcClientManager {
 			LOGGER.error("serverName: " + serverName + "|serverBean is null");
 			return null;
 		}
+		return addUdsRpcClient(serverBean);
+	}
+
+	public UdsRpcClient addUdsRpcClient(UdsServerBean serverBean) {
+		if (serverBean == null) {
+			LOGGER.error("serverBean is null");
+			return null;
+		}
+		String serverName = serverBean.getServer_name();
 		UdsRpcClient rpcClient = RPC_CLIENT_MAP.remove(serverName);
 		if (rpcClient != null) {
 			LOGGER.warn("remove old UdsRpcClient add |new client:" + rpcClient.toString() + "|old client "
@@ -241,14 +278,14 @@ public class UdsRpcClientManager {
 					+ "|Server_type:" + serverBean.getServer_type() + " not master");
 			return null;
 		}
-		UdsRpcClient udsRpcClient;
+		UdsRpcClient udsRpcClient = null;
 		try {
 			udsRpcClient = new UdsRpcClient(serverBean);
 		} catch (Exception e) {
 			e.printStackTrace();
+			LOGGER.error("udsRpcClient is not connect", serverBean.toString());
 			return null;
 		}
-
 		RPC_CLIENT_MAP.put(serverName, udsRpcClient);
 		LOGGER.info("addUdsRpcClient new client:" + udsRpcClient.toString());
 		return udsRpcClient;

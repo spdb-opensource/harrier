@@ -20,7 +20,9 @@ public class JobStepInfo implements Comparable<JobStepInfo> {
 	private String logDir;
 	// 日志
 	private String logName;
-	
+	// 脚本路径
+	private String script_dir;
+	// 脚本名
 	private String script_name;
 
 	// 开始时间
@@ -123,5 +125,12 @@ public class JobStepInfo implements Comparable<JobStepInfo> {
 		this.script_name = script_name;
 	}
 
-	
+	public String getScript_dir() {
+		return script_dir;
+	}
+
+	public void setScript_dir(String script_dir) {
+		this.script_dir = script_dir;
+	}
+
 }

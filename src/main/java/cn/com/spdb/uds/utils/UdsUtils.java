@@ -53,6 +53,7 @@ public class UdsUtils {
 		return buffer;
 	}
 
+
 	/**
 	 * 作业名： sys_subSys_表名_算法
 	 * 
@@ -253,8 +254,7 @@ public class UdsUtils {
 				if (UdsConstant.SERVER_NAME.equals(serverBean.getServer_name())) {
 					continue;
 				}
-				UdsRpcClient udsRpcClient = UdsRpcClientManager.getInstance()
-						.addUdsRpcClient(serverBean.getServer_name());
+				UdsRpcClient udsRpcClient = UdsRpcClientManager.getInstance().addUdsRpcClient(serverBean);
 				if (udsRpcClient == null) {
 					buffer.append(
 							"try link server error Name:" + serverBean.getServer_name() + " ip:" + serverBean.getIp())
@@ -267,9 +267,9 @@ public class UdsUtils {
 				buffer.append("try link server Name:" + serverBean.getServer_name() + " ip:" + serverBean.getIp())
 						.append("\n");
 			} catch (Exception e) {
+				e.printStackTrace();
 				buffer.append("try link server error Name:" + serverBean.getServer_name() + " ip:" + serverBean.getIp())
 						.append("\n");
-				e.printStackTrace();
 			}
 		}
 		return buffer.toString();
@@ -356,4 +356,22 @@ public class UdsUtils {
 		}
 		return false;
 	}
+
+	
+
+	public static String guessEncodeS(byte[] bs) {
+		BytesEncodingDetect bytesEncodingDetect = new BytesEncodingDetect();
+		String fileCode = BytesEncodingDetect.javaname[bytesEncodingDetect.detectEncoding(bs)];
+		return fileCode;
+	}
+
+	public static String guessEncodeFile(File file) {
+		if (!file.exists()) {
+			return null;
+		}
+		BytesEncodingDetect bytesEncodingDetect = new BytesEncodingDetect();
+		String fileCode = BytesEncodingDetect.javaname[bytesEncodingDetect.detectEncoding(file)];
+		return fileCode;
+	}
+
 }

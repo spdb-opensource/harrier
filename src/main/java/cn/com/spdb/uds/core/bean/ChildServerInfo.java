@@ -21,7 +21,7 @@ public class ChildServerInfo implements Serializable {
 
 	private byte enable;
 
-	private int jobNum;
+	private volatile int jobNum;
 
 	private long updateTime;
 
@@ -117,17 +117,20 @@ public class ChildServerInfo implements Serializable {
 	 */
 	public int getSystemJob(String platform, String system) {
 		String key = UdsConstant.getUdsSystemBeanKey(platform, system);
-		Integer num = systemJobMap.get(key);
-		if (num == null) {
-			return 0;
+		Integer num = 0;
+		synchronized (systemJobMap) {
+			num = systemJobMap.get(key);
+			if (num == null) {
+				return 0;
+			}
 		}
 		return num;
 	}
 
 	public void incrementSystemJob(String platform, String system) {
 		String key = UdsConstant.getUdsSystemBeanKey(platform, system);
-		Integer num = systemJobMap.get(key);
 		synchronized (systemJobMap) {
+			Integer num = systemJobMap.get(key);
 			if (num == null) {
 				systemJobMap.put(key, 1);
 			} else {

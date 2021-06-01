@@ -43,8 +43,10 @@ public class UdsHandlerManger {
 	private ConcurrentHashMap<Integer, UdsRpcHandler> SERVER_HANDLERS = new ConcurrentHashMap<Integer, UdsRpcHandler>();
 
 	/** 固定线程池 */
-	private ThreadPoolExecutor executor = new ThreadPoolExecutor(30, 60, 10000L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new NameThreadFactory(
-			UdsHandlerManger.class.getSimpleName()));
+	private ThreadPoolExecutor executorReceive = new ThreadPoolExecutor(30, 30, 10000L, TimeUnit.MILLISECONDS,
+			new LinkedBlockingQueue<Runnable>(), new NameThreadFactory(UdsHandlerManger.class.getSimpleName()));
+	private ThreadPoolExecutor executorSend = new ThreadPoolExecutor(20, 20, 10000L, TimeUnit.MILLISECONDS,
+			new LinkedBlockingQueue<Runnable>(), new NameThreadFactory(UdsHandlerManger.class.getSimpleName()));
 
 	/**
 	 * Task 发送消息封装
@@ -69,11 +71,12 @@ public class UdsHandlerManger {
 		taskPoolFactory = new TaskPoolFactory(20, 60);
 		/** 发送消息生成者 */
 		sendProducer = new SendProducer();
-		new NameThreadFactory(UdsHandlerManger.class.getSimpleName() + "-sendProducer").newDeamonThread(sendProducer).start();
+		new NameThreadFactory(UdsHandlerManger.class.getSimpleName() + "-sendProducer").newDeamonThread(sendProducer)
+				.start();
 		/** 接受消息生产者 */
 		receiveProducer = new ReceiveProducer();
-		new NameThreadFactory(UdsHandlerManger.class.getSimpleName() + "-receiveProducer").newDeamonThread(receiveProducer).start();
-
+		new NameThreadFactory(UdsHandlerManger.class.getSimpleName() + "-receiveProducer")
+				.newDeamonThread(receiveProducer).start();
 		/**
 		 * 扫包加载 SERVER_HANDLERS
 		 */
@@ -252,7 +255,7 @@ public class UdsHandlerManger {
 					Task task = null;
 					task = queue.take();
 					if (task != null) {
-						executor.submit(new SendConsumer(task));
+						executorSend.submit(new SendConsumer(task));
 					}
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -297,8 +300,10 @@ public class UdsHandlerManger {
 				// 发送节点是否存活
 				if (!rpcClient.isActive()) {
 					// 不是心跳协议和注册协议直接返回错误
-					if (udsRpcEvent.getCommand() == RpcCommand.SERVER_HEARTBEAT || udsRpcEvent.getCommand() == RpcCommand.SERVER_REGISTER) {
-						LOGGER.error("udsRpcClient is not  active ,RpcCommand.SERVER_HEARTBEAT recover active :" + rpcClient.toString());
+					if (udsRpcEvent.getCommand() == RpcCommand.SERVER_HEARTBEAT
+							|| udsRpcEvent.getCommand() == RpcCommand.SERVER_REGISTER) {
+						LOGGER.error("udsRpcClient is not  active ,RpcCommand.SERVER_HEARTBEAT recover active :"
+								+ rpcClient.toString());
 					} else {
 						LOGGER.error("udsRpcClient is not  active please cheak udsRpcClient: :" + rpcClient.toString());
 						// 其他协议直接返回错误
@@ -364,7 +369,7 @@ public class UdsHandlerManger {
 					UdsRpcEvent event = events.take();
 					if (event != null) {
 						// 提交执行
-						executor.submit(new ReceiveConsumer(event));
+						executorReceive.submit(new ReceiveConsumer(event));
 					}
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -402,8 +407,17 @@ public class UdsHandlerManger {
 				LOGGER.error("not send me  event：" + event.toString());
 				return;
 			}
+			UdsRpcClient rpcClient = UdsRpcClientManager.getInstance().getUdsRpcClient(event.getSourceId());
+			// 注册协议通过，其他协议没有客服端则拦截
+			if (rpcClient == null && event.getCommand() != RpcCommand.SERVER_REGISTER) {
+				LOGGER.error("rpcClient  is null ,not register local server ,event：" + event.toString());
+				return;
+			}
+			if (rpcClient != null) {
+				rpcClient.updateMillisTime();
+			}
 			if (!event.isCallBack() && handler instanceof ServerRpcEventHandler) {
-				receiveServerEvent((ServerRpcEventHandler) handler, event);
+				receiveServerEvent((ServerRpcEventHandler) handler, event, rpcClient);
 			} else if (event.isCallBack() && handler instanceof ServerRpcEventCallBack) {
 				callbackServerEvent((ServerRpcEventCallBack) handler, event);
 			} else {
@@ -417,14 +431,8 @@ public class UdsHandlerManger {
 		 * @param handler
 		 * @param event
 		 */
-		private void receiveServerEvent(ServerRpcEventHandler handler, UdsRpcEvent event) {
+		private void receiveServerEvent(ServerRpcEventHandler handler, UdsRpcEvent event, UdsRpcClient rpcClient) {
 
-			UdsRpcClient rpcClient = UdsRpcClientManager.getInstance().getUdsRpcClient(event.getSourceId());
-			// 注册协议通过，其他协议没有客服端则拦截
-			if (rpcClient == null && event.getCommand() != RpcCommand.SERVER_REGISTER) {
-				LOGGER.error(" UdsServerDao or rpcClient  is null ,not register local server ,event：" + event.toString());
-				return;
-			}
 			if (event.getCommand() != RpcCommand.SERVER_HEARTBEAT) {
 				LOGGER.info("rpc receive event： " + event.toString());
 			}
@@ -440,6 +448,7 @@ public class UdsHandlerManger {
 				if (callBackEvent.getCommand() != RpcCommand.SERVER_HEARTBEAT) {
 					LOGGER.info("rpc send callBackEvent " + callBackEvent.toString());
 				}
+
 				/** 发送回调事件 */
 				rpcClient.write(callBackEvent);
 			}
@@ -561,13 +570,20 @@ public class UdsHandlerManger {
 		return callBackEvent;
 	}
 
-	public ThreadPoolExecutor getExecutor() {
-		return executor;
+	public ThreadPoolExecutor getExecutorReceive() {
+		return executorReceive;
 	}
 
-	public void setExecutor(ThreadPoolExecutor executor) {
-		this.executor = executor;
+	public void setExecutorReceive(ThreadPoolExecutor executorReceive) {
+		this.executorReceive = executorReceive;
 	}
-	
-	
+
+	public ThreadPoolExecutor getExecutorSend() {
+		return executorSend;
+	}
+
+	public void setExecutorSend(ThreadPoolExecutor executorSend) {
+		this.executorSend = executorSend;
+	}
+
 }

@@ -18,6 +18,7 @@ import cn.com.spdb.uds.db.bean.UdsServerBean;
 import cn.com.spdb.uds.db.dao.UdsServerDao;
 import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.NameThreadFactory;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.NettyRuntime;
 
 public class UdsRpcServer {
@@ -59,8 +60,7 @@ public class UdsRpcServer {
 				if (UdsConstant.IS_PRIMARY_SERVER && UdsConstant.ORDER <= serverBean.getOrder()) {
 					continue;
 				}
-				UdsRpcClient udsRpcClient = UdsRpcClientManager.getInstance()
-						.addUdsRpcClient(serverBean.getServer_name());
+				UdsRpcClient udsRpcClient = UdsRpcClientManager.getInstance().addUdsRpcClient(serverBean);
 				if (udsRpcClient == null) {
 					continue;
 				}
@@ -73,11 +73,11 @@ public class UdsRpcServer {
 
 	public void init() {
 		RpcServerOptions options = new RpcServerOptions();
-
-		int size = NettyRuntime.availableProcessors() > 32 ? 32 : NettyRuntime.availableProcessors();
+		/** 单位秒 */
+		int size = UdsConstant.AVAILABLE_PROCESSORS_SIZE > 32 ? 32 : UdsConstant.AVAILABLE_PROCESSORS_SIZE;
 		options.setTaskTheads(size);
-		options.setAcceptorThreads(size);
 		options.setWorkThreads(size);
+		options.setAcceptorThreads(size);
 
 		rpcServer = new RpcServer(options);
 		rpcServer.registerService(new UdsTransferRpcImpl());

@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import cn.com.spdb.uds.db.bean.UdsJobBean;
 
+@Deprecated
 public class PlatformConterBean {
 
 	/** 等待处理作业 */
@@ -23,6 +25,7 @@ public class PlatformConterBean {
 
 	/** 等待分发作业 */
 	private ArrayList<UdsJobBean> dispatcherJobList = new ArrayList<UdsJobBean>();
+
 
 	/** 当前查询到多少 */
 	private int initNum = 0;
@@ -167,7 +170,7 @@ public class PlatformConterBean {
 		synchronized (dispatcherJobList) {
 			if (!dispatcherJobList.contains(udsJobBean)) {
 //			udsJobBean.setPriority((short) (udsJobBean.getPriority() + 1));
-			udsJobBean.setDispatcher_time(new Timestamp(System.currentTimeMillis()));
+				udsJobBean.setDispatcher_time(new Timestamp(System.currentTimeMillis()));
 				dispatcherJobList.add(udsJobBean);
 			}
 		}

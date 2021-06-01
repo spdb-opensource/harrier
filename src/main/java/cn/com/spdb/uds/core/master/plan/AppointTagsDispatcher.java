@@ -25,7 +25,7 @@ public class AppointTagsDispatcher extends AbstractDispatcherPlan {
 
 		UdsJobTagDao jobTagDao = DBManager.getInstance().getDao(UdsJobTagDao.class);
 		List<UdsJobTagBean> tagBeanList = jobTagDao.getUdsJobTagsOnlySort(udsJobBean.getPlatform(),
-				udsJobBean.getSystem(), udsJobBean.getSystem(), JobTagsType.server);
+				udsJobBean.getSystem(), udsJobBean.getJob(), JobTagsType.server);
 		String serverName = null;
 		// DB获取作业标签
 		int max = over == true ? Integer.MIN_VALUE : 0;

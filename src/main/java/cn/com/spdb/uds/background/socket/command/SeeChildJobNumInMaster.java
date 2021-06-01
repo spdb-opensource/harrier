@@ -12,22 +12,23 @@ public class SeeChildJobNumInMaster extends AbsstactConsoleCommand {
 
 	@Override
 	public void hanlder(String param, StringBuffer buffer) {
-		if (UdsConstant.IS_PRIMARY_SERVER) {
+		if (UdsConstant.IS_PRIMARY_SERVER || UdsConstant.SEND_LOCATE == UdsConstant.TRUE_NUM) {
 			ConcurrentHashMap<String, ChildServerInfo> childServerJobMap = MasterManager.getInstance()
 					.getChildServerJobMap();
 			for (ChildServerInfo info : childServerJobMap.values()) {
 				buffer.append("name:" + info.getName() + " jobnum: " + info.getJobNum() + " systemNum:"
-						+ info.getSystemJobMap()).append("\n");
-				buffer.append("WeightMap:" + info.getWeightMap().toString()).append("\n");
-				buffer.append("--------------").append("\n");
+						+ info.getSystemJobMap()).append("\r\n");
+				buffer.append("WeightMap:" + info.getWeightMap().toString()).append("\r\n");
+				buffer.append("--------------").append("\r\n");
 			}
-		} else {
+		}
+		if (!UdsConstant.IS_PRIMARY_SERVER || UdsConstant.SEND_LOCATE == UdsConstant.TRUE_NUM) {
 			ChildServerInfo info = ChildManager.getInstance().buildChildServerDate();
 			buffer.append(
 					"name:" + info.getName() + " jobnum: " + info.getJobNum() + " systemNum:" + info.getSystemJobMap())
-					.append("\n");
-			buffer.append("QJonNum:" + ChildManager.getInstance().getExecutorJobNum()).append("\n");
-			buffer.append("WeightMap:" + ChildManager.getInstance().getWeightMap().toString()).append("\n");
+					.append("\r\n");
+			buffer.append("QJonNum:" + ChildManager.getInstance().getExecutorJobNum()).append("\r\n");
+			buffer.append("WeightMap:" + ChildManager.getInstance().getWeightMap().toString()).append("\r\n");
 		}
 	}
 }

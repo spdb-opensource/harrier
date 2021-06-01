@@ -42,15 +42,12 @@ public class ServerRegisterClientHandler implements ServerRpcEventCallBack, Serv
 
 	@Override
 	public UdsRpcEvent receiveHandle(UdsRpcEvent event) {
-		String targetId = event.getTargetId();
 		String sourceId = event.getSourceId();
 		// 注册到本地客服端
 		UdsRpcClient client = UdsRpcClientManager.getInstance().addUdsRpcClient(sourceId);
 		UdsRpcEvent callbackEvent = event.callBackEvent();
 		if (client == null) {
-			// 几乎不可能出现，除非数据库连接不是一个库
-			LOGGER.warn(" check databases conifg targetId : " + targetId + " local name:" + UdsConstant.SERVER_NAME
-					+ " client :" + client.toString());
+			LOGGER.warn(" check databases conifg " + "event:" + event.toString());
 		} else {
 			client.updateMillisTime();
 			callbackEvent.addAttribute(RpcAttrKey.CODE, RpcResultCode.SUCCESS);

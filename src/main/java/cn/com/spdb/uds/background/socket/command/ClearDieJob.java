@@ -18,7 +18,7 @@ public class ClearDieJob implements InterfaceConsoleCommand {
 	@Override
 	public String hanlder(String param, PrintWriter pw) {
 		StringBuffer buffer = new StringBuffer();
-		if (UdsConstant.IS_PRIMARY_SERVER) {
+		if (UdsConstant.IS_PRIMARY_SERVER && UdsConstant.SEND_LOCATE == UdsConstant.FALSE_NUM) {
 			buffer.append("server is master");
 		} else {
 			ConcurrentHashMap<String, JobRunable> concurrentHashMap = ChildManager.getInstance().getRunJobsPool();
@@ -30,7 +30,7 @@ public class ClearDieJob implements InterfaceConsoleCommand {
 					if (param.equals("kill")) {
 						try {
 							Runtime.getRuntime().exec("ps -ef | grep uds | grep " + job.getJob()
-									+ " |grep -v grep |awk '{print \"kill $2\"}' | sh");
+									+ " |grep -v grep |awk '{print \"kill \" $2}' | sh");
 						} catch (IOException e) {
 							e.printStackTrace();
 						}

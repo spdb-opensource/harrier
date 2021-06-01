@@ -1,5 +1,7 @@
 package cn.com.spdb.uds.db.bean;
 
+import cn.com.spdb.uds.utils.Symbol;
+
 public class UdsSystemBean {
 	// 平台
 	private String platform;
@@ -62,10 +64,14 @@ public class UdsSystemBean {
 		this.use_platform = use_platform;
 	}
 
+	public String getPlatformAndSystemKey() {
+		return platform + Symbol.XIA_HUA_XIAN + system;
+	}
+
 	@Override
 	public String toString() {
-		return "UdsSystemBean [platform=" + platform + ", system=" + system + ", max_run_job=" + max_run_job + ", strategy=" + strategy + ", strategy_pro=" + strategy_pro
-				+ ", use_platform=" + use_platform + "]";
+		return "UdsSystemBean [platform=" + platform + ", system=" + system + ", max_run_job=" + max_run_job
+				+ ", strategy=" + strategy + ", strategy_pro=" + strategy_pro + ", use_platform=" + use_platform + "]";
 	}
 
 }

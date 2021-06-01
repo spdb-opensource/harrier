@@ -61,11 +61,7 @@ public class UdsLogger {
 
 						@Override
 						public int compare(UdsErrorBean o1, UdsErrorBean o2) {
-							if (o1.getMsg_time().compareTo(o2.getMsg_time()) > 0) {
-								return 1;
-							} else {
-								return -1;
-							}
+							return o1.getMsg_time().compareTo(o2.getMsg_time());
 						}
 					});
 					UdsJobRecordDao dao = DBManager.getInstance().getDao(UdsJobRecordDao.class);
@@ -80,11 +76,7 @@ public class UdsLogger {
 
 				@Override
 				public int compare(UdsErrorBean o1, UdsErrorBean o2) {
-					if (o1.getMsg_time().compareTo(o2.getMsg_time()) > 0) {
-						return 1;
-					} else {
-						return -1;
-					}
+					return o1.getMsg_time().compareTo(o2.getMsg_time());
 				}
 			});
 			UdsJobRecordDao dao = DBManager.getInstance().getDao(UdsJobRecordDao.class);
@@ -96,8 +88,7 @@ public class UdsLogger {
 	/**
 	 * 日志级别为INFOA
 	 * 
-	 * @param logEvent
-	 *            {@link LogEvent}
+	 * @param logEvent {@link LogEvent}
 	 * @param objects
 	 */
 	public static void logEvent(LogEvent logEvent, Object... objects) {
@@ -184,7 +175,7 @@ public class UdsLogger {
 
 			@Override
 			public void run() {
-				try {					
+				try {
 					int dateNum = Integer.valueOf(DateUtils.getDateTime(new Date(), DateUtils.PATTERN_YYYYMMDD_CONS));
 					clearJobLog(new File(UdsConstant.AUTO_JOB_LOG_DIR_PATH), dateNum, System.currentTimeMillis(), 30);
 					clearJobLog(new File(UdsConstant.AUTO_UNKNOW_DIR_PATH), dateNum, System.currentTimeMillis(), 30);

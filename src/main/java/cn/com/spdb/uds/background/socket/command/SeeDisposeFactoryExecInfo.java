@@ -6,6 +6,7 @@ import cn.com.spdb.uds.UdsConstant;
 import cn.com.spdb.uds.background.socket.AbsstactConsoleCommand;
 import cn.com.spdb.uds.core.master.MasterManager;
 
+@Deprecated
 public class SeeDisposeFactoryExecInfo extends AbsstactConsoleCommand {
 
 	@Override
@@ -22,7 +23,6 @@ public class SeeDisposeFactoryExecInfo extends AbsstactConsoleCommand {
 			buffer.append("CompletedTaskCount:" + executor.getCompletedTaskCount()).append("\r\n");
 			buffer.append("TaskCount:" + executor.getTaskCount()).append("\r\n");
 		}
-
 	}
 
 }

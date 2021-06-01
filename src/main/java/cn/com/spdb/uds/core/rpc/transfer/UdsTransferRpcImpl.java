@@ -1,6 +1,5 @@
 package cn.com.spdb.uds.core.rpc.transfer;
 
-import com.baidu.jprotobuf.pbrpc.ProtobufRPC;
 import com.baidu.jprotobuf.pbrpc.ProtobufRPCService;
 
 import cn.com.spdb.uds.core.rpc.event.UdsRpcEvent;
