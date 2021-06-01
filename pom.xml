@@ -25,7 +25,7 @@
 		<netty.version>4.1.16.Final</netty.version>
 		<junit.version>4.12</junit.version>
 		<baidu.rpc.version>3.5.19</baidu.rpc.version>
-		<quartz.version>2.2.1</quartz.version>
+		<quartz.version>2.3.2</quartz.version>
 		<httpclient.version>4.3.6</httpclient.version>
 		<maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
 		<maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
