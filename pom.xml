@@ -13,19 +13,19 @@
 		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-version>5.3.4</spring-version>
-		<log4j2-version>2.10.0</log4j2-version>
+		<log4j2-version>2.13.2</log4j2-version>
 		<org.aspectj.version>1.8.10</org.aspectj.version>
 		<cglib.version>2.2.2</cglib.version>
-		<mysql.version>5.1.20</mysql.version>
+		<mysql.version>8.0.16</mysql.version>
 		<druid.version>1.1.10</druid.version>
-		<mybatis.version>3.3.1</mybatis.version>
+		<mybatis.version>3.5.6</mybatis.version>
 		<mybatis-spring.version>1.2.4</mybatis-spring.version>
 		<fastjson.version>1.2.31</fastjson.version>
 		<slf4j-api.version>1.6.6</slf4j-api.version>
-		<netty.version>4.1.16.Final</netty.version>
-		<junit.version>4.12</junit.version>
+		<netty.version>4.1.42.Final</netty.version>
+		<junit.version>4.13.1</junit.version>
 		<baidu.rpc.version>3.5.19</baidu.rpc.version>
-		<quartz.version>2.2.1</quartz.version>
+		<quartz.version>2.3.2</quartz.version>
 		<httpclient.version>4.3.6</httpclient.version>
 		<maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
 		<maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
