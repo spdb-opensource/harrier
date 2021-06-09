@@ -1,6 +1,6 @@
 ![](https://img.shields.io/badge/release-v2.2-blue.svg)
 ![](https://img.shields.io/badge/language-java-blue.svg)
-![](https://img.shields.io/github/downloads/spdb-opensource/harrier/total?color=blue)
+https://img.shields.io/github/downloads/spdb-opensource/harrier/total?color=blue
 
 ------
 
