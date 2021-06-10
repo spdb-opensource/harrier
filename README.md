@@ -1,6 +1,7 @@
-![](https://img.shields.io/badge/release-v2.2-blue.svg)
+![](https://img.shields.io/badge/release-v2.2-green.svg)
 ![](https://img.shields.io/badge/language-java-blue.svg)
-
+![](https://img.shields.io/github/license/spdb-opensource/harrier?color=purple)
+[![codebeat badge](https://codebeat.co/badges/3ccf5cb3-b1bb-434f-9d64-a1bcbff30dc0)](https://codebeat.co/projects/github-com-spdb-opensource-harrier-main)
 
 ------
 
