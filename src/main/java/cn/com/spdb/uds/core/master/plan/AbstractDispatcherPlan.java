@@ -14,7 +14,7 @@ public abstract class AbstractDispatcherPlan {
 
 	public abstract Short getStrategyNum();
 
-	public static boolean isExistDispatcherPlan(int num) {
+	public static  boolean isExistDispatcherPlan(int num) {
 		Short s = (short) num;
 		return DISPATCHER_PLAN_MAP.containsKey(s);
 	}

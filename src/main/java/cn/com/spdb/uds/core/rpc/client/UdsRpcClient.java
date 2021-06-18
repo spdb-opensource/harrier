@@ -17,6 +17,7 @@ import cn.com.spdb.uds.core.bean.UdsErrorLevel;
 import cn.com.spdb.uds.core.rpc.event.UdsRpcEvent;
 import cn.com.spdb.uds.core.rpc.transfer.TransferRpc;
 import cn.com.spdb.uds.db.bean.UdsServerBean;
+import cn.com.spdb.uds.log.LogEvent;
 import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.DateUtils;
 
@@ -70,7 +71,7 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 		try {
 			call = transerRpc.transferEventConcurrent(udsRpcEvent);
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}
 		return call;
 	}
@@ -80,7 +81,7 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 		try {
 			transerRpc.transferEvent(udsRpcEvent);
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}
 	}
 
@@ -114,14 +115,14 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 				transferRpcProxy.close();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}
 		try {
 			if (rpcClient != null) {
 				rpcClient.shutdown();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}
 	}
 
@@ -236,7 +237,7 @@ public class UdsRpcClient implements Comparable<UdsRpcClient> {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!getClass().equals(obj.getClass()))
 			return false;
 		UdsRpcClient other = (UdsRpcClient) obj;
 		if (ip == null) {

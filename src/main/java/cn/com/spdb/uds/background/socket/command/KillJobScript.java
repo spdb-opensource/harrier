@@ -13,6 +13,7 @@ import java.util.Map;
 import cn.com.spdb.uds.UdsConstant;
 import cn.com.spdb.uds.background.http.HttpResultCode;
 import cn.com.spdb.uds.background.socket.InterfaceConsoleCommand;
+import cn.com.spdb.uds.core.bean.JobStatus;
 import cn.com.spdb.uds.db.DBManager;
 import cn.com.spdb.uds.db.bean.UdsJobBean;
 import cn.com.spdb.uds.db.dao.UdsJobBaseDao;
@@ -73,35 +74,38 @@ public class KillJobScript implements InterfaceConsoleCommand {
 				+ DateUtils.getDateTime(DateUtils.PATTERN_YYYYMMDD_CONS) + ".log";
 		Process processWork = null;
 		int code = 128;
-		BufferedReader jobStepOut=null;
-		PrintStream logFileInput =null;
+		BufferedReader jobStepOut = null;
+		PrintStream logFileInput = null;
 		try {
 			UdsLogger.logEvent(LogEvent.BACK_CONSOLE, "kill job", job, logPath);
 			processWork = processBuilder.start();
 			/** 将脚本运行的信息记录文件 */
-			 jobStepOut = new BufferedReader(
+			jobStepOut = new BufferedReader(
 					new InputStreamReader(processWork.getInputStream(), "utf-8"));
-			 logFileInput = new PrintStream(new FileOutputStream(new File(logPath)), true);
+			logFileInput = new PrintStream(new FileOutputStream(new File(logPath)), true);
 			String line;
 			while ((line = jobStepOut.readLine()) != null) {
 				logFileInput.println(line);
 				logFileInput.flush();
 				UdsLogger.logEvent(LogEvent.BACK_CONSOLE, "kill log", job, line);
 			}
-
 			// 线程阻塞，等待外部返回执行结果
 			processWork.waitFor();
 			// 执行结束退出获取返回值
 			code = processWork.exitValue();
 		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.BACK_CONSOLE, "kill job", job, e.getMessage());
 		} finally {
-			try {
-				if(jobStepOut!=null)jobStepOut.close();
-				if(logFileInput!=null)logFileInput.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+			if(jobStepOut != null) {
+				try {
+					jobStepOut.close();
+				} catch (IOException e) {
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+				}
+			}
+			if(logFileInput != null) {
+				logFileInput.close();
 			}
 			processWork.destroy();
 		}

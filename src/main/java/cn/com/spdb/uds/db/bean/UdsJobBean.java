@@ -3,8 +3,6 @@ package cn.com.spdb.uds.db.bean;
 import java.sql.Timestamp;
 import java.util.HashMap;
 
-import com.baidu.jprotobuf.pbrpc.utils.StringUtils;
-
 import cn.com.spdb.uds.UdsConstant;
 
 public class UdsJobBean {
@@ -45,22 +43,13 @@ public class UdsJobBean {
 
 	private HashMap<Integer, Integer> weightConfMap;
 
-	private String platfromSytemKey;
 
 	public String getPlatfromSytemKey() {
-		if (platfromSytemKey != null) {
-			return platfromSytemKey;
-		} else {
-			UdsSystemBean udsSystemBean = UdsConstant.getUdsSystemBean(platform, system);
-			if (udsSystemBean == null) {
-				return null;
-			}
-			String key = UdsConstant.getUdsSystemBeanKey(udsSystemBean.getPlatform(), udsSystemBean.getSystem());
-			if (StringUtils.isBlank(key)) {
-				return null;
-			}
-			return platfromSytemKey = key;
+		UdsSystemBean udsSystemBean = UdsConstant.getUdsSystemBean(platform, system);
+		if (udsSystemBean == null) {
+			return null;
 		}
+		return udsSystemBean.getPlatformAndSystemKey();
 	}
 
 	public int getLocation() {
@@ -250,7 +239,7 @@ public class UdsJobBean {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!getClass().equals(obj.getClass()))
 			return false;
 		UdsJobBean other = (UdsJobBean) obj;
 		if (job == null) {

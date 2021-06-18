@@ -2,7 +2,10 @@ package cn.com.spdb.uds.core.bean;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -10,7 +13,6 @@ import java.util.function.Consumer;
 
 import com.baidu.jprotobuf.pbrpc.utils.StringUtils;
 
-import cn.com.spdb.uds.UdsConstant;
 import cn.com.spdb.uds.db.bean.UdsJobBean;
 
 public class PlatformSystemCenterBean {
@@ -30,19 +32,49 @@ public class PlatformSystemCenterBean {
 	/** 等待分发作业 */
 	private ConcurrentHashMap<String, SystemConterBean> platformConterMap = new ConcurrentHashMap<String, SystemConterBean>();
 
-	/** 移除长时间不用的应用 */
-	public void checkRemovePlatformConterMapBytime(final long over) {
-		platformConterMap.forEachValue(2, new Consumer<SystemConterBean>() {
+	
+	private PriorityQueue<UdsJobBean> priQueue = new PriorityQueue<UdsJobBean>(150, new Comparator<UdsJobBean>() {
+		@Override
+		public int compare(UdsJobBean o1, UdsJobBean o2) {
+			if (o1.getPriority() == o2.getPriority()) {
+				if (o1.getDispatcher_time() != null && o2.getDispatcher_time() != null) {
+					if (o1.getDispatcher_time().equals(o2.getDispatcher_time())) {
+						return o1.getJob().compareTo(o2.getJob());
+					}
+					return o1.getDispatcher_time().compareTo(o2.getDispatcher_time());
+				}
+			}
+			return o2.getPriority() - o1.getPriority();
+		}
+	});
+
+	public  PriorityQueue<UdsJobBean> getCheckPriQueue() {
+		platformConterMap.forEachEntry(2, new Consumer<Entry<String, SystemConterBean>>() {
 			@Override
-			public void accept(SystemConterBean t) {
-				String key = UdsConstant.getUdsSystemBeanKey(t.getPlatform(), t.getSystem());
-				if (!key.equals(t.getPlatformSystemId())) {
-					if (t.isremove(over)) {
-						platformConterMap.remove(key);
+			public void accept(Entry<String, SystemConterBean> t) {
+				UdsJobBean udsJobBean=t.getValue().peek();
+				while((udsJobBean=t.getValue().peek())!=null) {
+					if(t.getKey().equals(udsJobBean.getPlatfromSytemKey())) {
+						if(!priQueue.contains(udsJobBean)){							
+							priQueue.offer(udsJobBean);
+						}
+						break;
+					}else {
+						t.getValue().remove(udsJobBean);
 					}
 				}
 			}
 		});
+		return priQueue;
+	}
+	
+	/** 移除长时间不用的应用 */
+	public void checkRemovePlatformConterMapBytime(final long overtime) {
+		for(Entry<String, SystemConterBean> en: platformConterMap.entrySet()) {
+			if(en.getValue().isremove(overtime)) {
+				platformConterMap.remove(en.getKey());
+			}
+		}
 	}
 
 	public PlatformSystemCenterBean(String platform) {

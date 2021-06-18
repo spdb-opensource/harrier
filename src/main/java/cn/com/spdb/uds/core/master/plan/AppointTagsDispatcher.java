@@ -7,6 +7,8 @@ import java.util.Map.Entry;
 import cn.com.spdb.uds.UdsConstant;
 import cn.com.spdb.uds.core.bean.ChildServerInfo;
 import cn.com.spdb.uds.core.bean.JobTagsType;
+import cn.com.spdb.uds.core.bean.UdsErrorCode;
+import cn.com.spdb.uds.core.bean.UdsErrorLevel;
 import cn.com.spdb.uds.core.master.MasterManager;
 import cn.com.spdb.uds.core.rpc.client.UdsRpcClient;
 import cn.com.spdb.uds.core.rpc.client.UdsRpcClientManager;
@@ -15,7 +17,6 @@ import cn.com.spdb.uds.db.bean.UdsJobBean;
 import cn.com.spdb.uds.db.bean.UdsJobTagBean;
 import cn.com.spdb.uds.db.bean.UdsSystemBean;
 import cn.com.spdb.uds.db.dao.UdsJobTagDao;
-import cn.com.spdb.uds.log.LogEvent;
 import cn.com.spdb.uds.log.UdsLogger;
 
 public class AppointTagsDispatcher extends AbstractDispatcherPlan {
@@ -29,6 +30,7 @@ public class AppointTagsDispatcher extends AbstractDispatcherPlan {
 		String serverName = null;
 		// DB获取作业标签
 		int max = over == true ? Integer.MIN_VALUE : 0;
+		boolean isAlarm = true;
 		for (Entry<String, ChildServerInfo> entry : MasterManager.getInstance().getChildServerJobMap().entrySet()) {
 			ChildServerInfo date = entry.getValue();
 			if (date.getEnable() != UdsConstant.TRUE_NUM) {
@@ -42,14 +44,14 @@ public class AppointTagsDispatcher extends AbstractDispatcherPlan {
 			for (UdsJobTagBean tagBean : tagBeanList) {
 				if (tags.contains(tagBean.getTag())) {
 					isNotPass = false;
+					isAlarm = false;
 					break;
 				}
 			}
 			if (isNotPass) {
-				UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "udsjobtages is not exist", date.getName());
 				continue;
 			}
-			
+
 			int tmpMax = date.getMaxJobNum() * date.getPerformanceRatio() / 1000;
 			int jobNum = tmpMax - date.getJobNum();
 			if (!over && jobNum <= 0) {
@@ -59,6 +61,9 @@ public class AppointTagsDispatcher extends AbstractDispatcherPlan {
 				serverName = date.getName();
 				max = jobNum;
 			}
+		}
+		if (isAlarm) {
+			UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_TAG_IS_NOT_EIST, UdsErrorLevel.H, udsJobBean.getJob());
 		}
 		if (serverName != null) {
 			return UdsRpcClientManager.getInstance().getUdsRpcClient(serverName);

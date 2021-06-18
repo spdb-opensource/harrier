@@ -102,10 +102,9 @@ public class JobDependFilter extends AbstractPendingFilter {
 						tDate = DateUtils.getNextValidTimeAfter(cron, tDate);
 					} catch (ParseException e) {
 						UdsLogger.logEvent(LogEvent.ERROR, "uds job JobDependFilter is error", e.getMessage());
-						UdsLogger
-								.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, bean.getJob());
+						UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, bean.getJob());
 
-						e.printStackTrace();
+						UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 					}
 					if (minDate == null || tDate.compareTo(minDate) < 0) {
 						minDate = tDate;
@@ -132,8 +131,7 @@ public class JobDependFilter extends AbstractPendingFilter {
 						tDate = DateUtils.getNextValidTimeAfter(cron, tDate);
 					} catch (ParseException e) {
 						UdsLogger.logEvent(LogEvent.ERROR, "uds job JobDependFilter is error", e.getMessage());
-						UdsLogger
-								.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, bean.getJob());
+						UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, bean.getJob());
 
 					}
 					if (minDate == null || tDate.compareTo(minDate) < 0) {
@@ -163,10 +161,9 @@ public class JobDependFilter extends AbstractPendingFilter {
 						tDate = DateUtils.getNextValidTimeAfter(cron, tDate);
 					} catch (ParseException e) {
 						UdsLogger.logEvent(LogEvent.ERROR, "uds job JobDependFilter is error", e.getMessage());
-						UdsLogger
-								.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, bean.getJob());
+						UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, bean.getJob());
 
-						e.printStackTrace();
+						UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 					}
 					if (minDate == null || tDate.compareTo(minDate) < 0) {
 						minDate = tDate;
@@ -186,7 +183,7 @@ public class JobDependFilter extends AbstractPendingFilter {
 				List<UdsJobDateTriggerBean> list = controlDao.getUdsJobDateTrigger(bean.getPlatform(), bean.getSystem(),
 						bean.getJob());
 				for (UdsJobDateTriggerBean dateTriggerBean : list) {
-					String cron = " 0 0 0 " + dateTriggerBean.getDay() + " " + dateTriggerBean.getMonth()+ " "
+					String cron = " 0 0 0 " + dateTriggerBean.getDay() + " " + dateTriggerBean.getMonth() + " "
 							+ dateTriggerBean.getWeek() + " " + dateTriggerBean.getYear();
 					try {
 						tDate = DateUtils.getNextValidTimeAfter(cron, tDate);
@@ -200,7 +197,7 @@ public class JobDependFilter extends AbstractPendingFilter {
 					} catch (ParseException e) {
 						UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, udsJobBean.getJob(),
 								"UdsJobDateTriggerBean is null");
-						e.printStackTrace();
+						UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 					}
 				}
 				// 比较作业执行时间要小于下次执行作业时间

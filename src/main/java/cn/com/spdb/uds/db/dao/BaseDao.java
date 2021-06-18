@@ -38,7 +38,7 @@ public class BaseDao extends AbstractBaseDao {
 			}
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -56,7 +56,7 @@ public class BaseDao extends AbstractBaseDao {
 			}
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} finally {
 			sqlSession.close();

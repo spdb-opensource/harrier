@@ -81,6 +81,24 @@
 				</Delete>
 			</DefaultRolloverStrategy>
 		</RollingFile>
+		
+<!-- 		<RollingFile name="job" fileName="${LOG_HOME}/job/job.log" -->
+<!-- 			filePattern="${LOG_HOME}/job/job_%d{yyyy-MM-dd}_%i.log"> -->
+<!-- 			<ThresholdFilter level="INFO" onMatch="ACCEPT" -->
+<!-- 				onMismatch="DENY" /> -->
+<!-- 			<PatternLayout pattern="[%d] [%t] [%-5level] - %msg%n" /> -->
+<!-- 			<Policies> -->
+<!-- 				<TimeBasedTriggeringPolicy interval="1" -->
+<!-- 					modulate="true" /> -->
+<!-- 				<SizeBasedTriggeringPolicy size="100 MB" /> -->
+<!-- 			</Policies> -->
+<!-- 			<DefaultRolloverStrategy max="10"> -->
+<!-- 				<Delete basePath="${LOG_HOME}/job/"> -->
+<!-- 					<IfFileName glob="job_*.log" /> -->
+<!-- 					<IfLastModified age="30d" /> -->
+<!-- 				</Delete> -->
+<!-- 			</DefaultRolloverStrategy> -->
+<!-- 		</RollingFile> -->
 
 
 
@@ -111,6 +129,10 @@
 			<AppenderRef ref="console" />
 			<AppenderRef ref="child" />
 		</logger>
+<!-- 		<logger name="jobLog" level="info" additivity="false"> -->
+<!-- 			<AppenderRef ref="console" /> -->
+<!-- 			<AppenderRef ref="job" /> -->
+<!-- 		</logger> -->
 
 		<logger name="masterLog" level="info" additivity="false">
 			<AppenderRef ref="console" />

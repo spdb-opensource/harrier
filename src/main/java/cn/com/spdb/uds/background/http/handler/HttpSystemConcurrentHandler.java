@@ -8,9 +8,13 @@ import cn.com.spdb.uds.UdsConstant;
 import cn.com.spdb.uds.background.http.AbstractHttpPostBodyWorkHandler;
 import cn.com.spdb.uds.background.http.HttpMapProtocol;
 import cn.com.spdb.uds.background.http.HttpResultCode;
+import cn.com.spdb.uds.background.socket.command.LoadTagsInMaster;
+import cn.com.spdb.uds.background.socket.command.LoadUdsSystem;
 import cn.com.spdb.uds.core.master.plan.AbstractDispatcherPlan;
 import cn.com.spdb.uds.core.rpc.client.UdsRpcClient;
 import cn.com.spdb.uds.core.rpc.client.UdsRpcClientManager;
+import cn.com.spdb.uds.core.rpc.event.RpcCommand;
+import cn.com.spdb.uds.core.rpc.event.UdsRpcEvent;
 import cn.com.spdb.uds.db.DBManager;
 import cn.com.spdb.uds.db.bean.UdsSystemBean;
 import cn.com.spdb.uds.db.dao.UdsJobControlDao;
@@ -108,7 +112,6 @@ public class HttpSystemConcurrentHandler extends AbstractHttpPostBodyWorkHandler
 					try {
 						order = Short.parseShort(orderStr);
 					} catch (NumberFormatException e) {
-						e.printStackTrace();
 						UdsLogger.logEvent(LogEvent.HTTP_ERROR, "orderStr isnot short", strategy, orderStr);
 						return "配置序号不是机器";
 					}
@@ -130,6 +133,9 @@ public class HttpSystemConcurrentHandler extends AbstractHttpPostBodyWorkHandler
 		List<UdsSystemBean> listUdsSystemBeans = new ArrayList<UdsSystemBean>();
 		listUdsSystemBeans.add(bean);
 		int tmp = UdsJobControlDao.updateUdsSystemList(listUdsSystemBeans);
+		UdsRpcEvent udsRpcEvent = UdsRpcEvent.buildUdsRpcEvent(null, RpcCommand.SERVER_COMMAND);
+		UdsRpcClientManager.getInstance().sendBroadcastMessage(udsRpcEvent, LoadUdsSystem.class.getSimpleName(),
+				true);
 		if (tmp > 0) {
 			return HttpResultCode.SUCCESS;
 		}

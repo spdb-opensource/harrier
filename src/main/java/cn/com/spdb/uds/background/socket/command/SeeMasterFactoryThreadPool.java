@@ -22,15 +22,6 @@ public class SeeMasterFactoryThreadPool extends AbsstactConsoleCommand {
 			buffer.append("QueueSize:" + executor.getQueue().size()).append("\r\n");
 			buffer.append("CompletedTaskCount:" + executor.getCompletedTaskCount()).append("\r\n");
 			buffer.append("TaskCount:" + executor.getTaskCount()).append("\r\n");
-			executor = MasterManager.getInstance().getMasterFactory().getExecutorDispatcher();
-			buffer.append("ExecutorDispatcher").append("\r\n");
-			buffer.append("CorePoolSize:" + executor.getCorePoolSize()).append("\r\n");
-			buffer.append("MaximumPoolSize:" + executor.getMaximumPoolSize()).append("\r\n");
-			buffer.append("PoolSize:" + executor.getPoolSize()).append("\r\n");
-			buffer.append("ActiveCount:" + executor.getActiveCount()).append("\r\n");
-			buffer.append("QueueSize:" + executor.getQueue().size()).append("\r\n");
-			buffer.append("CompletedTaskCount:" + executor.getCompletedTaskCount()).append("\r\n");
-			buffer.append("TaskCount:" + executor.getTaskCount()).append("\r\n");
 		}
 
 	}

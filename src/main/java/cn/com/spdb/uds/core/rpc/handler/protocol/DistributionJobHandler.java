@@ -36,7 +36,7 @@ public class DistributionJobHandler implements ServerRpcEventCallBack, ServerRpc
 			UdsJobBean bean = udsJobBaseDao.getUdsJobBeanByJob(jobName);
 			if (bean != null) {
 				// 并发归还
-				MasterManager.getInstance().decrementChildServerSystem(callBackEvent.getSourceId(), bean.getPlatform(),
+				MasterManager.getInstance().decrementChildServerPlatformAndSystem(callBackEvent.getSourceId(), bean.getPlatform(),
 						bean.getSystem());
 				// 权重归还
 				MasterManager.getInstance().subWeight(callBackEvent.getSourceId(), jobName);

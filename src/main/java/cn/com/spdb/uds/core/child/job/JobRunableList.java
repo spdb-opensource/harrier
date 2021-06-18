@@ -27,9 +27,8 @@ public class JobRunableList implements Runnable {
 	private static final String UPDATESQL = "UPDATE m_substream SET JOB_STATUS=1 WHERE JOB_ID='%s';";
 
 	/**
-	 * String sql =
-	 * "SELECT JOB_ID,JOB,TX_DATE,BATCH FROM m_substream WHERE STREAM_ID='" +
-	 * param + "';";
+	 * String sql = "SELECT JOB_ID,JOB,TX_DATE,BATCH FROM m_substream WHERE
+	 * STREAM_ID='" + param + "';";
 	 */
 	private List<HashMap<Object, Object>> list = new ArrayList<HashMap<Object, Object>>();
 
@@ -44,40 +43,54 @@ public class JobRunableList implements Runnable {
 			UdsJobBaseDao udsJobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
 			UdsJobBean udsJobBean = udsJobBaseDao.getUdsJobBeanByJob(job);
 			if (udsJobBean == null) {
-				UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_FORCE_START, UdsErrorLevel.M, job, jobId, jobDate, batch,"作业不存在");
+				UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_FORCE_START, UdsErrorLevel.M, job, jobId, jobDate,
+						batch, "作业不存在");
 				return;
 			}
-			udsJobBaseDao.updateJobServerName(udsJobBean.getPlatform(), udsJobBean.getSystem(), job, UdsConstant.SERVER_NAME);
 			String platform = udsJobBean.getPlatform();
 			String system = udsJobBean.getSystem();
+			String oldJobDate = udsJobBean.getJob_date();
+			int oldBathce = udsJobBean.getBatch();
 
-			// 检查作业批次号 单批次，发的多批次
-			if (udsJobBean.getBatch() == 0 && batch > 0) {
-				UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_FORCE_START, UdsErrorLevel.M, job, jobId, jobDate, batch,"批次号错误");
-				return;
+			JobRunable jobRunable;
+			try {
+				synchronized (JobRunableList.class) {
+					udsJobBaseDao.updateJobServerName(platform, system, job, UdsConstant.SERVER_NAME);
+					// 检查作业批次号 单批次，发的多批次
+					if (udsJobBean.getBatch() == 0 && batch > 0) {
+						UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_FORCE_START, UdsErrorLevel.M, job, jobId,
+								jobDate, batch, "批次号错误");
+						return;
+					}
+					// 检查作业批次号 多批次，发的单批次
+					if (udsJobBean.getBatch() > 0 && batch == 0) {
+						UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_FORCE_START, UdsErrorLevel.M, job, jobId,
+								jobDate, batch, "批次号错误");
+						return;
+					}
+					// 设置作业状态
+					if (udsJobBaseDao.updateJobRuningByForceStart(platform, system, job, batch, jobDate,
+							UdsConstant.SERVER_NAME) <= 0) {
+						UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_FORCE_START, UdsErrorLevel.M, job, jobId,
+								jobDate, batch, "修改作业状态失败");
+						return;
+					}
+				}
+				udsJobBean.setNum_times(udsJobBean.getNum_times() + 1);
+				udsJobBean.setJob_date(jobDate);
+				udsJobBean.setBatch(batch);
+				List<UdsJobStepBean> jobStepBeanList = udsJobBaseDao.getUdsJobStepBean(platform, system, job);
+				String conv_signal = udsJobBaseDao.getConvSignalByJob(platform, system, job);
+				jobRunable = ChildManager.getInstance().bulidJobRunable(udsJobBean, jobStepBeanList, conv_signal);
+				jobRunable.setNotForcestartJob(false);
+				jobRunable.run();
+			} finally {
+				udsJobBaseDao.updateJobStatusAndJobdate(platform, system, job, JobStatus.DONE.status(), oldJobDate,
+						oldBathce);
 			}
-			// 检查作业批次号 多批次，发的单批次
-			if (udsJobBean.getBatch() > 0 && batch == 0) {
-				UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_FORCE_START, UdsErrorLevel.M, job, jobId, jobDate, batch,"批次号错误");
-				return;
-			}
-
-			// 设置作业状态
-			if (udsJobBaseDao.updateJobRuningByForceStart(platform, system, job, batch, jobDate, UdsConstant.SERVER_NAME) <= 0) {
-				UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_FORCE_START, UdsErrorLevel.M, job, jobId, jobDate, batch,"修改作业状态失败");
-				return;
-			}
-
-			udsJobBean.setNum_times(udsJobBean.getNum_times() + 1);
-			udsJobBean.setJob_date(jobDate);
-			udsJobBean.setBatch(batch);
-			List<UdsJobStepBean> jobStepBeanList = udsJobBaseDao.getUdsJobStepBean(platform, system, job);
-			String conv_signal = udsJobBaseDao.getConvSignalByJob(platform, system, job);
-			JobRunable jobRunable = ChildManager.getInstance().bulidJobRunable(udsJobBean, jobStepBeanList, conv_signal);
-			jobRunable.setNotForcestartJob(false);
-			jobRunable.run();
 			if (jobRunable.getReturnCode() != 0) {
-				UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_FORCE_START, UdsErrorLevel.M, job, jobId, jobDate, batch,"执行失败");
+				UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_FORCE_START, UdsErrorLevel.M, job, jobId, jobDate,
+						batch, "执行失败");
 				return;
 			} else {
 				if (!jobId.equals("0")) {

@@ -23,6 +23,7 @@ public enum UdsErrorCode {
 	JOB_RCV_BACTH_ERROR(413, "接受信号文件作业批次号不正确"),
 	JOB_STREAM_BACTH_ERROR(414, "触发作业批次号不正确"),
 	JOB_SCHEDULER_BATCH_ERROR(415,"定时作业的批次不正确"),
+	JOB_TAG_IS_NOT_EIST(416,"作业标签分发没有对应的机器"),
 	JOB_FINSH_NOTICE(450,"作业完成"),
 	;
 

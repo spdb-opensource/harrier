@@ -62,6 +62,19 @@ public class UdsJobControlDao extends AbstractBaseDao {
 		return list;
 	}
 
+	public List<UdsJobBean> getUdsJobByDependency(String platform, String system, String job, int batch) {
+		HashMap<Object, Object> map = new HashMap<Object, Object>();
+		map.put("dep_platform", platform);
+		map.put("dep_system", system);
+		map.put("dep_job", job);
+		map.put("dep_batch", batch);
+		List<UdsJobBean> list = selectList("uds_job_control.getUdsJobByDependency", map);
+		if (list == null) {
+			list = new ArrayList<UdsJobBean>();
+		}
+		return list;
+	}
+
 	/**
 	 * 获取数据库中触发时间大于当前时间的作业信息
 	 * 
@@ -167,7 +180,7 @@ public class UdsJobControlDao extends AbstractBaseDao {
 			}
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -175,6 +188,29 @@ public class UdsJobControlDao extends AbstractBaseDao {
 		return tmp;
 	}
 
+	/**
+	 * 更新平台参数
+	 * 
+	 * @param listUdsSystemBeans
+	 * @return
+	 */
+	public int updateUdsSystemListRunNum(List<UdsSystemBean> listUdsSystemBeans) {
+		SqlSession sqlSession = sqlSessionFactory.openSession();
+		int tmp = 0;
+		try {
+			for (UdsSystemBean udsSystemBean : listUdsSystemBeans) {
+				tmp += sqlSession.update("uds_job_control.updateUdsSystemRunNum", udsSystemBean);
+			}
+			sqlSession.commit();
+		} catch (Exception e) {
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+			UdsLogger.logEvent(LogEvent.ERROR_DB, e.getMessage());
+		} finally {
+			sqlSession.close();
+		}
+		return tmp;
+	}
+	
 	/**
 	 * 获取平台参数
 	 * 

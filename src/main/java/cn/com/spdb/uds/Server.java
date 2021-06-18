@@ -18,6 +18,7 @@ import cn.com.spdb.uds.core.rpc.server.UdsRpcServer;
 import cn.com.spdb.uds.db.DBManager;
 import cn.com.spdb.uds.db.dao.BaseDao;
 import cn.com.spdb.uds.db.dao.UdsServerDao;
+import cn.com.spdb.uds.log.LogEvent;
 import cn.com.spdb.uds.log.SystemOutAndErrPrintStream;
 import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.DateUtils;
@@ -99,7 +100,7 @@ public class Server {
 						try {
 							Thread.sleep(DateUtils.TIME_MILLSECOND_OF_SECOND * 20);
 						} catch (InterruptedException e) {
-							e.printStackTrace();
+							UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 						}
 						num = ChildManager.getInstance().getExecutorJobNum();
 					}

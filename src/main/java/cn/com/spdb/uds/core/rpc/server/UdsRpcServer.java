@@ -16,6 +16,7 @@ import cn.com.spdb.uds.core.rpc.transfer.UdsTransferRpcImpl;
 import cn.com.spdb.uds.db.DBManager;
 import cn.com.spdb.uds.db.bean.UdsServerBean;
 import cn.com.spdb.uds.db.dao.UdsServerDao;
+import cn.com.spdb.uds.log.LogEvent;
 import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.NameThreadFactory;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -30,7 +31,7 @@ public class UdsRpcServer {
 			try {
 				rpcServer.shutdown();
 			} catch (Exception e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 		}
 	}
@@ -105,7 +106,7 @@ public class UdsRpcServer {
 					ServerStatus.REQUEST_COUNTS.clear();
 					Thread.sleep(1000 * 10);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 

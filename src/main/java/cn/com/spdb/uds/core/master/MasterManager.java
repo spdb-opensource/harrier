@@ -14,26 +14,16 @@ import cn.com.spdb.uds.SchedulerManager;
 import cn.com.spdb.uds.UdsConstant;
 import cn.com.spdb.uds.core.bean.ChildServerInfo;
 import cn.com.spdb.uds.core.bean.JobStatus;
-import cn.com.spdb.uds.core.bean.PlatformConterBean;
 import cn.com.spdb.uds.core.bean.SignalFileInfo;
 import cn.com.spdb.uds.core.bean.UdsErrorCode;
 import cn.com.spdb.uds.core.bean.UdsErrorLevel;
-import cn.com.spdb.uds.core.filter.pending.AbstractPendingFilter;
-import cn.com.spdb.uds.core.filter.pending.JobDependFilter;
-import cn.com.spdb.uds.core.filter.pending.JobSystemMaxNumFilter;
-import cn.com.spdb.uds.core.filter.pending.JobTimeWindowFilter;
 import cn.com.spdb.uds.core.filter.receiver.AbstractReceiverFilter;
 import cn.com.spdb.uds.core.filter.receiver.JobFilter;
 import cn.com.spdb.uds.core.filter.receiver.JobFrequencyFilter;
-import cn.com.spdb.uds.core.master.plan.AbstractDispatcherPlan;
 import cn.com.spdb.uds.core.master.plan.AppointDispatcher;
 import cn.com.spdb.uds.core.master.plan.AppointOrderDispatcher;
 import cn.com.spdb.uds.core.master.plan.AppointTagsDispatcher;
 import cn.com.spdb.uds.core.master.plan.CommonDispatcher;
-import cn.com.spdb.uds.core.rpc.client.UdsRpcClient;
-import cn.com.spdb.uds.core.rpc.client.UdsRpcClientManager;
-import cn.com.spdb.uds.core.rpc.event.RpcCommand;
-import cn.com.spdb.uds.core.rpc.event.UdsRpcEvent;
 import cn.com.spdb.uds.db.DBManager;
 import cn.com.spdb.uds.db.bean.UdsJobBean;
 import cn.com.spdb.uds.db.bean.UdsJobDateTriggerBean;
@@ -44,7 +34,6 @@ import cn.com.spdb.uds.db.dao.UdsJobWeightDao;
 import cn.com.spdb.uds.log.LogEvent;
 import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.DateUtils;
-import cn.com.spdb.uds.utils.Symbol;
 import cn.com.spdb.uds.utils.UdsUtils;
 
 public class MasterManager {
@@ -68,12 +57,7 @@ public class MasterManager {
 	// 接受目录作业过滤
 	private List<AbstractReceiverFilter> jobReceiverFilterList = new ArrayList<AbstractReceiverFilter>();
 	// 等待作业过滤
-	@Deprecated
-	private List<AbstractPendingFilter> jobPendingFilterList = new ArrayList<AbstractPendingFilter>();
-	// 子节点机器运行作业数
 	private volatile ConcurrentHashMap<String, ChildServerInfo> childServerJobMap = new ConcurrentHashMap<String, ChildServerInfo>();
-	@Deprecated
-	private MasterPendingJobDisposeFactory pendingJobDisposeFactory = new MasterPendingJobDisposeFactory();
 
 	private MasterFactory masterFactory = new MasterFactory();
 
@@ -93,6 +77,20 @@ public class MasterManager {
 		return num;
 	}
 
+	public void incrementChildServerPlatformAndSystem(String serverName, String platform, String system) {
+		ChildServerInfo childServerInfo = childServerJobMap.get(serverName);
+		if (childServerInfo != null) {
+			childServerInfo.incrementPlatformAndSystemJob(platform, system);
+		}
+	}
+
+	public void decrementChildServerPlatformAndSystem(String serverName, String platform, String system) {
+		ChildServerInfo childServerInfo = childServerJobMap.get(serverName);
+		if (childServerInfo != null) {
+			childServerInfo.decrementtPlatformAndSystemJob(platform, system);
+		}
+	}
+	
 	public void incrementChildServerSystem(String serverName, String platform, String system) {
 		ChildServerInfo childServerInfo = childServerJobMap.get(serverName);
 		if (childServerInfo != null) {
@@ -126,17 +124,13 @@ public class MasterManager {
 		// 接受过滤
 		jobReceiverFilterList.add(new JobFilter());
 		jobReceiverFilterList.add(new JobFrequencyFilter());
-		// 等待过滤
-		jobPendingFilterList.add(new JobSystemMaxNumFilter());
-		jobPendingFilterList.add(new JobTimeWindowFilter());
-		jobPendingFilterList.add(new JobDependFilter());
+
 		// 策略
 		new CommonDispatcher();
 		new AppointDispatcher();
 		new AppointOrderDispatcher();
 		new AppointTagsDispatcher();
 
-		masterFactory.start();
 
 		SchedulerManager.getInstance().scheduleWithFixedDelay("MASTERMANAGER_CHECKRECEIVERDIR", new Runnable() {
 
@@ -146,7 +140,7 @@ public class MasterManager {
 					checkReceiverDir();
 				} catch (Exception e) {
 					UdsLogger.logEvent(LogEvent.ERROR, "checkReceiverDir", e.getMessage());
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}, 20 * DateUtils.TIME_MILLSECOND_OF_SECOND, 5 * DateUtils.TIME_MILLSECOND_OF_SECOND);
@@ -159,7 +153,7 @@ public class MasterManager {
 					checkDbSchedulerJob();
 				} catch (Exception e) {
 					UdsLogger.logEvent(LogEvent.ERROR, "checkDbSchedulerJob", e.getMessage());
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}, 10 * DateUtils.TIME_MILLSECOND_OF_SECOND + 5 * DateUtils.TIME_MILLSECOND_OF_SECOND,
@@ -172,7 +166,7 @@ public class MasterManager {
 					masterFactory.checkDbToPending();
 				} catch (Exception e) {
 					UdsLogger.logEvent(LogEvent.ERROR, "checkDbPending", e.getMessage());
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}, 10 * DateUtils.TIME_MILLSECOND_OF_SECOND + 8 * DateUtils.TIME_MILLSECOND_OF_SECOND,
@@ -186,7 +180,7 @@ public class MasterManager {
 					masterFactory.checkPendingToDispatcher();
 				} catch (Exception e) {
 					UdsLogger.logEvent(LogEvent.ERROR, "checkPendingFactoryToDispatcher", e.getMessage());
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}, 10 * DateUtils.TIME_MILLSECOND_OF_SECOND + 3 * DateUtils.TIME_MILLSECOND_OF_SECOND,
@@ -200,7 +194,7 @@ public class MasterManager {
 					checkCallAgainJob();
 				} catch (Exception e) {
 					UdsLogger.logEvent(LogEvent.ERROR, "checkCallAgainJob", e.getMessage());
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}, 10 * DateUtils.TIME_MILLSECOND_OF_SECOND + 15 * DateUtils.TIME_MILLSECOND_OF_SECOND,
@@ -263,7 +257,7 @@ public class MasterManager {
 					UdsLogger.logEvent(LogEvent.ERROR, "UdsJobDateTriggerBean is error ", bean.getJob(),
 							e.getMessage());
 					UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, bean.getJob());
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 				// 根据偏移获取真实运行job_date时间
 				Date targetJobDate = startDate;
@@ -315,7 +309,7 @@ public class MasterManager {
 				UdsLogger.logEvent(LogEvent.MASTER_SCHEDULER, "UdsJobDateTriggerBean is success", bean.getJob());
 			} catch (Exception e) {
 				UdsLogger.logEvent(LogEvent.ERROR, "UdsJobDateTriggerBean error ", bean.getJob());
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 		}
 		if (jobsMaps.size() > 0) {
@@ -326,233 +320,6 @@ public class MasterManager {
 		}
 	}
 
-	@Deprecated
-	private HashMap<String, PlatformConterBean> platformConterBeanMap = new HashMap<String, PlatformConterBean>();
-
-	/**
-	 * 检测等待分发的作业,提交到工厂处理
-	 */
-	@Deprecated
-	public void checkDbPendingToFactory() {
-		if (!isCheckRecive()) {
-			return;
-		}
-		UdsJobBaseDao udsJobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
-		for (UdsSystemBean systemBean : UdsConstant.MAP_SYSTEM_JOB.values()) {
-			if (systemBean.getSystem().equals(Symbol.XING_HAO)) {
-				String platform = systemBean.getPlatform();
-				PlatformConterBean conterBean = platformConterBeanMap.get(platform);
-				if (conterBean == null) {
-					platformConterBeanMap.put(platform, conterBean = new PlatformConterBean());
-				}
-				if (systemBean.getMax_run_job() == 0) {
-					UdsLogger.logEvent(LogEvent.MASTER_PENDIG, "MASTER PENDIG PLATFORM NUM IS 0",
-							systemBean.getSystem(), systemBean.getPlatform());
-					continue;
-				}
-
-				if (conterBean.isDealJobfinsh()) {
-					int initNum = conterBean.getInitNum();
-					if (conterBean.isWaitDealJobinsh()) {
-						List<UdsJobBean> jobList = udsJobBaseDao.checkPendingJobByPlatformOrder(platform, initNum);
-						if (jobList.size() < UdsConstant.CHECK_DB_PENDING_LIMIT_NUM) {
-							initNum = 0;
-						} else {
-							initNum += UdsConstant.CHECK_DB_PENDING_LIMIT_NUM;
-						}
-						conterBean.setInitNum(initNum);
-						conterBean.addWaitDealJobAll(jobList);
-					}
-					conterBean.transfromWaitToDeal(UdsConstant.CHECK_PENDING_LIMIT_NUM);
-					ArrayList<UdsJobBean> dealJobList = conterBean.getNewDealJobList();
-					if (dealJobList.size() > 0) {
-						UdsLogger.logEvent(LogEvent.MASTER_PENDIG, "MASTER PENDIG SUBMIT", systemBean.getPlatform(),
-								systemBean.getSystem(), initNum, dealJobList.size());
-					}
-					for (UdsJobBean udsJobBean : dealJobList) {
-						pendingJobDisposeFactory.submit(udsJobBean);
-					}
-				}
-			}
-		}
-	}
-
-	@Deprecated
-	public void transfromDealToDispatcher(UdsJobBean bean) {
-		PlatformConterBean conterBean = platformConterBeanMap.get(bean.getPlatform());
-		if (conterBean != null) {
-			conterBean.transfromDealToUpdateDispatcher(bean);
-		}
-	}
-
-	@Deprecated
-	public void removeDeal(UdsJobBean bean) {
-		PlatformConterBean conterBean = platformConterBeanMap.get(bean.getPlatform());
-		if (conterBean != null) {
-			conterBean.removeDealJob(bean);
-		}
-	}
-
-	@Deprecated
-	public void addJobToDispatcherWaitMap(UdsJobBean bean) {
-		PlatformConterBean conterBean = platformConterBeanMap.get(bean.getPlatform());
-		if (conterBean != null) {
-			conterBean.addDispatcherJobList(bean);
-		}
-	}
-
-	@Deprecated
-	public void removeDispatcherJob(UdsJobBean bean) {
-		PlatformConterBean conterBean = platformConterBeanMap.get(bean.getPlatform());
-		conterBean.removeDispatcherJob(bean);
-	}
-
-	/**
-	 * 从工厂提货准备分发
-	 * 
-	 */
-	@Deprecated
-	private int checkDBDispatcherNum = 0;
-
-	@Deprecated
-	public void checkPendingFactoryToDispatcher() {
-		UdsJobBaseDao udsJobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
-		if (!isCheckRecive()) {
-			return;
-		}
-
-		// 数据超时校验
-		checkDBDispatcherNum = checkDBDispatcherNum >= UdsConstant.CHECK_DB_DISPATCHER_NUM ? 0 : checkDBDispatcherNum;
-		if (checkDBDispatcherNum == 0) {
-			List<UdsJobBean> tmpList = udsJobBaseDao.getJobStatusDispatcherOverTime();
-			for (UdsJobBean bean : tmpList) {
-				addJobToDispatcherWaitMap(bean);
-			}
-		}
-
-		// 汇总需要更新数据
-		List<UdsJobBean> updateDispatcherWaitList = new ArrayList<UdsJobBean>();
-		for (PlatformConterBean conterBean : platformConterBeanMap.values()) {
-			if (conterBean == null) {
-				continue;
-			}
-			updateDispatcherWaitList.addAll(conterBean.transfromUpdateDispatcherToDispatcher());
-		}
-
-		// 新增,并更新状态
-		if (updateDispatcherWaitList.size() > 0) {
-			ArrayList<String> jobs = new ArrayList<String>(updateDispatcherWaitList.size());
-			for (UdsJobBean bean : updateDispatcherWaitList) {
-				jobs.add(bean.getJob());
-			}
-			udsJobBaseDao.updateAllJobStatusDispatcher(jobs);
-		}
-
-		List<UdsJobBean> dispatcherWaitList = new ArrayList<UdsJobBean>();
-		long now = System.currentTimeMillis();
-
-		int checkNum = 0;
-		for (Entry<String, PlatformConterBean> entry : platformConterBeanMap.entrySet()) {
-			try {
-				String platform = entry.getKey();
-				UdsSystemBean systemBean = UdsConstant.getUdsSystemBean(platform, Symbol.XING_HAO);
-				int max = systemBean.getMax_run_job();
-				if (max <= 0) {
-					UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "systemBean.getMax_run_job() is 0", platform);
-					continue;
-				}
-				PlatformConterBean conterBean = entry.getValue();
-
-				// 获取平台最大并发
-				dispatcherWaitList = conterBean.getNewDispatcherJobList(systemBean.getMax_run_job());
-
-				checkNum += dispatcherWaitList.size();
-				for (UdsJobBean udsJobBean : dispatcherWaitList) {
-					try {
-						// 权重判断
-						if (udsJobBean.getCheck_weight() == UdsConstant.TRUE_NUM) {
-							if (!checkLimitWeight(udsJobBean)) {
-								break;
-							}
-						}
-						if (dispatcherJob(udsJobBean)) {
-							removeDispatcherJob(udsJobBean);
-						} else {
-							if (udsJobBean.getDispatcher_time() == null || now
-									- udsJobBean.getDispatcher_time().getTime() > DateUtils.TIME_MILLSECOND_OF_MINUTE
-											* UdsConstant.DISPATCHER_OVER_MINUTE) {
-								removeDispatcherJob(udsJobBean);
-							}
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		checkDBDispatcherNum++;
-		if (checkNum > 0) {
-			UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "checkDispatcherNum:", checkNum);
-		}
-	}
-
-	@Deprecated
-	public boolean dispatcherJob(UdsJobBean udsJobBean) {
-		UdsSystemBean udsSystemBean = UdsConstant.getUdsSystemBean(udsJobBean.getPlatform(), udsJobBean.getSystem());
-		if (udsSystemBean == null) {
-			return false;
-		}
-		return dispatcherJob(udsJobBean, udsSystemBean);
-	}
-
-	// 分发作业
-	@Deprecated
-	private boolean dispatcherJob(UdsJobBean udsJobBean, UdsSystemBean udsSystemBean) {
-		// 该平台应用最大并行数
-		int max = udsSystemBean.getMax_run_job();
-		if (max <= 0) {
-			UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "dispatcherJob,systemBean.getMax_run_job() is 0",
-					udsSystemBean.getPlatform(), udsSystemBean.getSystem());
-			return false;
-		}
-		// 当前运行数
-		int num = MasterManager.getInstance().getChildServerSystemSum(udsSystemBean.getPlatform(),
-				udsSystemBean.getSystem());
-		if (num >= max) {
-			return false;
-		}
-		// 机器选择
-		UdsRpcClient client = AbstractDispatcherPlan.getUdsRpcClient(udsSystemBean, udsJobBean);
-		if (client == null) {
-			return false;
-		}
-		// 地域判断
-		if ((client.getLocation() & UdsConstant.LOCATION) <= 0) {
-			UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "client location not my location", client.getLocation(),
-					UdsConstant.LOCATION);
-			return false;
-		}
-		// 数据库更新
-		UdsJobBaseDao udsJobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
-		int tmp = udsJobBaseDao.updateJobServerNameByLastStatus(udsJobBean.getPlatform(), udsJobBean.getSystem(),
-				udsJobBean.getJob(), client.getServerName(), JobStatus.DISPATCHER);
-		if (tmp > 0) {
-			UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER job", udsJobBean.toString());
-			UdsRpcEvent udsRpcEvent = UdsRpcEvent.buildUdsRpcEvent(client.getServerName(), RpcCommand.DISTRIBUTION_JOB);
-			// 单独并发控制
-			MasterManager.getInstance().incrementChildServerSystem(client.getServerName(), udsJobBean.getPlatform(),
-					udsJobBean.getSystem());
-			// 权重控制
-			if (udsJobBean.getCheck_weight() == UdsConstant.TRUE_NUM) {
-				MasterManager.getInstance().addWeight(client.getServerName(), udsJobBean);
-			}
-			UdsRpcClientManager.getInstance().sendMessage(client, udsRpcEvent, udsJobBean.getJob());
-			return true;
-		}
-		return false;
-	}
 
 	/**
 	 * 检测信号文件夹
@@ -727,15 +494,6 @@ public class MasterManager {
 		this.jobReceiverFilterList = jobReceiverFilterList;
 	}
 
-	@Deprecated
-	public List<AbstractPendingFilter> getJobPendingFilterList() {
-		return jobPendingFilterList;
-	}
-
-	@Deprecated
-	public void setJobPendingFilterList(List<AbstractPendingFilter> jobPendingFilterList) {
-		this.jobPendingFilterList = jobPendingFilterList;
-	}
 
 	public ConcurrentHashMap<String, ChildServerInfo> getChildServerJobMap() {
 		return childServerJobMap;
@@ -745,15 +503,6 @@ public class MasterManager {
 		this.childServerJobMap = childServerJobMap;
 	}
 
-	@Deprecated
-	public MasterPendingJobDisposeFactory getPendingJobDisposeFactory() {
-		return pendingJobDisposeFactory;
-	}
-
-	@Deprecated
-	public void setPendingJobDisposeFactory(MasterPendingJobDisposeFactory pendingJobDisposeFactory) {
-		this.pendingJobDisposeFactory = pendingJobDisposeFactory;
-	}
 
 	public MasterFactory getMasterFactory() {
 		return masterFactory;

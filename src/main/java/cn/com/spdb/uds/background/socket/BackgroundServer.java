@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.com.spdb.uds.UdsConstant;
+import cn.com.spdb.uds.log.LogEvent;
+import cn.com.spdb.uds.log.UdsLogger;
 
 public class BackgroundServer {
 
@@ -76,11 +78,11 @@ public class BackgroundServer {
 								socket.close();
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 						}
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		});
@@ -92,11 +94,11 @@ public class BackgroundServer {
 		backendExecutorService.shutdownNow();
 	}
 
-	public static List<String> getIP_LIST() {
+	public List<String> getIP_LIST() {
 		return IP_LIST;
 	}
 
-	public static void setIP_LIST(List<String> iP_LIST) {
+	public void setIP_LIST(List<String> iP_LIST) {
 		IP_LIST = iP_LIST;
 	}
 

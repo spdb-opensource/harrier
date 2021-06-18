@@ -2,7 +2,6 @@ package cn.com.spdb.uds.utils.dynamicjava;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -15,7 +14,8 @@ public class DynamicClassLoader extends URLClassLoader {
 
 	public Class<?> loadClass(String fullName, JavaClassObject javaClassObject) {
 		byte[] classData = javaClassObject.getBytes();
-		Class<?> clazz = this.defineClass(fullName, classData, 0, classData.length);
+		Class<?> clazz = this.defineClass(fullName, classData, 0,
+				classData.length);
 		return clazz;
 	}
 
@@ -32,11 +32,11 @@ public class DynamicClassLoader extends URLClassLoader {
 	 * @return
 	 * @throws IOException
 	 */
-	public Class<?> loadClass(File file) {
+	public Class<?> loadClass(File file) throws IOException {
+		byte[] bytes = new byte[(int) file.length()];
 		FileInputStream inputStream = null;
 		Class<?> clazz = null;
 		try {
-			byte[] bytes = new byte[(int) file.length()];
 			inputStream = new FileInputStream(file);
 			int j = 0;
 			while (true) {
@@ -47,19 +47,11 @@ public class DynamicClassLoader extends URLClassLoader {
 				j += i;
 			}
 			clazz = super.defineClass(null, bytes, 0, j);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (ClassFormatError e) {
-			e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw e;
 		} finally {
-			try {
-				if (inputStream != null) {
-					inputStream.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			if (inputStream != null) {
+				inputStream.close();
 			}
 		}
 		return clazz;

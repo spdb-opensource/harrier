@@ -1,13 +1,12 @@
 package cn.com.spdb.uds.background.http;
 
-import io.netty.util.CharsetUtil;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.http.HttpEntity;
@@ -27,9 +26,14 @@ import org.apache.http.util.EntityUtils;
 
 import com.alibaba.fastjson.JSON;
 
+import cn.com.spdb.uds.db.bean.UdsSystemBean;
+import cn.com.spdb.uds.log.LogEvent;
+import cn.com.spdb.uds.log.UdsLogger;
+import io.netty.util.CharsetUtil;
+
 public class HttpClient {
 
-	private static final String IP = "10.129.62.126";
+	private static final String IP = "127.0.0.1";
 	private static final int PROT = 7878;
 
 	private static URIBuilder URIBUILDER = null;
@@ -129,11 +133,11 @@ public class HttpClient {
 				return string;
 			}
 		} catch (URISyntaxException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} catch (IOException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} finally {
 			try {
 				if (httpClient != null) {
@@ -143,7 +147,7 @@ public class HttpClient {
 					response.close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 		}
 		return null;
@@ -194,11 +198,11 @@ public class HttpClient {
 				return string;
 			}
 		} catch (URISyntaxException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} catch (IOException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} finally {
 			try {
 				if (httpClient != null) {
@@ -208,7 +212,7 @@ public class HttpClient {
 					response.close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 		}
 		return null;
@@ -255,11 +259,11 @@ public class HttpClient {
 			}
 
 		} catch (URISyntaxException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} catch (IOException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} finally {
 			try {
 				if (httpClient != null) {
@@ -269,7 +273,7 @@ public class HttpClient {
 					response.close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 		}
 		return null;
@@ -278,9 +282,10 @@ public class HttpClient {
 	public static void main(String[] args) {
 		HttpClient client = new HttpClient();
 		HashMap<String, Object> paramsHashMap = new HashMap<String, Object>();
-		paramsHashMap.put("job", "uds-99");
+		String str="[{\"max_run_job\":30,\"system\":\"AAB\",\"platform\":\"HHA\"},{\"max_run_job\":30,\"system\":\"AAA\",\"platform\":\"HHA\"}]";
+		paramsHashMap.put("systemlist", str);
 	
-		String httpEntity = client.sendPostHttpBody("/kill/job/script", paramsHashMap);
+		String httpEntity = client.sendPostHttpBody("/load/udssystem", paramsHashMap);
 
 		// List<Map<String, Object>> list = new ArrayList<Map<String,
 		// Object>>();

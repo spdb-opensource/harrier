@@ -222,7 +222,7 @@ public class ChildManager {
 		Iterator<JobRunable> jobRunableS = runJobsPool.values().iterator();
 		while (jobRunableS.hasNext()) {
 			JobRunable jobRunable = jobRunableS.next();
-			childServerInfo.incrementSystemJob(jobRunable.getPlatform(), jobRunable.getSystem());
+			childServerInfo.incrementPlatformAndSystemJob(jobRunable.getPlatform(), jobRunable.getSystem());
 		}
 		childServerInfo.setMaxJobNum((short) UdsConstant.MAX_JOB_NUM);
 		childServerInfo.setPerformanceRatio((short) UdsConstant.PERFORMANCE_RATIO);

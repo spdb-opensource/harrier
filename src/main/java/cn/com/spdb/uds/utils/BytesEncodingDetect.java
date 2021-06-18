@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.sql.Timestamp;
 
 /**
  * <Detect encoding .> Copyright (C) <2009> <Fluck,ACC http://androidos.cc/dev>
@@ -106,20 +105,20 @@ public class BytesEncodingDetect extends Encoding {
 				byteoffset += bytesread;
 			}
 			;
+			chinesestream.close();
 			guess = detectEncoding(rawtext);
 		} catch (Exception e) {
 			System.err.println("Error loading or using URL " + e.toString());
 			guess = -1;
-		} finally {
+		}finally {
 			try {
-				if(chinesestream!=null) chinesestream.close();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-
-		}
+			// TODO: handle finally clause
+				if (chinesestream != null) chinesestream.close();
+				}catch (Exception e) {
+					// TODO: handle exception
+					e.printStackTrace();
+				}
+				}
 		return guess;
 	}
 
@@ -131,7 +130,7 @@ public class BytesEncodingDetect extends Encoding {
 	 * is returned.
 	 */
 	public int detectEncoding(File testfile) {
-		FileInputStream chinesefile=null;
+		FileInputStream chinesefile = null;
 		byte[] rawtext;
 		rawtext = new byte[(int) testfile.length()];
 		try {
@@ -140,14 +139,15 @@ public class BytesEncodingDetect extends Encoding {
 			chinesefile.close();
 		} catch (Exception e) {
 			System.err.println("Error: " + e);
-		} finally {
+		}finally {
 			try {
-				if(chinesefile!=null) chinesefile.close();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+			// TODO: handle finally clause
+				if (chinesefile != null) chinesefile.close();
+				}catch (Exception e) {
+					// TODO: handle exception
+					e.printStackTrace();
+				}
+				}
 		return detectEncoding(rawtext);
 	}
 

@@ -14,6 +14,7 @@ import org.springframework.core.NestedExceptionUtils;
 
 import com.baidu.jprotobuf.pbrpc.utils.StringUtils;
 
+import cn.com.spdb.uds.log.LogEvent;
 import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.DateUtils;
 import cn.com.spdb.uds.utils.NameThreadFactory;
@@ -47,7 +48,7 @@ public class SchedulerManager {
 				try {
 					UdsLogger.updateMapErrorDb();
 				} catch (Exception e) {
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}, 30 * DateUtils.TIME_MILLSECOND_OF_SECOND, 2 * DateUtils.TIME_MILLSECOND_OF_MINUTE);
@@ -128,7 +129,7 @@ public class SchedulerManager {
 			CronExpression cronExpression = new CronExpression(Cron);
 			date = cronExpression.getNextInvalidTimeAfter(new Date());
 		} catch (ParseException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}
 		return date;
 	}

@@ -5,6 +5,7 @@ import io.netty.util.internal.StringUtil;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.alibaba.fastjson.JSON;
 
@@ -65,7 +66,6 @@ public class HttpCommandHandler extends AbstractHttpPostBodyWorkHandler {
 					map.put("msg", "");
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				UdsLogger.logEvent(LogEvent.HTTP_ERROR, e.getMessage());
 			}
 		} else {

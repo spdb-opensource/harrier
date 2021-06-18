@@ -74,4 +74,35 @@ public class UdsSystemBean {
 				+ ", strategy=" + strategy + ", strategy_pro=" + strategy_pro + ", use_platform=" + use_platform + "]";
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((platform == null) ? 0 : platform.hashCode());
+		result = prime * result + ((system == null) ? 0 : system.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UdsSystemBean other = (UdsSystemBean) obj;
+		if (platform == null) {
+			if (other.platform != null)
+				return false;
+		} else if (!platform.equals(other.platform))
+			return false;
+		if (system == null) {
+			if (other.system != null)
+				return false;
+		} else if (!system.equals(other.system))
+			return false;
+		return true;
+	}
+
 }

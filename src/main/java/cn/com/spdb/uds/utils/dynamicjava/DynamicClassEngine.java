@@ -2,7 +2,6 @@ package cn.com.spdb.uds.utils.dynamicjava;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -20,17 +19,21 @@ import javax.tools.ToolProvider;
 
 public class DynamicClassEngine {
 
-	private static DynamicClassEngine instance = new DynamicClassEngine();
+	private static DynamicClassEngine instance;
 
 	private URLClassLoader parentClassLoader;
 
 	private String classPath;
-
+	
+	private static final Object KEY = new Object();
+	
 	public static DynamicClassEngine getInstance() {
+		synchronized (KEY) {
 		if (instance == null) {
 			instance = new DynamicClassEngine();
 		}
 		return instance;
+	}
 	}
 
 	private DynamicClassEngine() {
@@ -47,30 +50,22 @@ public class DynamicClassEngine {
 		this.classPath = sBuilder.toString();
 	}
 
-	public Class<?> loadFromJavaFile(File file)  {
-		FileInputStream inputStream =null;
-		Class<?> clazz=null;
+	public Class<?> loadFromJavaFile(File file) throws IOException {
+		FileInputStream inputStream = null;
 		try {
 			inputStream = new FileInputStream(file);
 			byte[] bytes = new byte[(int) file.length()];
 			inputStream.read(bytes);
 			String javaCode = new String(bytes);
 			String absolutePath = file.getPath();
-			clazz=javaCodeToObject(absolutePath, javaCode);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			return javaCodeToObject(absolutePath, javaCode);
 		} catch (IOException e) {
-			e.printStackTrace();
-		}finally {
-			try {
-				if(inputStream!=null) {
-					inputStream.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			throw e;
+		} finally {
+			if(inputStream != null) {
+				inputStream.close();
 			}
 		}
-		return clazz;
 	}
 
 	public Class<?> javaCodeToObject(String filePath, String javaCode) {

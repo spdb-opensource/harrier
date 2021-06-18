@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.com.spdb.uds.UdsConstant;
+import cn.com.spdb.uds.log.LogEvent;
+import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.ClassUtils;
 import cn.com.spdb.uds.utils.DateUtils;
 import cn.com.spdb.uds.utils.ClassUtils.ClassFilter;
@@ -82,7 +84,7 @@ public class HttpServer {
 					try {
 						handler = (InterfaceHttpWorkeHandler) clazz.newInstance();
 					} catch (InstantiationException | IllegalAccessException e) {
-						e.printStackTrace();
+						UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 					}
 					LOGGER.info("handler  load handler http path: " + path + " class: " + clazz);
 					HTTP_HANDER.put(path, handler);
@@ -130,7 +132,7 @@ public class HttpServer {
 					channelFuture.channel().close().sync();
 					LOGGER.info("close http server prot " + HTTP_PORT);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				} finally {
 					bossGroup.shutdownGracefully();
 					workGroup.shutdownGracefully();
@@ -150,7 +152,7 @@ public class HttpServer {
 			LOGGER.info("shutDown http server prot " + HTTP_PORT);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}
 	}
 

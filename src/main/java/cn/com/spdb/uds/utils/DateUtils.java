@@ -11,6 +11,9 @@ import org.quartz.CronExpression;
 
 import com.baidu.jprotobuf.pbrpc.utils.StringUtils;
 
+import cn.com.spdb.uds.log.LogEvent;
+import cn.com.spdb.uds.log.UdsLogger;
+
 public class DateUtils {
 	// ------------------时间单位-----------------
 	public static final int TIME_MILLSECOND_OF_SECOND = 1000;
@@ -70,7 +73,7 @@ public class DateUtils {
 			try {
 				return dateFormat.parse(dateStr);
 			} catch (ParseException e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 		}
 		return null;
@@ -167,6 +170,7 @@ public class DateUtils {
 		String[] tmps = cron.split("\\ ");
 		StringBuffer cronBuffer = new StringBuffer();
 		String tmpCron = cron;
+		try {
 		// 包含1到7
 		if (tmps[5].matches(".*[1-7]+.*")) {
 			char[] chs = tmps[5].toCharArray();
@@ -220,6 +224,10 @@ public class DateUtils {
 		CronExpression tmpCronExpression2 = new CronExpression(tmpCron);
 		Date tmpDate = tmpCronExpression2.getNextValidTimeAfter(date);
 		return tmpDate;
+	} catch (ParseException e) {
+		throw e;
+		// TODO: handle exception
+	}
 	}
 
 	public static boolean isDate(String strDate, String pattern) {
@@ -229,12 +237,12 @@ public class DateUtils {
 			dateFormat.parse(strDate);
 			return true;
 		} catch (ParseException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			return false;
 		}
 	}
 
-	public static void main(String[] args) throws ParseException {
+	public static void main(String[] args) {
 		String cron = "0 0 0 3,6,9,12,15,18,21,24,27,30,L * ? *";
 		int i = 20;
 		Date date = new Date();
@@ -244,7 +252,7 @@ public class DateUtils {
 				System.out.println(new Timestamp(date.getTime()).toString());
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 		}
 

@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -136,8 +137,12 @@ public class JobRunable implements Runnable {
 					udsJobBaseDao.updateJobStatus(platform, system, job, JobStatus.DONE.status());
 					// 触发下游作业
 					if (notForcestartJob) {
-						checkStreamJob();
 						// 检测文件是否触发
+						if (UdsConstant.DEP_STREAM == UdsConstant.TRUE_NUM) {
+							checkDepStreamJob();
+						} else {
+							checkStreamJob();
+						}
 					}
 					checkStreamSelfJob();
 				}
@@ -147,10 +152,15 @@ public class JobRunable implements Runnable {
 					udsJobBaseDao.updateJobDone(platform, system, job, last_script_name);
 					// 记录
 					udsJobRecordDao.insertJobRecord(platform, system, job);
+
 					// 触发下游作业
 					if (notForcestartJob) {
-						checkStreamJob();
 						// 检测文件是否触发
+						if (UdsConstant.DEP_STREAM == UdsConstant.TRUE_NUM) {
+							checkDepStreamJob();
+						} else {
+							checkStreamJob();
+						}
 					}
 					checkStreamSelfJob();
 				}
@@ -161,8 +171,8 @@ public class JobRunable implements Runnable {
 							DateUtils.getDateTime(new Date(), DateUtils.PATTERN_NORMAL), batch);
 				}
 			}
-		}catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} finally {
 			ChildManager.getInstance().removeJobPool(job);
 			if (check_weight == UdsConstant.TRUE_NUM) {
@@ -211,7 +221,7 @@ public class JobRunable implements Runnable {
 					UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, job,
 							"job end stream UdsJobDateFrequencyBean is null");
 
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}
@@ -236,7 +246,7 @@ public class JobRunable implements Runnable {
 					UdsLogger.logEvent(LogEvent.ERROR, "uds job UdsJobDateFrequencyBean is error", e.getMessage());
 					UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, job,
 							"job end stream UdsJobDateFrequencyBean is null");
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}
@@ -261,7 +271,7 @@ public class JobRunable implements Runnable {
 				} catch (ParseException e) {
 					UdsLogger.logEvent(LogEvent.ERROR, "uds job UdsJobDateFrequencyBean is error", e.getMessage());
 					UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, bean.getJob());
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}
@@ -283,7 +293,7 @@ public class JobRunable implements Runnable {
 				} catch (ParseException e) {
 					UdsLogger.logEvent(LogEvent.ERROR, "uds job UdsJobDateFrequencyBean is error", e.getMessage());
 					UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, bean.getJob());
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}
@@ -419,6 +429,278 @@ public class JobRunable implements Runnable {
 		}
 	}
 
+	//FIXME 还没有从UDS_SOURCE表中去除外部触发的作业。
+	private void checkDepStreamJob() {
+		UdsJobControlDao udsJobControlDao = DBManager.getInstance().getDao(UdsJobControlDao.class);
+		UdsJobBaseDao udsJobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
+		List<UdsJobBean> depingList = udsJobControlDao.getUdsJobByDependency(this.platform, this.system, this.job,
+				this.batch);
+		Date jobDate = DateUtils.parserDate(this.jobDate, DateUtils.PATTERN_YYYYMMDD_CONS);
+		for (UdsJobBean depingJobBean : depingList) {
+			Date depingJobDate = DateUtils.parserDate(depingJobBean.getJob_date(), DateUtils.PATTERN_YYYYMMDD_CONS);
+			Date nextJobDate = null;
+			Date next2JobDate = null;
+			int nextBatch = 0;
+			// 获取正确的下次执行时间
+			if (jobDate.compareTo(depingJobDate) < 0) {
+				continue;
+			} else if (jobDate.compareTo(depingJobDate) == 0) {
+				if (depingJobBean.getBatch() == 0) {
+					continue;
+				} else {
+					nextBatch = depingJobBean.getBatch() + 1;
+					if (this.batch > 0) {
+						if (nextBatch == this.batch) {
+							nextJobDate = jobDate;
+						} else if (nextBatch > this.batch) {
+							continue;
+						} else {
+							if (depingJobBean.getCheck_file_stream() == UdsConstant.TRUE_NUM) {
+								continue;
+							} else {
+								// 告警
+							}
+						}
+					} else {
+						continue;
+					}
+				}
+			} else {
+				if (depingJobBean.getBatch() == 0) {
+					nextBatch = 0;
+				} else {
+					nextBatch = 1;
+				}
+				switch (JobType.getJoyType(depingJobBean.getJob_type())) {
+				case D: {
+					nextJobDate = DateUtils.add(depingJobDate, 1);
+					next2JobDate = DateUtils.add(nextJobDate, 1);
+				}
+					break;
+				case W:
+				case M:
+				case Y: {
+					List<UdsJobDateFrequencyBean> list = udsJobControlDao.getUdsJobDateFrequency(
+							depingJobBean.getPlatform(), depingJobBean.getSystem(), depingJobBean.getJob());
+					if (list.size() <= 0) {
+						UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, job,
+								"job end stream UdsJobDateFrequencyBean is null");
+					}
+					// 根据上次执行作业时间,计算下次执行作业的最近的 一次时间
+					for (UdsJobDateFrequencyBean frequencyBean : list) {
+						String day = frequencyBean.getDay().trim();
+						String month = frequencyBean.getMonth().trim();
+						String week = frequencyBean.getWeek().trim();
+						String year = frequencyBean.getYear();
+						String cron = null;
+						if (depingJobBean.getJob_type().equals(jobType.W.getId())) {
+							cron = " 0 0 0 ? " + month + " " + week + " " + year;
+						} else {
+							cron = " 0 0 0 " + day + " " + month + " ? " + year;
+						}
+						try {
+							Date tmpDate = DateUtils.getNextValidTimeAfter(cron, depingJobDate);
+							if (nextJobDate == null || tmpDate.compareTo(nextJobDate) < 0) {
+								nextJobDate = tmpDate;
+							}
+						} catch (ParseException e) {
+							UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, job,
+									"job end stream UdsJobDateFrequencyBean is null");
+							UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+							continue;
+						}
+					}
+					// 根据上次执行作业时间,计算下次执行作业2的最近的 一次时间
+					for (UdsJobDateFrequencyBean frequencyBean : list) {
+						String day = frequencyBean.getDay().trim();
+						String month = frequencyBean.getMonth().trim();
+						String week = frequencyBean.getWeek().trim();
+						String year = frequencyBean.getYear();
+						String cron = null;
+						if (depingJobBean.getJob_type().equals(jobType.W.getId())) {
+							cron = " 0 0 0 ? " + month + " " + week + " " + year;
+						} else {
+							cron = " 0 0 0 " + day + " " + month + " ? " + year;
+						}
+						try {
+							Date tmpDate = DateUtils.getNextValidTimeAfter(cron, nextJobDate);
+							if (next2JobDate == null || tmpDate.compareTo(next2JobDate) < 0) {
+								next2JobDate = tmpDate;
+							}
+						} catch (ParseException e) {
+							UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, job,
+									"job end stream UdsJobDateFrequencyBean is null");
+							UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+							continue;
+						}
+					}
+				}
+					break;
+				default:
+					continue;
+				}
+
+				if (jobDate.compareTo(next2JobDate) >= 0) {
+					if (depingJobBean.getCheck_file_stream() == UdsConstant.TRUE_NUM) {
+						continue;
+					} else {
+						// 告警
+					}
+				}
+				if (jobDate.compareTo(nextJobDate) < 0) {
+					continue;
+				}
+			}
+			// 判断准备触发
+
+			List<UdsJobBean> depList = udsJobControlDao.getUdsJobDependency(depingJobBean.getPlatform(),
+					depingJobBean.getSystem(), depingJobBean.getJob());
+			boolean isStream = true;
+			for (UdsJobBean depJobBean : depList) {
+				// 依赖作业的作业日期
+				Date tDate = DateUtils.parserDate(depJobBean.getJob_date(), DateUtils.PATTERN_YYYYMMDD_CONS);
+				int tbatch = depJobBean.getBatch();
+				if (tDate.compareTo(nextJobDate) > 0) {
+					continue;
+				} else if (tDate.compareTo(nextJobDate) == 0) {
+					if (tbatch == 0) {
+						if (depJobBean.getLast_status().equals(JobStatus.DONE.status())) {
+							continue;
+						} else {
+							isStream = false;
+							break;
+						}
+					} else {
+						// 多批次
+						if (nextBatch > 0) {
+							// 依赖作业批次大于当前作业，说明依赖作业的满足多批次运行条件
+							if (tbatch > nextBatch) {
+								continue;
+							}
+							// 批次相同
+							if (tbatch == nextBatch) {
+								// 依赖作业为Done，说明依赖作业的满足多批次运行条件
+								if (depJobBean.getLast_status().equals(JobStatus.DONE.status())) {
+									continue;
+								} else {
+									isStream = false;
+									break;
+								}
+							}
+							if (tbatch < nextBatch) {
+								isStream = false;
+								break;
+							}
+						} else {
+							// 获取依赖批次,作业为单批次，依赖作业为多批次
+							int dep_batch = udsJobControlDao.getDepbatch(depingJobBean.getPlatform(),
+									depingJobBean.getSystem(), depingJobBean.getJob(), depJobBean.getPlatform(),
+									depJobBean.getSystem(), depJobBean.getJob());
+							dep_batch = dep_batch > 0 ? dep_batch : 0;
+							if (tbatch > dep_batch) {
+								continue;
+							}
+							if (tbatch == dep_batch && depJobBean.getLast_status().equals(JobStatus.DONE.status())) {
+								continue;
+							}
+							if (tbatch < dep_batch) {
+								isStream = false;
+								break;
+							}
+						}
+					}
+				} else {
+					// 作业为Done，获取下次运行时间，当前运行数据日期小于下次运行日期，依赖条件满足
+					if (!depJobBean.getLast_status().equals(JobStatus.DONE.status())) {
+						isStream = false;
+						break;
+					}
+					JobType jobType = JobType.getJoyType(depJobBean.getJob_type());
+					Date minDate = null;
+					switch (jobType) {
+					case W:
+					case Y:
+					case M: {
+						List<UdsJobDateFrequencyBean> list = udsJobControlDao.getUdsJobDateFrequency(
+								depJobBean.getPlatform(), depJobBean.getSystem(), depJobBean.getJob());
+						// 获取下次执行的时间的最小值
+						for (UdsJobDateFrequencyBean frequencyBean : list) {
+							String day = frequencyBean.getDay().trim();
+							String month = frequencyBean.getMonth().trim();
+							String week = frequencyBean.getWeek().trim();
+							String year = frequencyBean.getYear();
+							String cron = null;
+							if (depJobBean.getJob_type().equals(jobType.W.getId())) {
+								cron = "0 0 0 ? " + month + " " + week + " " + year;
+							} else {
+								cron = "0 0 0 " + day + " " + month + " ? " + year;
+							}
+							try {
+								Date tmpDate = DateUtils.getNextValidTimeAfter(cron, tDate);
+								if (minDate == null || tmpDate.compareTo(minDate) < 0) {
+									minDate = tmpDate;
+								}
+							} catch (ParseException e) {
+								UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M,
+										depJobBean.getJob());
+								UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+							}
+						}
+
+					}
+						break;
+					case C: {// 定时作业
+						List<UdsJobDateTriggerBean> list = udsJobControlDao.getUdsJobDateTrigger(
+								depJobBean.getPlatform(), depJobBean.getSystem(), depJobBean.getJob());
+						for (UdsJobDateTriggerBean dateTriggerBean : list) {
+							String cron = " 0 0 0 " + dateTriggerBean.getDay() + " " + dateTriggerBean.getMonth() + " "
+									+ dateTriggerBean.getWeek() + " " + dateTriggerBean.getYear();
+							try {
+								Date tmpDate = DateUtils.getNextValidTimeAfter(cron, tDate);
+								byte offsetDay = dateTriggerBean.getOffset_day();
+								if (offsetDay != 0) {
+									tmpDate = DateUtils.add(tDate, offsetDay);
+								}
+								if (minDate == null || tmpDate.compareTo(minDate) < 0) {
+									minDate = tmpDate;
+								}
+							} catch (ParseException e) {
+								UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M,
+										depJobBean.getJob(), "UdsJobDateTriggerBean is null");
+								UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+							}
+						}
+					}
+						break;
+					case D: {
+						minDate = DateUtils.add(tDate, 1);
+					}
+						break;
+					default:
+						break;
+					}
+					if (minDate == null) {
+						UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_DB_NULL, UdsErrorLevel.M, depJobBean.getJob(),
+								"UdsJobDateFrequencyBean is null");
+						continue;
+					}
+					// 比较作业执行时间要小于下次执行作业时间
+					if (nextJobDate.compareTo(minDate) < 0) {
+						continue;
+					} else {
+						isStream = false;
+						break;
+					}
+				}
+			}
+			if (isStream) {
+				// 触发
+				udsJobBaseDao.updateJobTriggerByStatusPending(Arrays.asList(new String[] { depingJobBean.getJob() }),
+						nextBatch, DateUtils.getDateTime(nextJobDate, DateUtils.PATTERN_YYYYMMDD_CONS));
+			}
+		}
+	}
+
 	private void doStep(JobStepInfo jobStepInfo) {
 		UdsJobRecordDao udsJobRecordDao = DBManager.getInstance().getDao(UdsJobRecordDao.class);
 		Timestamp startTimestamp = new Timestamp(System.currentTimeMillis());
@@ -461,8 +743,10 @@ public class JobRunable implements Runnable {
 			}
 			// 日志名字
 			String logPath = jobStepInfo.getLogDir() + File.separator + jobStepInfo.getLogName();
-			InputStream inputStream =null;
-			OutputStream outputStream=null;
+			BufferedReader bufferedReader = null;
+			BufferedWriter bufferedWriter = null;
+			InputStream inputStream = null;
+			OutputStream outputStream = null;
 			try {
 				// 日志开始插入给的默认值
 				UdsLogger.logEvent(LogEvent.CHILD_JOB_STEP, cmd, workDir, logPath);
@@ -476,17 +760,31 @@ public class JobRunable implements Runnable {
 				if (!logFile.exists()) {
 					logFile.createNewFile();
 				}
+				String stepPath = jobStepInfo.getScript_dir() + File.separator + jobStepInfo.getScript_name();
+				String encode = UdsUtils.guessEncodeFile(new File(stepPath));
 
-				 inputStream = new BufferedInputStream(processWork.getInputStream());
-				 outputStream = new BufferedOutputStream(new FileOutputStream(logFile, true));
-				byte[] bytes = new byte[1024];
-				int tmp = 0;
-				while ((tmp = inputStream.read(bytes)) != -1) {
-					outputStream.write(bytes, 0, tmp);
+				if (encode != null && UdsConstant.TRANSFER_STEP_UTF8 == UdsConstant.TRUE_NUM) {
+					bufferedReader = new BufferedReader(
+							new InputStreamReader(processWork.getInputStream(), encode));
+					bufferedWriter = new BufferedWriter(
+							new OutputStreamWriter(new FileOutputStream(logFile, true), "utf-8"));
+					String line = null;
+					while ((line = bufferedReader.readLine()) != null) {
+						bufferedWriter.write(line);
+						bufferedWriter.flush();
+					}
+					bufferedWriter.flush();
+				} else {
+					inputStream = new BufferedInputStream(processWork.getInputStream());
+				    outputStream = new BufferedOutputStream(new FileOutputStream(logFile, true));
+					byte[] bytes = new byte[1024];
+					int tmp = 0;
+					while ((tmp = inputStream.read(bytes)) != -1) {
+						outputStream.write(bytes, 0, tmp);
+						outputStream.flush();
+					}
 					outputStream.flush();
 				}
-				outputStream.flush();
-
 
 				// 线程阻塞，等待外部返回执行结果
 				processWork.waitFor();
@@ -494,16 +792,37 @@ public class JobRunable implements Runnable {
 				returnCode = processWork.exitValue();
 
 			} catch (IOException e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			} finally {
-				try {
-					if(inputStream!=null) inputStream.close();
-					if(outputStream!=null)outputStream.close();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if (bufferedReader != null) {
+					try {
+						bufferedReader.close();
+					} catch (IOException e) {
+						UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+					}
+				}
+				if (bufferedWriter != null) {
+					try {
+						bufferedWriter.close();
+					} catch (IOException e) {
+						UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+					}
+				}
+				if (inputStream != null) {
+					try {
+						inputStream.close();
+					} catch (IOException e) {
+						UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+					}
+				}
+				if (outputStream != null) {
+					try {
+						outputStream.close();
+					} catch (IOException e) {
+						UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+					}
 				}
 				processWork.destroy();
 				jobStepInfo.setReturnCode(returnCode);
@@ -513,7 +832,7 @@ public class JobRunable implements Runnable {
 			}
 		}
 	}
-	
+
 	public JobRunable(UdsJobBean udsJobBean, List<JobStepInfo> tmplist) {
 		Collections.sort(tmplist);
 		this.jobStepList = new ArrayList<JobStepInfo>();

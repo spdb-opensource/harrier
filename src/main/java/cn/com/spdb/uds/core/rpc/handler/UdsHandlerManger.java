@@ -17,6 +17,8 @@ import cn.com.spdb.uds.core.rpc.event.RpcAttrKey;
 import cn.com.spdb.uds.core.rpc.event.RpcCommand;
 import cn.com.spdb.uds.core.rpc.event.RpcResultCode;
 import cn.com.spdb.uds.core.rpc.event.UdsRpcEvent;
+import cn.com.spdb.uds.log.LogEvent;
+import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.ClassUtils;
 import cn.com.spdb.uds.utils.NameThreadFactory;
 import cn.com.spdb.uds.utils.ClassUtils.ClassFilter;
@@ -104,7 +106,7 @@ public class UdsHandlerManger {
 					try {
 						handler = (UdsRpcHandler) clazz.newInstance();
 					} catch (InstantiationException | IllegalAccessException e) {
-						e.printStackTrace();
+						UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 					}
 					LOGGER.info("handler  load command: " + command + " class: " + clazz);
 					SERVER_HANDLERS.put(command, handler);
@@ -258,7 +260,7 @@ public class UdsHandlerManger {
 						executorSend.submit(new SendConsumer(task));
 					}
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}
@@ -332,7 +334,7 @@ public class UdsHandlerManger {
 				}
 				rpcClient.write(udsRpcEvent);
 			} catch (Exception e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			} finally {
 				taskPoolFactory.returnTask(task);
 			}
@@ -372,7 +374,7 @@ public class UdsHandlerManger {
 						executorReceive.submit(new ReceiveConsumer(event));
 					}
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}

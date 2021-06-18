@@ -12,6 +12,8 @@ import cn.com.spdb.uds.core.child.job.JobRunable;
 import cn.com.spdb.uds.db.DBManager;
 import cn.com.spdb.uds.db.bean.UdsJobBean;
 import cn.com.spdb.uds.db.dao.UdsJobBaseDao;
+import cn.com.spdb.uds.log.LogEvent;
+import cn.com.spdb.uds.log.UdsLogger;
 
 public class ClearDieJob implements InterfaceConsoleCommand {
 
@@ -32,7 +34,7 @@ public class ClearDieJob implements InterfaceConsoleCommand {
 							Runtime.getRuntime().exec("ps -ef | grep uds | grep " + job.getJob()
 									+ " |grep -v grep |awk '{print \"kill \" $2}' | sh");
 						} catch (IOException e) {
-							e.printStackTrace();
+							UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 						}
 					}
 					buffer.append("job:").append(jobRunable.getJob()).append("|jobdata:")

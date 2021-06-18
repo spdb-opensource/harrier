@@ -32,7 +32,7 @@ public class RunScript implements InterfaceConsoleCommand {
 				list.add(map);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			return HttpResultCode.ERROR;
 		}
 		if (list.size() == 0) {

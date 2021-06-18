@@ -23,7 +23,7 @@ public abstract class AbstractBaseDao {
 			num = sqlSession.delete(arg0);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -39,7 +39,7 @@ public abstract class AbstractBaseDao {
 			num = sqlSession.delete(arg0, arg1);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, arg1, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -55,7 +55,7 @@ public abstract class AbstractBaseDao {
 			num = sqlSession.insert(arg0);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -71,7 +71,7 @@ public abstract class AbstractBaseDao {
 			num = sqlSession.insert(arg0, arg1);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, arg1, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -87,7 +87,7 @@ public abstract class AbstractBaseDao {
 			list = sqlSession.selectList(arg0);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -103,7 +103,7 @@ public abstract class AbstractBaseDao {
 			list = sqlSession.selectList(arg0, arg1);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, arg1, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -119,7 +119,7 @@ public abstract class AbstractBaseDao {
 			map = sqlSession.selectMap(arg0, arg1);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, arg1, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -135,7 +135,7 @@ public abstract class AbstractBaseDao {
 			map = sqlSession.selectMap(arg0, arg1, arg2);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, arg1, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -151,7 +151,7 @@ public abstract class AbstractBaseDao {
 			tmp = sqlSession.selectOne(arg0);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -167,7 +167,7 @@ public abstract class AbstractBaseDao {
 			tmp = sqlSession.selectOne(arg0, arg1);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, arg1, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -183,7 +183,7 @@ public abstract class AbstractBaseDao {
 			num = sqlSession.update(arg0);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, e.getMessage());
 		} finally {
 			sqlSession.close();
@@ -199,7 +199,7 @@ public abstract class AbstractBaseDao {
 			num = sqlSession.update(arg0, arg1);
 			sqlSession.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.ERROR_DB, arg0, arg1, e.getMessage());
 		} finally {
 			sqlSession.close();

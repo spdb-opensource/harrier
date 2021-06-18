@@ -87,7 +87,7 @@ public class UdsRpcClientManager {
 						UdsRpcClientManager.getInstance().checkUdsRpcClient(rpcClient);
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 
 			}
@@ -282,7 +282,7 @@ public class UdsRpcClientManager {
 		try {
 			udsRpcClient = new UdsRpcClient(serverBean);
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			LOGGER.error("udsRpcClient is not connect", serverBean.toString());
 			return null;
 		}
@@ -340,13 +340,13 @@ public class UdsRpcClientManager {
 		try {
 			Thread.sleep(3 * 1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}
 		for (UdsRpcClient client : RPC_CLIENT_MAP.values()) {
 			try {
 				client.shutDown();
 			} catch (Exception e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 		}
 		RPC_CLIENT_MAP.clear();

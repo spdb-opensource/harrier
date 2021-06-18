@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 
 import cn.com.spdb.uds.core.rpc.handler.UdsHandlerManger;
+import cn.com.spdb.uds.log.LogEvent;
+import cn.com.spdb.uds.log.UdsLogger;
 import io.netty.util.internal.ConcurrentSet;
 
 /**
@@ -71,7 +73,7 @@ public class UdsIdBuild {
 			}
 			id = (buffer.toString().hashCode() & 0xFFFFF) % (wokerIdMax + 1);
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}
 		this.workeid = id;
 	}
@@ -120,7 +122,7 @@ public class UdsIdBuild {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}
@@ -152,7 +154,7 @@ public class UdsIdBuild {
 				}
 //				System.out.println("t:"+t+"workeid:" + workeid);
 			} catch (Exception e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 		}
 	}

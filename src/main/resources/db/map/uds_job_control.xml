@@ -110,6 +110,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		]]>
 	</select>
 
+
+	
+	<!-- 获取依賴我的作业-->
+	<select id="getUdsJobByDependency" parameterType="java.util.Map"
+		resultMap="UdsJobBean">
+		<![CDATA[
+			SELECT platform,system,job,server_name,job_type,last_status,job_date
+			,last_script_name,timewindow,virtual_enable,check_frequency,check_time_trigger,check_weight,
+			batch,priority,num_times,pending_time,dispatcher_time,start_time,end_time
+			,call_again_max_num,call_again_num,location,check_file_stream,ignore_error 
+			FROM uds_job WHERE job IN (SELECT job FROM uds_job_dependency  WHERE 
+			dep_platform=#{dep_platform} AND dep_system=#{dep_system} AND dep_job=#{dep_job}
+			AND dep_batch<=#{dep_batch} AND is_enable=1) AND is_enable=1
+			]]>
+	</select>
+
+
 	<!-- 时间触发 -->
 	<select id="checkDateTriggerJob"
 		resultMap="UdsJobDateTriggerBean">
@@ -176,6 +193,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 
+
 	<!-- 获取依赖批次 -->
 	<select id="getDepbatch" parameterType="java.util.Map"
 		resultType="Integer">
@@ -203,6 +221,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			WHERE platform=#{platform} AND system=#{system};
 		]]>
 	</update>
-
+	
+	<update id="updateUdsSystemRunNum"
+		parameterType="java.util.Map">
+		<![CDATA[
+			UPDATE uds_system SET max_run_job=#{max_run_job} WHERE platform=#{platform} AND system=#{system};
+		]]>
+	</update>
+	
 
 </mapper>

@@ -6,9 +6,12 @@ import cn.com.spdb.uds.core.rpc.event.RpcCommand;
 import cn.com.spdb.uds.core.rpc.event.UdsRpcEvent;
 import cn.com.spdb.uds.core.rpc.handler.RpcEventProtocol;
 import cn.com.spdb.uds.core.rpc.handler.ServerRpcEventHandler;
+import cn.com.spdb.uds.log.LogEvent;
+import cn.com.spdb.uds.log.UdsLogger;
 
 @RpcEventProtocol(RpcCommand.UPDATE_CHILD_INFO)
 public class UpdateChildServerInfoHandler implements ServerRpcEventHandler {
+
 
 	@Override
 	public void sendHandle(UdsRpcEvent event, Object paramters) {
@@ -25,10 +28,10 @@ public class UpdateChildServerInfoHandler implements ServerRpcEventHandler {
 			if (check_weight == UdsConstant.TRUE_NUM) {
 				MasterManager.getInstance().subWeight(event.getSourceId(), job);
 			}
-			MasterManager.getInstance().decrementChildServerSystem(event.getSourceId(), platform, system);
+			MasterManager.getInstance().decrementChildServerPlatformAndSystem(event.getSourceId(), platform, system);
 			MasterManager.getInstance().offerDispatcherSignlaQueue(platform, system);
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}
 		return null;
 	}

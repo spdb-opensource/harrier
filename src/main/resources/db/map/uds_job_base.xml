@@ -206,6 +206,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		]]>
 	</update>
 
+	<update id="updateJobStatusAndJobdate"
+		parameterType="java.util.Map">
+		<![CDATA[
+			 UPDATE uds_job SET last_status=#{last_status} ,job_date=#{job_date},batch=#{batch}
+			 WHERE  platform=#{platform} AND system=#{system} AND job=#{job};
+		]]>
+	</update>
+
 
 	<update id="updateJobPending" parameterType="java.util.Map">
 		<![CDATA[

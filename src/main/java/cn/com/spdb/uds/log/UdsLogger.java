@@ -101,7 +101,7 @@ public class UdsLogger {
 			} catch (Exception e) {
 				msg = "JSON ERROR";
 				ERROR_LOG.error(e.toString());
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 			buffer.append(msg).append(SPLIT_CHAR);
 		}
@@ -120,7 +120,7 @@ public class UdsLogger {
 				msg = JSON.toJSONString(object);
 			} catch (Exception e) {
 				msg = "JSON ERROR";
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 			msg_parBuffer.append(msg).append(Symbol.DOU_HAO);
 		}
@@ -149,7 +149,7 @@ public class UdsLogger {
 			} catch (Exception e) {
 				msg = "JSON ERROR";
 				ERROR_LOG.error(e.toString());
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 			buffer.append(msg).append(SPLIT_CHAR);
 		}

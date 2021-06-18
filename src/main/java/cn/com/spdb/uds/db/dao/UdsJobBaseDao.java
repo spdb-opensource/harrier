@@ -12,6 +12,8 @@ import cn.com.spdb.uds.core.bean.JobStatus;
 import cn.com.spdb.uds.db.AbstractBaseDao;
 import cn.com.spdb.uds.db.bean.UdsJobBean;
 import cn.com.spdb.uds.db.bean.UdsJobStepBean;
+import cn.com.spdb.uds.log.LogEvent;
+import cn.com.spdb.uds.log.UdsLogger;
 
 public class UdsJobBaseDao extends AbstractBaseDao {
 
@@ -182,6 +184,27 @@ public class UdsJobBaseDao extends AbstractBaseDao {
 	}
 
 	/**
+	 * 更新作业状态和数据日期
+	 * 
+	 * @param platform
+	 * @param system
+	 * @param job
+	 * @param last_status
+	 * @return
+	 */
+	public int updateJobStatusAndJobdate(String platform, String system, String job, String last_status,
+			String job_date,int batch) {
+		HashMap<Object, Object> map = new HashMap<Object, Object>();
+		map.put("platform", platform);
+		map.put("system", system);
+		map.put("job", job);
+		map.put("last_status", last_status);
+		map.put("job_date", job_date);
+		map.put("batch", batch);
+		return update("uds_job_base.updateJobStatusAndJobdate", map);
+	}
+
+	/**
 	 * 进入pending 状态修改pending时间 信号文件触发作业进入pending
 	 * 
 	 * @param platform
@@ -245,7 +268,7 @@ public class UdsJobBaseDao extends AbstractBaseDao {
 				}
 				sqlSession.commit();
 			} catch (Exception e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			} finally {
 				sqlSession.close();
 				setUpdataTime(System.currentTimeMillis());
@@ -270,7 +293,7 @@ public class UdsJobBaseDao extends AbstractBaseDao {
 				}
 				sqlSession.commit();
 			} catch (Exception e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			} finally {
 				sqlSession.close();
 				setUpdataTime(System.currentTimeMillis());

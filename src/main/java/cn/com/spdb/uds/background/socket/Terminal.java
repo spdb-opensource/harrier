@@ -41,7 +41,7 @@ public class Terminal implements Runnable {
 			this.writer.println("plesae input command");
 			this.writer.flush();
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}
 	}
 
@@ -147,7 +147,7 @@ public class Terminal implements Runnable {
 			}
 		} catch (Exception e) {
 			UdsLogger.logEvent(LogEvent.BACK_ERROR,e.getMessage());
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}finally{
 			if(this.writer!=null){				
 				this.writer.close();

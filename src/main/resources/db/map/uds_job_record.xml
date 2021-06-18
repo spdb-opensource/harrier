@@ -55,8 +55,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<insert id="insertJobRecord" parameterType="java.util.Map">
 		<![CDATA[
 		INSERT INTO uds_job_record (platform,system,job,job_type,last_status,server_name,pending_time,
-		start_time,end_time,job_date,batch,num_times,virtual_enable) 
-		SELECT platform,system,job,job_type,last_status,server_name,pending_time,
+		dispatcher_time,start_time,end_time,job_date,batch,num_times,virtual_enable) 
+		SELECT platform,system,job,job_type,last_status,server_name,pending_time,dispatcher_time,
 		start_time,end_time,job_date,batch,num_times,virtual_enable 
 		FROM uds_job
 		WHERE platform=#{platform} AND system=#{system} AND job=#{job};

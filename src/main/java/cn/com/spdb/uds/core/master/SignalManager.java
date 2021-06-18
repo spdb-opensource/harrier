@@ -1,6 +1,7 @@
 package cn.com.spdb.uds.core.master;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import cn.com.spdb.uds.UdsConstant;
@@ -19,7 +20,7 @@ public class SignalManager {
 	/**
 	 * 文件加载
 	 */
-	private Hashtable<String, Long> stableCheckSize = new Hashtable<String, Long>();
+	private HashMap<String,Long> stableCheckSize = new HashMap<String,Long>();
 
 	public static SignalManager getInstance() {
 		synchronized (KEY) {

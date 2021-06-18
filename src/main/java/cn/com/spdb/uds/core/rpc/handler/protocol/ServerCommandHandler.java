@@ -63,7 +63,7 @@ public class ServerCommandHandler implements ServerRpcEventCallBack, ServerRpcEv
 			}
 			callbackEvent.addAttribute(RpcAttrKey.CMD_MSG, tmp);
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			callbackEvent.addAttribute(RpcAttrKey.CODE, RpcResultCode.ERROR);
 			callbackEvent.addAttribute(RpcAttrKey.CMD_MSG, e.getMessage());
 			UdsLogger.logEvent(LogEvent.HTTP_ERROR, e.getMessage());

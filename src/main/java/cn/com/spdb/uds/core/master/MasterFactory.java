@@ -1,12 +1,13 @@
 package cn.com.spdb.uds.core.master;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import cn.com.spdb.uds.UdsConstant;
@@ -28,7 +29,6 @@ import cn.com.spdb.uds.db.bean.UdsSystemBean;
 import cn.com.spdb.uds.db.dao.UdsJobBaseDao;
 import cn.com.spdb.uds.log.LogEvent;
 import cn.com.spdb.uds.log.UdsLogger;
-import cn.com.spdb.uds.utils.DateUtils;
 import cn.com.spdb.uds.utils.NameThreadFactory;
 import cn.com.spdb.uds.utils.Symbol;
 
@@ -37,14 +37,11 @@ public class MasterFactory {
 	private ThreadPoolExecutor executorPending = new ThreadPoolExecutor(10, 10, 10000L, TimeUnit.MILLISECONDS,
 			new LinkedBlockingQueue<Runnable>(),
 			new NameThreadFactory(MasterFactory.class.getSimpleName() + "Pending"));
-	/** 分发处理线程 */
-	private ThreadPoolExecutor executorDispatcher = new ThreadPoolExecutor(10, 10, 10000L, TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<Runnable>(),
-			new NameThreadFactory(MasterFactory.class.getSimpleName() + "Dispatcher"));
 
-	private LinkedBlockingQueue<String> signalQueue = new LinkedBlockingQueue<String>();
-	private ConcurrentHashMap<String, AtomicInteger> signalNum = new ConcurrentHashMap<String, AtomicInteger>();
+	private ConcurrentHashMap<String, PlafromThread> signalQueueHashMap = new ConcurrentHashMap<String, PlafromThread>();
 
+	private NameThreadFactory factory = new NameThreadFactory(
+			MasterFactory.class.getSimpleName() + "PlatformSinghtDeal");
 	/** 等待作业过滤 */
 	private List<AbstractPendingFilter> jobPendingFilterList = new ArrayList<AbstractPendingFilter>();
 
@@ -60,7 +57,6 @@ public class MasterFactory {
 	}
 
 	private void init() {
-		// jobPendingFilterList.add(new JobSystemMaxNumFilter());
 		jobPendingFilterList.add(new JobTimeWindowFilter());
 		jobPendingFilterList.add(new JobDependFilter());
 	}
@@ -70,32 +66,22 @@ public class MasterFactory {
 		executorPending.submit(new PendingJobConsumer(udsJobBean, platformSystemConterBean));
 	}
 
-	public void start() {
-		NameThreadFactory factory = new NameThreadFactory(MasterFactory.class.getSimpleName() + "SinghtJobDeal");
-		factory.newThread(true, new PlaformJobSignalTake()).start();
-	}
-
 	/** 信号量进入计数和队列 */
 	public void offerDispatcherSignlaQueue(String string) {
-		AtomicInteger atomicInteger = signalNum.get(string);
-		if (atomicInteger == null) {
-			signalNum.put(string, atomicInteger = new AtomicInteger(0));
-		}
-		// 大于3个不再添加
-		if (atomicInteger.get() >= 5) {
+		String keyJobPlafrom = string;
+		String[] tmpStr = keyJobPlafrom.split(Symbol.XIA_HUA_XIAN);
+		if (tmpStr.length < 1) {
 			return;
 		}
-		atomicInteger.incrementAndGet();
-		signalQueue.offer(string);
-	}
-
-	/** 信号量减少 */
-	private int decrementSinnalNum(String keyJobPlafrom) {
-		AtomicInteger atomicInteger = signalNum.get(keyJobPlafrom);
-		if (atomicInteger != null) {
-			return atomicInteger.decrementAndGet();
+		PlafromThread plafromThread = signalQueueHashMap.get(tmpStr[0]);
+		if (plafromThread == null) {
+			plafromThread = new PlafromThread();
+			signalQueueHashMap.put(tmpStr[0], plafromThread);
+			Thread thread = factory.newThread(true, plafromThread);
+			plafromThread.setThread(thread);
+			plafromThread.start();
 		}
-		return 0;
+		plafromThread.offer(keyJobPlafrom);
 	}
 
 	/** 等待检测 */
@@ -154,6 +140,7 @@ public class MasterFactory {
 			return;
 		}
 		UdsJobBaseDao udsJobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
+		HashSet<String> setPlatfromSytemKeyList = new HashSet<String>();
 		// 数据超时校验
 		if (checkDBDispatcherNum == 0) {
 			List<UdsJobBean> tmpList = udsJobBaseDao.getJobStatusDispatcherOverTime();
@@ -164,11 +151,11 @@ public class MasterFactory {
 							platformSystemConterBean = new PlatformSystemCenterBean(bean.getPlatform()));
 				}
 				platformSystemConterBean.addDispatcherQueue(bean);
-				offerDispatcherSignlaQueue(bean.getPlatfromSytemKey());
+				setPlatfromSytemKeyList.add(bean.getPlatfromSytemKey());
 			}
 			int size = tmpList.size();
 			if (size > 0) {
-				UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "checkDBDispatcherNum:", size);
+				UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "checkDBDispatcherNum:", size, setPlatfromSytemKeyList);
 			}
 		}
 		checkDBDispatcherNum = ++checkDBDispatcherNum >= UdsConstant.CHECK_DB_DISPATCHER_NUM ? 0 : checkDBDispatcherNum;
@@ -199,157 +186,22 @@ public class MasterFactory {
 						@Override
 						public void accept(UdsJobBean udsJobBean) {
 							conterBean.addDispatcherQueue(udsJobBean);
-							offerDispatcherSignlaQueue(udsJobBean.getPlatfromSytemKey());
+							setPlatfromSytemKeyList.add(udsJobBean.getPlatfromSytemKey());
 						}
 					});
 
 				}
 			}
-			offerDispatcherSignlaQueue(systemBean.getPlatformAndSystemKey());
-			conterBean.checkRemovePlatformConterMapBytime(DateUtils.TIME_MILLSECOND_OF_DAY);
+			setPlatfromSytemKeyList.add(systemBean.getPlatformAndSystemKey());
+			conterBean.checkRemovePlatformConterMapBytime(UdsConstant.CLEAR_PLATFORM_MAP);
 			if (tmpNum > 0) {
 				UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER SUBMIT", conterBean.getPlatform(),
 						tmpNum);
 			}
 		}
-	}
-
-	/** 信号出列 */
-	private class DispatcherJobConsumer implements Runnable {
-
-		public DispatcherJobConsumer(String platformSystemKey, PlatformSystemCenterBean platformSystemConterBean) {
-			this.platformSystemKey = platformSystemKey;
-			this.platformSystemConterBean = platformSystemConterBean;
-			this.createTime = System.currentTimeMillis();
+		for (String key : setPlatfromSytemKeyList) {
+			offerDispatcherSignlaQueue(key);
 		}
-
-		private String platformSystemKey = null;
-		private PlatformSystemCenterBean platformSystemConterBean = null;
-		private long createTime = 0L;
-
-		@Override
-		public void run() {
-			try {
-				while (true) {
-					// 平台信息
-					UdsSystemBean systemBean = UdsConstant.getUdsSystemBean(platformSystemConterBean.getPlatform(),
-							Symbol.XING_HAO);
-					if (systemBean == null) {
-						UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER PLATFORM IS NULL");
-						return;
-					}
-					// 平台最大运行数
-					int max = systemBean.getMax_run_job();
-					// 平台是否关闭并发
-					if (max <= 0) {
-						UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER PLATFORM NUM IS 0",
-								systemBean.getPlatform(), systemBean.getSystem());
-						return;
-					}
-					// 获取作业
-					UdsJobBean udsJobBean = platformSystemConterBean.dispatcherQueuePoll(platformSystemKey);
-					if (udsJobBean == null) {
-						return;
-					}
-
-					// 应用参数
-					UdsSystemBean udsSystemBean = UdsConstant.getUdsSystemBean(platformSystemKey);
-					if (udsSystemBean == null) {
-						UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER SYSTEM IS NULL");
-						return;
-					}
-					// 机器选择
-					UdsRpcClient client = null;
-					synchronized (LOCK) {
-						// 当前应用的运行数
-						int num = MasterManager.getInstance().getChildServerSystemSum(udsSystemBean.getPlatform(),
-								udsSystemBean.getSystem());
-						if (num >= max) {
-							UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER SYSTEM NUM IS MAX",
-									systemBean.getPlatform(), systemBean.getSystem());
-							return;
-						}
-						client = AbstractDispatcherPlan.getUdsRpcClient(udsSystemBean, udsJobBean);
-						if (client == null) {
-							platformSystemConterBean.addDispatcherQueue(udsJobBean);
-							return;
-						}
-						// 地域判断
-						if ((client.getLocation() & UdsConstant.LOCATION) <= 0) {
-							UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "CLIENT LOCATION NOT MY LOCATION",
-									client.getLocation(), UdsConstant.LOCATION);
-							return;
-						}
-						if (udsJobBean.getCheck_weight() == UdsConstant.TRUE_NUM) {
-							if (udsJobBean.getCheck_weight() == UdsConstant.TRUE_NUM) {
-								if (!MasterManager.getInstance().checkLimitWeight(udsJobBean)) {
-									UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER,
-											"MASTER DISPATCHER JOB IS NOT LIMITWEIGHT ", udsJobBean.getJob());
-									platformSystemConterBean.addDispatcherQueue(udsJobBean);
-									return;
-								}
-								// 权重控制
-								MasterManager.getInstance().addWeight(client.getServerName(), udsJobBean);
-							}
-						}
-						// 单独并发控制
-						MasterManager.getInstance().incrementChildServerSystem(client.getServerName(),
-								udsJobBean.getPlatform(), udsJobBean.getSystem());
-					}
-
-					// 数据库更新
-					UdsJobBaseDao udsJobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
-					udsJobBaseDao.updateJobServerNameByLastStatus(udsJobBean.getPlatform(), udsJobBean.getSystem(),
-							udsJobBean.getJob(), client.getServerName(), JobStatus.DISPATCHER);
-					UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER job", udsJobBean.toString());
-					UdsRpcEvent udsRpcEvent = UdsRpcEvent.buildUdsRpcEvent(client.getServerName(),
-							RpcCommand.DISTRIBUTION_JOB);
-					UdsRpcClientManager.getInstance().sendMessage(client, udsRpcEvent, udsJobBean.getJob());
-					if (System.currentTimeMillis() - createTime > 1 * DateUtils.TIME_MILLSECOND_OF_MINUTE) {
-						return;
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				decrementSinnalNum(platformSystemKey);
-			}
-		}
-	}
-
-	/** 信号处理 */
-	private class PlaformJobSignalTake implements Runnable {
-
-		@Override
-		public void run() {
-			while (true) {
-				try {
-					if (!MasterManager.getInstance().isCheckRecive()) {
-						Thread.sleep(1000 * 10);
-						continue;
-					}
-					String keyJobPlafrom = signalQueue.take();
-					String[] tmpStr = keyJobPlafrom.split(Symbol.XIA_HUA_XIAN);
-					if (tmpStr.length < 1) {
-						continue;
-					}
-					PlatformSystemCenterBean platformSystemConterBean = platformMap.get(tmpStr[0]);
-					if (platformSystemConterBean != null) {
-						UdsJobBean udsJobBean = platformSystemConterBean.dispatcherQueuePeek(keyJobPlafrom);
-						if (udsJobBean != null) {
-							executorDispatcher.submit(new DispatcherJobConsumer(udsJobBean.getPlatfromSytemKey(),
-									platformSystemConterBean));
-						} else {
-							decrementSinnalNum(keyJobPlafrom);
-						}
-					}
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-
-		}
-
 	}
 
 	/** Pending依赖检测作业 */
@@ -397,7 +249,7 @@ public class MasterFactory {
 					platformSystemConterBean.addUpdateDispatcherJobList(udsJobBean);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			} finally {
 				platformSystemConterBean.removeDealJobQueueJob(udsJobBean);
 			}
@@ -412,36 +264,12 @@ public class MasterFactory {
 		this.executorPending = executorPending;
 	}
 
-	public ThreadPoolExecutor getExecutorDispatcher() {
-		return executorDispatcher;
-	}
-
-	public void setExecutorDispatcher(ThreadPoolExecutor executorDispatcher) {
-		this.executorDispatcher = executorDispatcher;
-	}
-
 	public int getCheckDBDispatcherNum() {
 		return checkDBDispatcherNum;
 	}
 
 	public void setCheckDBDispatcherNum(int checkDBDispatcherNum) {
 		this.checkDBDispatcherNum = checkDBDispatcherNum;
-	}
-
-	public LinkedBlockingQueue<String> getSignalQueue() {
-		return signalQueue;
-	}
-
-	public void setSignalQueue(LinkedBlockingQueue<String> signalQueue) {
-		this.signalQueue = signalQueue;
-	}
-
-	public ConcurrentHashMap<String, AtomicInteger> getSignalNum() {
-		return signalNum;
-	}
-
-	public void setSignalNum(ConcurrentHashMap<String, AtomicInteger> sinnalNum) {
-		this.signalNum = sinnalNum;
 	}
 
 	public List<AbstractPendingFilter> getJobPendingFilterList() {
@@ -458,6 +286,175 @@ public class MasterFactory {
 
 	public void setPlatformMap(ConcurrentHashMap<String, PlatformSystemCenterBean> platformMap) {
 		this.platformMap = platformMap;
+	}
+
+	private class PlafromThread implements Runnable {
+
+		private Thread thread = null;
+
+		private LinkedBlockingQueue<String> signalQueue = new LinkedBlockingQueue<String>();
+
+		public void offer(String keyJobPlafrom) {
+			signalQueue.offer(keyJobPlafrom);
+		}
+
+		public void start() {
+			if (thread == null) {
+				return;
+			}
+			if (thread.isAlive()) {
+				thread.stop();
+			}
+			thread.start();
+		}
+
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					if (!MasterManager.getInstance().isCheckRecive()) {
+						Thread.sleep(1000 * 10);
+						continue;
+					}
+					String keyJobPlafrom = signalQueue.take();
+					String[] tmpStr = keyJobPlafrom.split(Symbol.XIA_HUA_XIAN);
+					if (tmpStr.length < 1) {
+						continue;
+					}
+					while (true) {
+						// 平台信息
+						PlatformSystemCenterBean platformSystemConterBean = platformMap.get(tmpStr[0]);
+						if (platformSystemConterBean == null) {
+							UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER PlatformSystemCenterBean IS NULL",
+									tmpStr);
+							break;
+						}
+						// 平台参数
+						UdsSystemBean platformBean = UdsConstant
+								.getUdsSystemBean(platformSystemConterBean.getPlatform(), Symbol.XING_HAO);
+						if (platformBean == null) {
+							UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER PLATFORM IS NULL",
+									platformSystemConterBean.getPlatform());
+							break;
+						}
+						int max = platformBean.getMax_run_job();
+						if (max <= 0) {
+							UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER PLATFORM NUM IS 0",
+									platformBean.getPlatform(), platformBean.getSystem());
+							break;
+						}
+						PriorityQueue<UdsJobBean> priQueue = platformSystemConterBean.getCheckPriQueue();
+						synchronized (LOCK) {
+							// 平台并发数
+							int num = MasterManager.getInstance().getChildServerSystemSum(platformBean.getPlatform(),
+									Symbol.XING_HAO);
+							if (num >= max) {
+								UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER PLATFORM NUM IS MAX",
+										platformBean.getPlatform());
+								break;
+							}
+							UdsJobBean udsJobBean = null;
+							UdsSystemBean systemBean = null;
+							UdsRpcClient client = null;
+							while ((udsJobBean = priQueue.poll()) != null) {
+								// 应用参数
+								systemBean = UdsConstant.getUdsSystemBean(udsJobBean.getPlatfromSytemKey());
+								if (systemBean == null) {
+									UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER SYSTEM IS NULL",
+											keyJobPlafrom);
+									continue;
+								}
+								if (!platformBean.equals(systemBean)) {
+									// 应用并发数
+									max = systemBean.getMax_run_job();
+									num = MasterManager.getInstance().getChildServerSystemSum(systemBean.getPlatform(),
+											systemBean.getSystem());
+									if (num >= max) {
+										UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER,
+												"MASTER DISPATCHER SYSTEM NUM IS MAX", systemBean.getPlatform(),
+												systemBean.getSystem());
+										continue;
+									}
+								}
+								// 机器选择
+								client = AbstractDispatcherPlan.getUdsRpcClient(systemBean, udsJobBean);
+								if (client == null) {
+									UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "CLIENT IS NULL",
+											udsJobBean.getJob());
+									continue;
+								}
+								// 地域判断
+								if ((client.getLocation() & UdsConstant.LOCATION) <= 0) {
+									UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "CLIENT LOCATION NOT MY LOCATION",
+											client.getLocation(), UdsConstant.LOCATION);
+									continue;
+								}
+								break;
+							}
+							if (udsJobBean == null) {
+								break;
+							}
+
+							// 权重控制
+							if (udsJobBean.getCheck_weight() == UdsConstant.TRUE_NUM) {
+								if (udsJobBean.getCheck_weight() == UdsConstant.TRUE_NUM) {
+									if (!MasterManager.getInstance().checkLimitWeight(udsJobBean)) {
+										UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER,
+												"MASTER DISPATCHER JOB IS NOT LIMITWEIGHT ", udsJobBean.getJob());
+										break;
+									}
+									MasterManager.getInstance().addWeight(client.getServerName(), udsJobBean);
+								}
+							}
+							// 平台并发增加
+							MasterManager.getInstance().incrementChildServerPlatformAndSystem(client.getServerName(),
+									udsJobBean.getPlatform(), udsJobBean.getSystem());
+
+							//
+							platformSystemConterBean.dispatcherQueueRemove(udsJobBean);
+
+							// 数据库更新
+							UdsJobBaseDao udsJobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
+							udsJobBaseDao.updateJobServerNameByLastStatus(udsJobBean.getPlatform(),
+									udsJobBean.getSystem(), udsJobBean.getJob(), client.getServerName(),
+									JobStatus.DISPATCHER);
+							UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER job",
+									udsJobBean.toString());
+							UdsRpcEvent udsRpcEvent = UdsRpcEvent.buildUdsRpcEvent(client.getServerName(),
+									RpcCommand.DISTRIBUTION_JOB);
+							UdsRpcClientManager.getInstance().sendMessage(client, udsRpcEvent, udsJobBean.getJob());
+						}
+
+					}
+				} catch (InterruptedException e) {
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+				}
+			}
+		}
+
+		public Thread getThread() {
+			return thread;
+		}
+
+		public void setThread(Thread thread) {
+			this.thread = thread;
+		}
+
+		public LinkedBlockingQueue<String> getSignalQueue() {
+			return signalQueue;
+		}
+
+		public void setSignalQueue(LinkedBlockingQueue<String> signalQueue) {
+			this.signalQueue = signalQueue;
+		}
+	}
+
+	public ConcurrentHashMap<String, PlafromThread> getSignalQueueHashMap() {
+		return signalQueueHashMap;
+	}
+
+	public void setSignalQueueHashMap(ConcurrentHashMap<String, PlafromThread> signalQueueHashMap) {
+		this.signalQueueHashMap = signalQueueHashMap;
 	}
 
 }

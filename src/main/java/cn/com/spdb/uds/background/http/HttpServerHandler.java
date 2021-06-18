@@ -37,7 +37,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 	private static Logger LOGGER = LoggerFactory.getLogger(HttpServerHandler.class.getSimpleName());
 
 	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+	public void channelRead(ChannelHandlerContext ctx, Object msg) {
 //		super.channelRead(ctx, msg);
 		if (!(msg instanceof FullHttpRequest)) {
 
@@ -101,7 +101,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 				send(ctx, context, HttpResponseStatus.BAD_REQUEST);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());	
 		} finally {
 			httpRequest.release();
 		}

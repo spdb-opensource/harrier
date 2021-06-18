@@ -20,18 +20,20 @@ import cn.com.spdb.uds.db.DBManager;
 import cn.com.spdb.uds.db.bean.UdsServerBean;
 import cn.com.spdb.uds.db.dao.UdsJobBaseDao;
 import cn.com.spdb.uds.db.dao.UdsServerDao;
+import cn.com.spdb.uds.log.LogEvent;
+import cn.com.spdb.uds.log.UdsLogger;
 
 public class UdsUtils {
 
 	// 获得指定文件的byte数组
 	public static byte[] getBytes(String filePath) {
 		byte[] buffer = null;
-		FileInputStream fis=null;
-		ByteArrayOutputStream bos=null;
+		FileInputStream fis = null;
+		ByteArrayOutputStream bos = null;
 		try {
 			File file = new File(filePath);
-			 fis = new FileInputStream(file);
-			 bos = new ByteArrayOutputStream(1000);
+			fis = new FileInputStream(file);
+			bos = new ByteArrayOutputStream(1000);
 			byte[] b = new byte[1000];
 			int n;
 			while ((n = fis.read(b)) != -1) {
@@ -39,20 +41,27 @@ public class UdsUtils {
 			}
 			buffer = bos.toByteArray();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		} catch (IOException e) {
-			e.printStackTrace();
-		}finally {
-			try {
-				fis.close();
-				bos.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+		} finally {
+			if(fis != null) {
+				try {
+					fis.close();
+				} catch (IOException e) {
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+				}
+			}
+			if(bos != null) {
+				try {
+					bos.close();
+				} catch (IOException e) {
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
+				}
 			}
 		}
 		return buffer;
 	}
-
 
 	/**
 	 * 作业名： sys_subSys_表名_算法
@@ -190,7 +199,7 @@ public class UdsUtils {
 		try {
 			FileUtils.moveFileToDirectory(file, dirFile, true);
 		} catch (IOException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			return false;
 		}
 		return true;
@@ -212,7 +221,7 @@ public class UdsUtils {
 		try {
 			FileUtils.moveFileToDirectory(file, dirFile, true);
 		} catch (IOException e) {
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			return false;
 		}
 		return true;
@@ -258,18 +267,18 @@ public class UdsUtils {
 				if (udsRpcClient == null) {
 					buffer.append(
 							"try link server error Name:" + serverBean.getServer_name() + " ip:" + serverBean.getIp())
-							.append("\n");
+							.append("\r\n");
 					continue;
 				}
 				UdsRpcEvent udsRpcEvent = UdsRpcEvent.buildUdsRpcEvent(udsRpcClient.getServerName(),
 						RpcCommand.SERVER_REGISTER);
 				UdsRpcClientManager.getInstance().sendMessage(udsRpcClient, udsRpcEvent, null);
 				buffer.append("try link server Name:" + serverBean.getServer_name() + " ip:" + serverBean.getIp())
-						.append("\n");
+						.append("\r\n");
 			} catch (Exception e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				buffer.append("try link server error Name:" + serverBean.getServer_name() + " ip:" + serverBean.getIp())
-						.append("\n");
+						.append("\r\n");
 			}
 		}
 		return buffer.toString();
@@ -300,7 +309,7 @@ public class UdsUtils {
 				try {
 					return file.createNewFile();
 				} catch (IOException e) {
-					e.printStackTrace();
+					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 					return false;
 				}
 			} else {
@@ -333,7 +342,7 @@ public class UdsUtils {
 			try {
 				return file.createNewFile();
 			} catch (IOException e) {
-				e.printStackTrace();
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 		}
 		return true;

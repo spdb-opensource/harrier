@@ -72,7 +72,7 @@ public class LogErrorSign {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!getClass().equals(obj.getClass()))
 			return false;
 		LogErrorSign other = (LogErrorSign) obj;
 		if (code != other.code)

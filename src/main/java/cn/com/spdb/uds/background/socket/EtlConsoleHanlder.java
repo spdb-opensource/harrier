@@ -59,8 +59,7 @@ public class EtlConsoleHanlder implements InterfaseTerminalHanlder {
 			}
 			hanlderCommand = (InterfaceConsoleCommand) calzz.newInstance();
 		} catch (Exception e) {
-			e.printStackTrace(pw);
-			e.printStackTrace();
+			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			UdsLogger.logEvent(LogEvent.BACK_ERROR, e.getMessage());
 		}
 		if (hanlderCommand != null) {
@@ -68,8 +67,7 @@ public class EtlConsoleHanlder implements InterfaseTerminalHanlder {
 				hanlderCommand.hanlder(msg.replaceFirst(split[0], "").trim(), pw);
 			} catch (Exception e) {
 				UdsLogger.logEvent(LogEvent.BACK_ERROR, e.getMessage());
-				e.printStackTrace();
-				e.printStackTrace(pw);
+				UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 			}
 			pw.println();
 			pw.println("end");

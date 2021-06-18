@@ -7,7 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import cn.com.spdb.uds.UdsConstant;
 import cn.com.spdb.uds.db.bean.UdsJobBean;
+import cn.com.spdb.uds.db.bean.UdsSystemBean;
 import cn.com.spdb.uds.utils.DateUtils;
+import cn.com.spdb.uds.utils.Symbol;
 
 public class ChildServerInfo implements Serializable {
 
@@ -127,8 +129,12 @@ public class ChildServerInfo implements Serializable {
 		return num;
 	}
 
-	public void incrementSystemJob(String platform, String system) {
-		String key = UdsConstant.getUdsSystemBeanKey(platform, system);
+	public boolean isStabilize() {
+		return System.currentTimeMillis() - updateTime > 2 * DateUtils.TIME_MILLSECOND_OF_MINUTE;
+	}
+
+	
+	private void incrementJob(String key) {
 		synchronized (systemJobMap) {
 			Integer num = systemJobMap.get(key);
 			if (num == null) {
@@ -136,27 +142,58 @@ public class ChildServerInfo implements Serializable {
 			} else {
 				systemJobMap.put(key, num + 1);
 			}
-			jobNum++;
 		}
+	}
+	
+	public void incrementPlatformAndSystemJob(String platform, String system) {
+		UdsSystemBean udssystem  = UdsConstant.getUdsSystemBean(platform, system);
+		String key=platform+Symbol.XIA_HUA_XIAN+Symbol.XING_HAO;
+		incrementJob(key);
+		if(!udssystem.getSystem().equals(Symbol.XING_HAO)) {
+			key=udssystem.getPlatformAndSystemKey();
+			incrementJob(key);
+		}
+		jobNum++;
+		updateTime = System.currentTimeMillis();
+	}
+	
+	public void incrementSystemJob(String platform, String system) {
+		String key = UdsConstant.getUdsSystemBeanKey(platform, system);
+		incrementJob(key);
+		jobNum++;
 		updateTime = System.currentTimeMillis();
 	}
 
-	public boolean isStabilize() {
-		return System.currentTimeMillis() - updateTime > 2 * DateUtils.TIME_MILLSECOND_OF_MINUTE;
-	}
-
-	public void decrementSystemJob(String platform, String system) {
-		String key = UdsConstant.getUdsSystemBeanKey(platform, system);
+	private void decrementJob(String key) {
 		synchronized (systemJobMap) {
 			Integer num = systemJobMap.get(key);
 			if (num != null) {
 				num = num > 0 ? num - 1 : 0;
 				systemJobMap.put(key, num);
 			}
-			jobNum--;
-			if (jobNum < 0) {
-				jobNum = 0;
-			}
+		}
+	}
+	public void decrementtPlatformAndSystemJob(String platform, String system) {
+		UdsSystemBean udssystem  = UdsConstant.getUdsSystemBean(platform, system);
+		String key=platform+Symbol.XIA_HUA_XIAN+Symbol.XING_HAO;
+		decrementJob(key);
+		if(!udssystem.getSystem().equals(Symbol.XING_HAO)) {
+			key=udssystem.getPlatformAndSystemKey();
+			decrementJob(key);
+		}
+		jobNum--;
+		if (jobNum < 0) {
+			jobNum = 0;
+		}
+		updateTime = System.currentTimeMillis();
+	}
+	
+	public void decrementSystemJob(String platform, String system) {
+		String key = UdsConstant.getUdsSystemBeanKey(platform, system);
+		decrementJob(key);
+		jobNum--;
+		if (jobNum < 0) {
+			jobNum = 0;
 		}
 		updateTime = System.currentTimeMillis();
 	}
