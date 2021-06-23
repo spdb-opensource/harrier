@@ -761,11 +761,10 @@ public class JobRunable implements Runnable {
 					logFile.createNewFile();
 				}
 				String stepPath = jobStepInfo.getScript_dir() + File.separator + jobStepInfo.getScript_name();
-				String encode = UdsUtils.guessEncodeFile(new File(stepPath));
 
-				if (encode != null && UdsConstant.TRANSFER_STEP_UTF8 == UdsConstant.TRUE_NUM) {
+				if (UdsConstant.TRANSFER_STEP_UTF8 == UdsConstant.TRUE_NUM) {
 					bufferedReader = new BufferedReader(
-							new InputStreamReader(processWork.getInputStream(), encode));
+							new InputStreamReader(processWork.getInputStream()));
 					bufferedWriter = new BufferedWriter(
 							new OutputStreamWriter(new FileOutputStream(logFile, true), "utf-8"));
 					String line = null;

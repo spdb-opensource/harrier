@@ -365,22 +365,4 @@ public class UdsUtils {
 		}
 		return false;
 	}
-
-	
-
-	public static String guessEncodeS(byte[] bs) {
-		BytesEncodingDetect bytesEncodingDetect = new BytesEncodingDetect();
-		String fileCode = BytesEncodingDetect.javaname[bytesEncodingDetect.detectEncoding(bs)];
-		return fileCode;
-	}
-
-	public static String guessEncodeFile(File file) {
-		if (!file.exists()) {
-			return null;
-		}
-		BytesEncodingDetect bytesEncodingDetect = new BytesEncodingDetect();
-		String fileCode = BytesEncodingDetect.javaname[bytesEncodingDetect.detectEncoding(file)];
-		return fileCode;
-	}
-
 }
