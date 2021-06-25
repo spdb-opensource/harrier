@@ -356,87 +356,82 @@ public class MasterFactory {
 							UdsJobBean udsJobBean = null;
 							UdsSystemBean systemBean = null;
 							UdsRpcClient client = null;
-
-							this.getClient(udsJobBean, priQueue, systemBean, keyJobPlafrom, platformBean, client);
+							while ((udsJobBean = priQueue.poll()) != null) {
+								// 应用参数
+								systemBean = UdsConstant.getUdsSystemBean(udsJobBean.getPlatfromSytemKey());
+								if (systemBean == null) {
+									UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER SYSTEM IS NULL",
+											keyJobPlafrom);
+									continue;
+								}
+								if (!platformBean.equals(systemBean)) {
+									// 应用并发数
+									max = systemBean.getMax_run_job();
+									num = MasterManager.getInstance().getChildServerSystemSum(systemBean.getPlatform(),
+											systemBean.getSystem());
+									if (num >= max) {
+										UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER,
+												"MASTER DISPATCHER SYSTEM NUM IS MAX", systemBean.getPlatform(),
+												systemBean.getSystem());
+										continue;
+									}
+								}
+								// 机器选择
+								client = AbstractDispatcherPlan.getUdsRpcClient(systemBean, udsJobBean);
+								if (client == null) {
+									UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "CLIENT IS NULL",
+											udsJobBean.getJob());
+									continue;
+								}
+								// 地域判断
+								if ((client.getLocation() & UdsConstant.LOCATION) <= 0) {
+									UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "CLIENT LOCATION NOT MY LOCATION",
+											client.getLocation(), UdsConstant.LOCATION);
+									continue;
+								}
+								break;
+							}
 							if (udsJobBean == null) {
 								break;
 							}
 
 							// 权重控制
 							if (udsJobBean.getCheck_weight() == UdsConstant.TRUE_NUM) {
-								if (!MasterManager.getInstance().checkLimitWeight(udsJobBean)) {
-									UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER,
-											"MASTER DISPATCHER JOB IS NOT LIMITWEIGHT ", udsJobBean.getJob());
-									break;
+								if (udsJobBean.getCheck_weight() == UdsConstant.TRUE_NUM) {
+									if (!MasterManager.getInstance().checkLimitWeight(udsJobBean)) {
+										UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER,
+												"MASTER DISPATCHER JOB IS NOT LIMITWEIGHT ", udsJobBean.getJob());
+										break;
+									}
+									MasterManager.getInstance().addWeight(client.getServerName(), udsJobBean);
 								}
-								MasterManager.getInstance().addWeight(client.getServerName(), udsJobBean);
 							}
-								
-							this.updateStat(udsJobBean, platformSystemConterBean, client);
+							// 平台并发增加
+							MasterManager.getInstance().incrementChildServerPlatformAndSystem(client.getServerName(),
+									udsJobBean.getPlatform(), udsJobBean.getSystem());
+
+							//
+							platformSystemConterBean.dispatcherQueueRemove(udsJobBean);
+
+							// 数据库更新
+							UdsJobBaseDao udsJobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
+							udsJobBaseDao.updateJobServerNameByLastStatus(udsJobBean.getPlatform(),
+									udsJobBean.getSystem(), udsJobBean.getJob(), client.getServerName(),
+									JobStatus.DISPATCHER);
+							UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER job",
+									udsJobBean.toString());
+							UdsRpcEvent udsRpcEvent = UdsRpcEvent.buildUdsRpcEvent(client.getServerName(),
+									RpcCommand.DISTRIBUTION_JOB);
+							UdsRpcClientManager.getInstance().sendMessage(client, udsRpcEvent, udsJobBean.getJob());
 						}
+
 					}
 				} catch (InterruptedException e) {
 					UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 				}
 			}
 		}
-		
-		public void getClient(UdsJobBean udsJobBean, PriorityQueue<UdsJobBean> priQueue, UdsSystemBean systemBean, String keyJobPlafrom, UdsSystemBean platformBean, UdsRpcClient client) {
-			while ((udsJobBean = priQueue.poll()) != null) {
-				// 应用参数
-				systemBean = UdsConstant.getUdsSystemBean(udsJobBean.getPlatfromSytemKey());
-				if (systemBean == null) {
-					UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER SYSTEM IS NULL",
-							keyJobPlafrom);
-					continue;
-				}
-				if (!platformBean.equals(systemBean)) {
-					// 应用并发数
-					int max = systemBean.getMax_run_job();
-					int num = MasterManager.getInstance().getChildServerSystemSum(systemBean.getPlatform(),
-							systemBean.getSystem());
-					if (num >= max) {
-						UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER,
-								"MASTER DISPATCHER SYSTEM NUM IS MAX", systemBean.getPlatform(),
-								systemBean.getSystem());
-						continue;
-					}
-				}
-				// 机器选择
-				client = AbstractDispatcherPlan.getUdsRpcClient(systemBean, udsJobBean);
-				if (client == null) {
-					UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "CLIENT IS NULL",
-							udsJobBean.getJob());
-					continue;
-				}
-				// 地域判断
-				if ((client.getLocation() & UdsConstant.LOCATION) <= 0) {
-					UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "CLIENT LOCATION NOT MY LOCATION",
-							client.getLocation(), UdsConstant.LOCATION);
-					continue;
-				}
-				break;
-			}
-		}
-		public void updateStat(UdsJobBean udsJobBean, PlatformSystemCenterBean platformSystemConterBean, UdsRpcClient client){
-			// 平台并发增加
-			MasterManager.getInstance().incrementChildServerPlatformAndSystem(client.getServerName(),
-					udsJobBean.getPlatform(), udsJobBean.getSystem());
 
-			//
-			platformSystemConterBean.dispatcherQueueRemove(udsJobBean);
-
-			// 数据库更新
-			UdsJobBaseDao udsJobBaseDao = DBManager.getInstance().getDao(UdsJobBaseDao.class);
-			udsJobBaseDao.updateJobServerNameByLastStatus(udsJobBean.getPlatform(),
-					udsJobBean.getSystem(), udsJobBean.getJob(), client.getServerName(),
-					JobStatus.DISPATCHER);
-			UdsLogger.logEvent(LogEvent.MASTER_DISPATCHER, "MASTER DISPATCHER job",
-					udsJobBean.toString());
-			UdsRpcEvent udsRpcEvent = UdsRpcEvent.buildUdsRpcEvent(client.getServerName(),
-					RpcCommand.DISTRIBUTION_JOB);
-			UdsRpcClientManager.getInstance().sendMessage(client, udsRpcEvent, udsJobBean.getJob());
-		}
 		public Thread getThread() {
 			return thread;
 		}
