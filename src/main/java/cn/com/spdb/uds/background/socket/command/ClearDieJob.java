@@ -17,6 +17,7 @@ import cn.com.spdb.uds.log.UdsLogger;
 
 public class ClearDieJob implements InterfaceConsoleCommand {
 
+	public static String str="ps -ef | grep uds | grep %s |grep -v grep |awk '{print \\\"kill \\\" $2}' | sh";
 	@Override
 	public String hanlder(String param, PrintWriter pw) {
 		StringBuffer buffer = new StringBuffer();
@@ -31,8 +32,9 @@ public class ClearDieJob implements InterfaceConsoleCommand {
 					jobRunable.kill();
 					if (param.equals("kill")) {
 						try {
-							Runtime.getRuntime().exec("ps -ef | grep uds | grep " + job.getJob()
-									+ " |grep -v grep |awk '{print \"kill \" $2}' | sh");
+							String str1 =null;
+							str1=String.format(str, job.getJob());
+							Runtime.getRuntime().exec(str1);
 						} catch (IOException e) {
 							UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 						}
