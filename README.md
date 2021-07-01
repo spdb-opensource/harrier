@@ -1,6 +1,7 @@
 ![harrier](https://user-images.githubusercontent.com/38176315/124080306-cb819880-da7c-11eb-9214-dae5f199bf5a.jpg)
 ![](https://img.shields.io/badge/language-java-blue.svg)
 ![](https://img.shields.io/badge/release-v2.3-green.svg)
+![](https://img.shields.io/tokei/lines/github/spdb-opensource/harrier?color=orange)
 ![](https://img.shields.io/github/license/spdb-opensource/harrier?color=purple)
 <a href="https://app.circleci.com/pipelines/github/spdb-opensource/harrier"><img src="https://img.shields.io/circleci/project/github/spdb-opensource/harrier?sanitize=true" alt="Build Status"></a>
 
