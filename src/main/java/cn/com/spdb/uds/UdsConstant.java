@@ -111,7 +111,7 @@ public class UdsConstant {
 	public static byte SERVER_ENABLE = 1;
 	// 作业最大并发数
 	public static short MAX_JOB_NUM = 30;
-	// 地域按照位区分 0|0 0000000000 0000000001 从右往左，上海、合肥
+	// 地域按照位区分 
 	public static int LOCATION = 1;
 	// 程序脚本路径
 	public static String SERVER_SCRIPT_DIR_PATH = "./script";
@@ -332,7 +332,7 @@ public class UdsConstant {
 	}
 
 	/**
-	 * 服务器独有常量 一个是config 配置文件 一个数据库文件
+	 * 服务器独有常量 一个是config配置文件 一个数据库文件
 	 */
 	public static void loadServerConstant(UdsServerBean udsServerBean) {
 		LOGGER.info("db UdsServerDao load start");
@@ -373,7 +373,6 @@ public class UdsConstant {
 			for (Entry<String, String> entry : cfgVar.entrySet()) {
 				try {
 					Field field = UdsConstant.class.getDeclaredField(entry.getKey().toString());
-					// 不是final 修饰 并且是的static 修饰
 					if (!Modifier.isFinal(field.getModifiers()) && Modifier.isStatic(field.getModifiers())) {
 						String valueStr = entry.getValue().toString();
 						Class<?> zlass = field.getType();

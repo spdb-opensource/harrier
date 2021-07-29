@@ -7,10 +7,6 @@ public class UdsSystemBean {
 	private String platform;
 	// 系统
 	private String system;
-
-	// private short data_keep_day = 0;
-	// private short log_keep_day = 0;
-	// private short record_keep_day = 0;
 	private int max_run_job = 0;
 	private short strategy = 0;
 	private String strategy_pro = "";

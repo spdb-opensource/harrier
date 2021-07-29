@@ -287,11 +287,6 @@ public class HttpClient {
 	
 		String httpEntity = client.sendPostHttpBody("/load/udssystem", paramsHashMap);
 
-		// List<Map<String, Object>> list = new ArrayList<Map<String,
-		// Object>>();
-		// list.add(paramsHashMap);
-		// HashMap<String, Object> map = new HashMap<String, Object>();
-		// map.put("list", list);
 		System.out.println(httpEntity);
 	}
 }

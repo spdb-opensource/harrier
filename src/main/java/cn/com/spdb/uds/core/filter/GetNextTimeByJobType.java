@@ -23,7 +23,7 @@ public class GetNextTimeByJobType {
 			}
 				break;
 			case M: {
-				// 根据上次执行作业时间,计算下次执行作业的最近的 一次时间
+				// 根据上次执行作业时间,计算下次执行作业的最近的一次时间
 				List<UdsJobDateFrequencyBean> list = controlDao.getUdsJobDateFrequency(udsJobBean.getPlatform(),
 						udsJobBean.getSystem(), udsJobBean.getJob());
 				for (UdsJobDateFrequencyBean bean : list) {
@@ -44,7 +44,7 @@ public class GetNextTimeByJobType {
 			}
 				break;
 			case W: {
-				// 根据上次执行作业时间,计算下次执行作业的最近的 一次时间
+				// 根据上次执行作业时间,计算下次执行作业的最近的一次时间
 				List<UdsJobDateFrequencyBean> list = controlDao.getUdsJobDateFrequency(udsJobBean.getPlatform(),
 						udsJobBean.getSystem(), udsJobBean.getJob());
 				for (UdsJobDateFrequencyBean bean : list) {
@@ -64,7 +64,7 @@ public class GetNextTimeByJobType {
 			}
 				break;
 			case Y: {
-				// 根据上次执行作业时间,计算下次执行作业的最近的 一次时间
+				// 根据上次执行作业时间,计算下次执行作业的最近的一次时间
 				List<UdsJobDateFrequencyBean> list = controlDao.getUdsJobDateFrequency(udsJobBean.getPlatform(),
 						udsJobBean.getSystem(), udsJobBean.getJob());
 				for (UdsJobDateFrequencyBean bean : list) {

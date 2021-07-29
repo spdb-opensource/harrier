@@ -85,10 +85,7 @@ public class JobFrequencyFilter extends AbstractReceiverFilter {
 								signalFileInfo.getJobDate(), udsJobBean.getJob_date(), udsJobBean.getJob_type());
 					}
 					//FIXME 这里不使用源信号文件名，使用作业名，减少数据库操作 
-					//if (!UdsUtils.moveFile(UdsConstant.AUTO_STREAM_DIR_PATH, signalFileInfo.getFile())) {
-					//	UdsLogger.logEvent(LogEvent.MASTER_MOVE_FAIL, udsJobBean.getJob(), signalFileInfo.getBatch(),
-					//			signalFileInfo.getJobDate());
-					//}
+
 				}else{
 					UdsUtils.moveToDayFile(UdsConstant.AUTO_FAIL_DIR_PATH, signalFileInfo.getFile());
 				}

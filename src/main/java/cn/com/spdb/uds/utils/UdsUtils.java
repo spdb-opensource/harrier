@@ -191,11 +191,6 @@ public class UdsUtils {
 		if (!dirFile.exists()) {
 			dirFile.mkdirs();
 		}
-		// File targetFile = new File(dirFile.getPath() + File.separator +
-		// file.getName());
-		// if (targetFile.exists()) {
-		// targetFile.delete();
-		// }
 		try {
 			FileUtils.moveFileToDirectory(file, dirFile, true);
 		} catch (IOException e) {
@@ -203,7 +198,6 @@ public class UdsUtils {
 			return false;
 		}
 		return true;
-		// return file.renameTo(targetFile);
 	}
 
 	public static boolean moveToDayFile(String dir, File file) {
@@ -322,12 +316,6 @@ public class UdsUtils {
 
 	public static boolean createSignFile(String job, int batch, String jobDate, String dirPtah) {
 		// FIXME 这里不使用源信号文件名，使用作业名，减少数据库操作
-		// UdsJobBaseDao udsJobBaseDao =
-		// DBManager.getInstance().getDao(UdsJobBaseDao.class);
-		// String signFileKey = udsJobBaseDao.getSignFileKeyByJob(job);
-		// if (StringUtils.isEmpty(signFileKey)) {
-		// return false;
-		// }
 		String signFileKey = job;
 		StringBuffer filePathBuffer = new StringBuffer();
 		filePathBuffer.append(dirPtah);

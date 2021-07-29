@@ -313,12 +313,6 @@ public class JobRunable implements Runnable {
 		String tjobDate = DateUtils.getDateTime(tDate, DateUtils.PATTERN_YYYYMMDD_CONS);
 		StringBuffer fileBuffer = new StringBuffer();
 		// FIXME 这里不使用源信号文件名，使用作业名，减少数据库操作
-		// UdsJobBaseDao udsJobBaseDao =
-		// DBManager.getInstance().getDao(UdsJobBaseDao.class);
-		// String signFileKey = udsJobBaseDao.getSignFileKeyByJob(job);
-		// if (StringUtils.isEmpty(signFileKey)) {
-		// return false;
-		// }
 		String signFileKey = job;
 
 		if (batch == 0) {

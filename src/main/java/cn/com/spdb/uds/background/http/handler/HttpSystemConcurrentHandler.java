@@ -37,9 +37,6 @@ public class HttpSystemConcurrentHandler extends AbstractHttpPostBodyWorkHandler
 		int strategy = (int) objectMap.get("strategy");
 		String strategyPro = (String) objectMap.get("strategy_pro");
 
-//		String platform_key = platform + "_" + Symbol.XING_HAO;
-//		UdsSystemBean platformBean = UdsConstant.MAP_SYSTEM_JOB.get(platform_key);
-
 		String system_key = platform + "_" + system;
 		UdsSystemBean bean = UdsConstant.MAP_SYSTEM_JOB.get(system_key);
 		if (bean == null || maxRunJob < 0) {
@@ -51,22 +48,9 @@ public class HttpSystemConcurrentHandler extends AbstractHttpPostBodyWorkHandler
 			bean.setMax_run_job(maxRunJob);
 		} else {
 			if (usePlatfrom == UdsConstant.TRUE_NUM) {
-//				int num = platformBean.getMax_run_job();
-//				if (bean.getUse_platform() == UdsConstant.FALSE_NUM) {
-//					num += bean.getMax_run_job();
-//				}
-//				if (num < 0) {
-//					return "平台并发数目不够";
-//				}
-//				platformBean.setMax_run_job(num);
 				bean.setMax_run_job(0);
 				bean.setUse_platform((byte) UdsConstant.TRUE_NUM);
 			} else {
-//				int num = platformBean.getMax_run_job() - (maxRunJob - bean.getMax_run_job());
-//				if (num < 0) {
-//					return "平台并发数目不够";
-//				}
-//				platformBean.setMax_run_job(num);
 				bean.setMax_run_job(maxRunJob);
 				bean.setUse_platform((byte) UdsConstant.FALSE_NUM);
 			}

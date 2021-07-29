@@ -36,9 +36,6 @@ public class HttpKillJobScriptHandler extends AbstractHttpPostBodyWorkHandler {
 		if (udsjobbean == null) {
 			return "job is null please check job name";
 		}
-//		if (!udsjobbean.getLast_status().equals(JobStatus.RUNING.status())) {
-//			return "job status is not running";
-//		}
 		String serverName = udsjobbean.getServer_name();
 		if (StringUtils.isBlank(serverName)) {
 			return "job serverName is null";

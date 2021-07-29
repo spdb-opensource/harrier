@@ -85,10 +85,7 @@ public class JobFilter extends AbstractReceiverFilter {
 									signalFileInfo.getJobDate(), udsJobBean.getJob_date(), udsJobBean.getJob_type());
 						}
 						//FIXME 这里不使用源信号文件名，使用作业名，减少数据库操作 
-						//if (!UdsUtils.moveFile(UdsConstant.AUTO_STREAM_DIR_PATH, signalFileInfo.getFile())) {
-						//	UdsLogger.logEvent(LogEvent.MASTER_MOVE_FAIL, udsJobBean.getJob(), signalFileInfo.getBatch(),
-						//			signalFileInfo.getJobDate());
-						//}
+
 					} else {
 						UdsUtils.moveToDayFile(UdsConstant.AUTO_FAIL_DIR_PATH, signalFileInfo.getFile());
 						UdsLogger.logErrorInstertDbError(UdsErrorCode.JOB_RCV_BACTH_ERROR, UdsErrorLevel.H,
@@ -111,10 +108,7 @@ public class JobFilter extends AbstractReceiverFilter {
 							signalFileInfo.getJobDate(), udsJobBean.getJob_date(), udsJobBean.getJob_type());
 				}
 				//FIXME 这里不使用源信号文件名，使用作业名，减少数据库操作 
-				//if (!UdsUtils.moveFile(UdsConstant.AUTO_STREAM_DIR_PATH, signalFileInfo.getFile())) {
-				//	UdsLogger.logEvent(LogEvent.MASTER_MOVE_FAIL, udsJobBean.getJob(), signalFileInfo.getBatch(),
-				//			signalFileInfo.getJobDate());
-				//}
+
 			} else {
 				UdsUtils.moveToDayFile(UdsConstant.AUTO_FAIL_DIR_PATH, signalFileInfo.getFile());
 			}
@@ -123,26 +117,7 @@ public class JobFilter extends AbstractReceiverFilter {
 						udsJobBean.getJob(), signalFileInfo.getJobDate(), udsJobBean.getLast_status(),
 						udsJobBean.getBatch());
 			}
-			// // 不是检测是否为FAILED,不为FAILED是则报错,否则日志记录
-			// if
-			// (udsJobBean.getLast_status().equals(JobStatus.FAILED.status())) {
-			// UdsLogger.logEvent(LogEvent.MASTER_JOB_RCV_STATUS_ERROR,
-			// "uds job is status  FAILED  ",
-			// udsJobBean.getJob(), udsJobBean.getLast_status());
-			// } else {
-			//
-			// if (UdsConstant.RCV_SIGN_FAIL_MOVE == 1) {
-			// if (!UdsUtils.moveFile(UdsConstant.AUTO_STREAM_DIR_PATH,
-			// signalFileInfo.getFile())) {
-			// UdsLogger.logEvent(LogEvent.MASTER_MOVE_FAIL,
-			// udsJobBean.getJob(), signalFileInfo.getBatch(),
-			// signalFileInfo.getJobDate());
-			// }
-			// } else {
-			// UdsUtils.moveToDayFile(UdsConstant.AUTO_FAIL_DIR_PATH,
-			// signalFileInfo.getFile());
-			// }
-			// }
+
 			return false;
 		}
 

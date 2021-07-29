@@ -38,7 +38,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) {
-//		super.channelRead(ctx, msg);
+
 		if (!(msg instanceof FullHttpRequest)) {
 
 			String context = "ERROR";
@@ -52,8 +52,6 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 		try {
 
 			String uri = httpRequest.uri();// 路径
-			// ByteBuf bodyBuffer = httpRequest.content();
-			// String body = bodyBuffer.toString(CharsetUtil.UTF_8);
 			HttpMethod httpMethod = httpRequest.method();
 
 			if (HttpMethod.GET.equals(httpMethod)) {
