@@ -16,7 +16,7 @@
 
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 
-	<bean class="com.spdb.uds.utils.EncryptPropertyPlaceholderConfigurer">
+	<bean class="cn.com.spdb.uds.utils.EncryptPropertyPlaceholderConfigurer">
 		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
 		<property name="locations">
 			<value>file:./config/uds.configuration.properties</value>
@@ -66,12 +66,12 @@
 		<property name="mapperLocations" value="classpath:./db/map/*.xml" />
 	</bean>
 
-	<bean id="DBManager" class=" com.spdb.uds.db.DBManager">
+	<bean id="DBManager" class=" cn.com.spdb.uds.db.DBManager">
 		<constructor-arg index="0" ref="sqlSessionFactory" />
 	</bean>
 
 
-	<bean id="SystemOutAndErrPrintStream" class=" com.spdb.uds.db.DBManager">
+	<bean id="SystemOutAndErrPrintStream" class=" cn.com.spdb.uds.db.DBManager">
 		<constructor-arg index="0" ref="sqlSessionFactory" />
 	</bean>
 
@@ -92,7 +92,7 @@
 	<!-- 被拦截类配置 -->
 	<aop:config>
 		<aop:pointcut id="daoOperation"
-			expression="execution(* com.spdb.uds.db.dao..*(..))" />
+			expression="execution(* cn.com.spdb.uds.db.dao..*(..))" />
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="daoOperation" />
 	</aop:config>
 
