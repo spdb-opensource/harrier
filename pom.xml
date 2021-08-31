@@ -23,7 +23,6 @@
 		<fastjson.version>1.2.76</fastjson.version>
 		<slf4j-api.version>1.7.32</slf4j-api.version>
 		<netty.version>4.1.66.Final</netty.version>
-		<junit.version>4.13.1</junit.version>
 		<baidu.rpc.version>3.5.19</baidu.rpc.version>
 		<quartz.version>2.3.2</quartz.version>
 		<httpclient.version>4.5.13</httpclient.version>
@@ -177,12 +176,6 @@
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
 			<version>${netty.version}</version>
-		</dependency>
-		<!-- junit -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
 		</dependency>
 
 		<!-- rpc -->
