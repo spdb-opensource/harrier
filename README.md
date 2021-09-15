@@ -1,4 +1,4 @@
-![harrier](https://user-images.githubusercontent.com/38176315/124080306-cb819880-da7c-11eb-9214-dae5f199bf5a.jpg)
+![HARRIER](https://user-images.githubusercontent.com/38176315/133361205-b2d987de-11e1-40fa-a848-cbc1bf1889cd.jpg)
 ![](https://img.shields.io/badge/language-java-blue.svg)
 ![](https://img.shields.io/badge/release-v2.3-green.svg)
 ![](https://img.shields.io/tokei/lines/github/spdb-opensource/harrier?color=orange)
