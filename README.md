@@ -127,7 +127,8 @@ uds_system
 ### 部署安装
 
 harrier调度系统支持单机部署以及（一主多子）集群部署,详见[harrier部署文档](./deployment.md)
-
+### 监控系统
+Harrier官方监控系统：[harrier-monitor](https://github.com/spdb-opensource/harrier-monitor)
 ### 快速入门
 
 请参考官方文档:[harrier部署文档](./deployment.md)
