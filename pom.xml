@@ -16,7 +16,7 @@
 		<log4j2-version>2.17.0</log4j2-version>
 		<org.aspectj.version>1.9.7</org.aspectj.version>
 		<cglib.version>3.3.0</cglib.version>
-		<mysql.version>8.0.26</mysql.version>
+		<mysql.version>8.0.27</mysql.version>
 		<druid.version>1.1.10</druid.version>
 		<mybatis.version>3.5.7</mybatis.version>
 		<mybatis-spring.version>2.0.6</mybatis-spring.version>
