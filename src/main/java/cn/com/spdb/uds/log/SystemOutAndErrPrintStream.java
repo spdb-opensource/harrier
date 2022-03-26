@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory;
 public class SystemOutAndErrPrintStream extends PrintStream {
 
 	private Logger logger = LoggerFactory.getLogger(SystemOutAndErrPrintStream.class);
-
-	private boolean isErr = false;
+	/*
+	Rename variable
+	 */
+	private boolean isError = false;
 
 
 	public SystemOutAndErrPrintStream(OutputStream out, boolean isErr) {
@@ -20,12 +22,12 @@ public class SystemOutAndErrPrintStream extends PrintStream {
 		} else {
 			System.setOut(this);
 		}
-		this.isErr = isErr;
+		this.isError = isErr;
 	}
 
 	@Override
 	public void print(String string) {
-		if (isErr) {
+		if (isError) {
 			logger.error(string);
 		} else {
 			logger.info(string);
@@ -34,7 +36,7 @@ public class SystemOutAndErrPrintStream extends PrintStream {
 
 	@Override
 	public void print(boolean b) {
-		if (isErr) {
+		if (isError) {
 			logger.error(String.valueOf(b));
 		} else {
 			logger.info(String.valueOf(b));
@@ -43,7 +45,7 @@ public class SystemOutAndErrPrintStream extends PrintStream {
 
 	@Override
 	public void print(char c) {
-		if (isErr) {
+		if (isError) {
 			logger.error(String.valueOf(c));
 		} else {
 			logger.info(String.valueOf(c));
@@ -52,7 +54,7 @@ public class SystemOutAndErrPrintStream extends PrintStream {
 
 	@Override
 	public void print(int i) {
-		if (isErr) {
+		if (isError) {
 			logger.error(String.valueOf(i));
 		} else {
 			logger.info(String.valueOf(i));
@@ -61,7 +63,7 @@ public class SystemOutAndErrPrintStream extends PrintStream {
 
 	@Override
 	public void print(long l) {
-		if (isErr) {
+		if (isError) {
 			logger.error(String.valueOf(l));
 		} else {
 			logger.info(String.valueOf(l));
@@ -70,7 +72,7 @@ public class SystemOutAndErrPrintStream extends PrintStream {
 
 	@Override
 	public void print(float f) {
-		if (isErr) {
+		if (isError) {
 			logger.error(String.valueOf(f));
 		} else {
 			logger.info(String.valueOf(f));
@@ -79,7 +81,7 @@ public class SystemOutAndErrPrintStream extends PrintStream {
 
 	@Override
 	public void print(double d) {
-		if (isErr) {
+		if (isError) {
 			logger.error(String.valueOf(d));
 		} else {
 			logger.info(String.valueOf(d));
@@ -88,7 +90,7 @@ public class SystemOutAndErrPrintStream extends PrintStream {
 
 	@Override
 	public void print(char[] x) {
-		if (isErr) {
+		if (isError) {
 			logger.error(String.valueOf(x));
 		} else {
 			logger.info(String.valueOf(x));
@@ -97,7 +99,7 @@ public class SystemOutAndErrPrintStream extends PrintStream {
 
 	@Override
 	public void print(Object obj) {
-		if (isErr) {
+		if (isError) {
 			logger.error(String.valueOf(obj));
 		} else {
 			logger.info(String.valueOf(obj));

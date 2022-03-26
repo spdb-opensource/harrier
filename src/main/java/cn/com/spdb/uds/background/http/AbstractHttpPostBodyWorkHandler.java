@@ -7,7 +7,7 @@ import java.util.Map;
  * @author T-luzl
  *
  */
-public abstract class AbstractHttpPostBodyWorkHandler implements InterfaceHttpWorkeHandler {
+public abstract class AbstractHttpPostBodyWorkHandler implements InterfaceHttpWorkHandler {
 
 	public abstract String handler(Map<String, Object> objectMap);
 

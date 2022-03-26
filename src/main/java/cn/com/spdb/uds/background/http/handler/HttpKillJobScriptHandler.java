@@ -9,8 +9,6 @@ import cn.com.spdb.uds.background.http.HttpMapProtocol;
 import cn.com.spdb.uds.background.http.HttpResultCode;
 import cn.com.spdb.uds.background.socket.command.KillJobRuning;
 import cn.com.spdb.uds.background.socket.command.KillJobScript;
-import cn.com.spdb.uds.core.bean.JobStatus;
-import cn.com.spdb.uds.core.master.MasterManager;
 import cn.com.spdb.uds.core.rpc.client.UdsRpcClient;
 import cn.com.spdb.uds.core.rpc.client.UdsRpcClientManager;
 import cn.com.spdb.uds.core.rpc.event.RpcCommand;

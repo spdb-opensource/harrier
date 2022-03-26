@@ -1,5 +1,6 @@
 package cn.com.spdb.uds.utils;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -76,6 +77,18 @@ public class UdsIdBuild {
 			UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 		}
 		this.workeid = id;
+	}
+
+	public static boolean moveFile(String dir, File file) {
+		if (file == null || !file.exists()) {
+			return false;
+		}
+		File dirFile = new File(dir);
+		if (!dirFile.exists()) {
+			dirFile.mkdirs();
+		}
+		File targetFile = new File(dir + File.separator + file.getName());
+		return file.renameTo(targetFile);
 	}
 
 	private long timesTamp() {

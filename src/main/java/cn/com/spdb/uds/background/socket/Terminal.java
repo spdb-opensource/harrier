@@ -23,7 +23,10 @@ public class Terminal implements Runnable {
 	private Socket conn;
 	private PrintWriter writer;
 	private List<String> beforeCommandList=new ArrayList<String>();
-	private int berforeCommandIndex=0;
+	/*
+	Rename Variable
+	 */
+	private int beforeCommandIndex =0;
 	private boolean isArrowInput=false;
 	private InterfaseTerminalHanlder hanlder;
 	
@@ -66,13 +69,13 @@ public class Terminal implements Runnable {
 						case 65:{//up
 							len=arrowInputStart;
 							arrowInputStart=-1;
-							berforeCommandIndex--;
-							if(berforeCommandIndex<0){
-								berforeCommandIndex=0;
+							beforeCommandIndex--;
+							if(beforeCommandIndex <0){
+								beforeCommandIndex =0;
 							}
-							if(berforeCommandIndex<beforeCommandList.size()){
+							if(beforeCommandIndex <beforeCommandList.size()){
 								isArrowInput=true;
-								String str=beforeCommandList.get(berforeCommandIndex);
+								String str=beforeCommandList.get(beforeCommandIndex);
 								writer.println("want input command:"+str);
 								writer.flush();
 								byte[] tmp =str.getBytes(CharsetWriter);
@@ -86,14 +89,14 @@ public class Terminal implements Runnable {
 						case 66: {
 							len = arrowInputStart;
 							arrowInputStart = -1;
-							berforeCommandIndex++;
-							if (berforeCommandIndex < 0) {
-								berforeCommandIndex = 0;
+							beforeCommandIndex++;
+							if (beforeCommandIndex < 0) {
+								beforeCommandIndex = 0;
 							}
-							if (berforeCommandIndex < beforeCommandList.size()) {
+							if (beforeCommandIndex < beforeCommandList.size()) {
 								isArrowInput = true;
 								String str = beforeCommandList
-										.get(berforeCommandIndex);
+										.get(beforeCommandIndex);
 								writer.println("want input command:" + str);
 								writer.flush();
 								byte[] tmp = str.getBytes(CharsetWriter);
@@ -122,7 +125,7 @@ public class Terminal implements Runnable {
 					msgString=new String(Arrays.copyOf(arr, len),CharsetWriter);
 					if(!isArrowInput){
 						beforeCommandList.add(msgString);
-						berforeCommandIndex=beforeCommandList.size();
+						beforeCommandIndex =beforeCommandList.size();
 					}
 					len=0;
 				}

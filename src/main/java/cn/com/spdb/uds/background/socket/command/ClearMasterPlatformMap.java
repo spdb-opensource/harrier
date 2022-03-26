@@ -31,5 +31,6 @@ public class ClearMasterPlatformMap extends AbsstactConsoleCommand {
 		}
 
 	}
+	//
 
 }

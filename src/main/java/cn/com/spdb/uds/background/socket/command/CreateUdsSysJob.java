@@ -54,6 +54,16 @@ public class CreateUdsSysJob implements InterfaceConsoleCommand {
 		String jobtriggerDB = "INSERT INTO uds_job_date_trigger (platform,system,job,start_time, MINUTE, HOUR, DAY, MONTH, WEEK) VALUES ('UDS','SYS','UDS_SYS_CLEAR_BACK_DB','2019-07-06 00:00:01','0','10','*','*','?');";
 		String jobtriggerlog = "INSERT INTO uds_job_date_trigger (platform,system,job,start_time, MINUTE, HOUR, DAY, MONTH, WEEK) VALUES ('UDS','SYS','UDS_SYS_CLEAR_LOG','2019-07-06 00:00:01','0','10','*','*','?');";
 
+		extractedDBManage(sqluds_system, sqluds_platform, sqlsourcedDB, sqlsourcedLog, jobdb, joblog, jobstepdb, jobsteplog, jobtriggerDB, jobtriggerlog);
+		if (pw != null) {
+			pw.print("创建完成请放入脚本");
+		}
+		return HttpResultCode.SUCCESS;
+	}
+	/*
+	Extract Method
+	 */
+	private void extractedDBManage(String sqluds_system, String sqluds_platform, String sqlsourcedDB, String sqlsourcedLog, String jobdb, String joblog, String jobstepdb, String jobsteplog, String jobtriggerDB, String jobtriggerlog) {
 		BaseDao baseDao = DBManager.getInstance().getDao(BaseDao.class);
 		List<String> sqlList = new ArrayList<String>();
 		sqlList.add(sqluds_system);
@@ -67,10 +77,6 @@ public class CreateUdsSysJob implements InterfaceConsoleCommand {
 		sqlList.add(jobtriggerDB);
 		sqlList.add(jobtriggerlog);
 		baseDao.insert(sqlList);
-		if (pw != null) {
-			pw.print("创建完成请放入脚本");
-		}
-		return HttpResultCode.SUCCESS;
 	}
 
 }

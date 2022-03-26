@@ -11,7 +11,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.util.NettyRuntime;
 
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -32,7 +31,7 @@ public class HttpServer {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(HttpServer.class);
 
-	private static HashMap<String, InterfaceHttpWorkeHandler> HTTP_HANDER = new HashMap<String, InterfaceHttpWorkeHandler>();
+	private static HashMap<String, InterfaceHttpWorkHandler> HTTP_HANDER = new HashMap<String, InterfaceHttpWorkHandler>();
 
 	private static final Object KEY = new Object();
 
@@ -68,21 +67,21 @@ public class HttpServer {
 				if (Modifier.isAbstract(modifers) || Modifier.isInterface(modifers)) {
 					return false;
 				}
-				if (InterfaceHttpWorkeHandler.class.isAssignableFrom(clazz)) {
+				if (InterfaceHttpWorkHandler.class.isAssignableFrom(clazz)) {
 					HttpMapProtocol rpcEventProtocol = clazz.getAnnotation(HttpMapProtocol.class);
 					if (rpcEventProtocol == null) {
 						return false;
 					}
 					String path = rpcEventProtocol.value();
 
-					InterfaceHttpWorkeHandler handler = HTTP_HANDER.get(path);
+					InterfaceHttpWorkHandler handler = HTTP_HANDER.get(path);
 
 					if (handler != null) {
 						LOGGER.error("handler is exist please check http path: " + path + " class: " + clazz);
 						return false;
 					}
 					try {
-						handler = (InterfaceHttpWorkeHandler) clazz.newInstance();
+						handler = (InterfaceHttpWorkHandler) clazz.newInstance();
 					} catch (InstantiationException | IllegalAccessException e) {
 						UdsLogger.logEvent(LogEvent.ERROR, e.getMessage());
 					}
@@ -156,8 +155,8 @@ public class HttpServer {
 		}
 	}
 
-	public InterfaceHttpWorkeHandler getHttpMapHandler(String path) {
-		InterfaceHttpWorkeHandler handler = HTTP_HANDER.get(path);
+	public InterfaceHttpWorkHandler getHttpMapHandler(String path) {
+		InterfaceHttpWorkHandler handler = HTTP_HANDER.get(path);
 		return handler;
 	}
 
