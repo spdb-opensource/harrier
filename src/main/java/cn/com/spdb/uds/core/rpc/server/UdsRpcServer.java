@@ -19,8 +19,6 @@ import cn.com.spdb.uds.db.dao.UdsServerDao;
 import cn.com.spdb.uds.log.LogEvent;
 import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.NameThreadFactory;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.NettyRuntime;
 
 public class UdsRpcServer {
 
@@ -85,7 +83,7 @@ public class UdsRpcServer {
 		rpcServer.start(UdsConstant.RPC_SERVER_PORT);
 
 		NameThreadFactory factory = new NameThreadFactory(this.getClass().getSimpleName() + "FIEXD_BUG");
-		factory.newDeamonThread(new FiexdBug()).start();
+		factory.newDeamonThread(new FixedBug()).start();
 	}
 
 	/**
@@ -96,7 +94,10 @@ public class UdsRpcServer {
 	 * @author T-luzl
 	 *
 	 */
-	private class FiexdBug implements Runnable {
+	/*
+	Rename variable
+	 */
+	private class FixedBug implements Runnable {
 
 		@Override
 		public void run() {

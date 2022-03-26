@@ -4,7 +4,6 @@ import java.io.PrintWriter;
 
 import cn.com.spdb.uds.background.http.HttpResultCode;
 import cn.com.spdb.uds.background.socket.InterfaceConsoleCommand;
-import cn.com.spdb.uds.log.UdsLogger;
 
 public class Exit implements InterfaceConsoleCommand {
 

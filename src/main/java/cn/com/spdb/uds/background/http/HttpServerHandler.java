@@ -72,7 +72,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 				});
 
 				String path = decoder.path();
-				InterfaceHttpWorkeHandler handler = HttpServer.getInstance().getHttpMapHandler(path);
+				InterfaceHttpWorkHandler handler = HttpServer.getInstance().getHttpMapHandler(path);
 				if (handler == null) {
 					send(ctx, context, HttpResponseStatus.BAD_REQUEST);
 					return;

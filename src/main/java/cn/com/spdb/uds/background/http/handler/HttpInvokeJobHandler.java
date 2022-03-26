@@ -54,9 +54,11 @@ public class HttpInvokeJobHandler extends AbstractHttpPostBodyWorkHandler {
 					return "多批次作业，批次号>0";
 				}
 			}
-
-			int tmp = baseDao.updateJobPending(udsJobBean.getPlatform(), udsJobBean.getSystem(), job, batch, job_date);
-			if (tmp <= 0) {
+			/*
+			Rename Variable
+			 */
+			int temp = baseDao.updateJobPending(udsJobBean.getPlatform(), udsJobBean.getSystem(), job, batch, job_date);
+			if (temp <= 0) {
 				return "作业执行失败";
 			}
 			StringBuffer buffer = new StringBuffer();

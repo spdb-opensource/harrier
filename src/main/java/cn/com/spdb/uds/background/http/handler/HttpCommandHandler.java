@@ -5,7 +5,6 @@ import io.netty.util.internal.StringUtil;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.alibaba.fastjson.JSON;
 
@@ -76,17 +75,23 @@ public class HttpCommandHandler extends AbstractHttpPostBodyWorkHandler {
 			if (StringUtil.isNullOrEmpty(command)) {
 				return "命令错误";
 			}
-			UdsRpcEvent udsRpcEvent = UdsRpcEvent.buildUdsRpcEvent(serverName, RpcCommand.SERVER_COMMAND);
-			UdsRpcEvent callBackEvent = UdsRpcClientManager.getInstance().sendMessageForUdsRpcEvent(udsRpcClient,
-					udsRpcEvent, command);
-			Integer code = callBackEvent.getAttribute(RpcAttrKey.CODE);
-			String msg = callBackEvent.getAttribute(RpcAttrKey.CMD_MSG);
-			String codeStr = (code == null || code.intValue() != RpcResultCode.SUCCESS) ? HttpResultCode.ERROR
-					: HttpResultCode.SUCCESS;
-			msg = msg == null ? "" : msg;
-			map.put("code", codeStr);
-			map.put("msg", msg);
+			extractedUdsRpcEvent(serverName, command, map, udsRpcClient);
 		}
 		return JSON.toJSONString(map);
+	}
+	/*
+	Extract Method
+	 */
+	private void extractedUdsRpcEvent(String serverName, String command, HashMap<String, String> map, UdsRpcClient udsRpcClient) {
+		UdsRpcEvent udsRpcEvent = UdsRpcEvent.buildUdsRpcEvent(serverName, RpcCommand.SERVER_COMMAND);
+		UdsRpcEvent callBackEvent = UdsRpcClientManager.getInstance().sendMessageForUdsRpcEvent(udsRpcClient,
+				udsRpcEvent, command);
+		Integer code = callBackEvent.getAttribute(RpcAttrKey.CODE);
+		String msg = callBackEvent.getAttribute(RpcAttrKey.CMD_MSG);
+		String codeStr = (code == null || code.intValue() != RpcResultCode.SUCCESS) ? HttpResultCode.ERROR
+				: HttpResultCode.SUCCESS;
+		msg = msg == null ? "" : msg;
+		map.put("code", codeStr);
+		map.put("msg", msg);
 	}
 }

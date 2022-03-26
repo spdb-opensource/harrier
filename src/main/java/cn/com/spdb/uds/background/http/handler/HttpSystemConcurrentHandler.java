@@ -8,18 +8,14 @@ import cn.com.spdb.uds.UdsConstant;
 import cn.com.spdb.uds.background.http.AbstractHttpPostBodyWorkHandler;
 import cn.com.spdb.uds.background.http.HttpMapProtocol;
 import cn.com.spdb.uds.background.http.HttpResultCode;
-import cn.com.spdb.uds.background.socket.command.LoadTagsInMaster;
 import cn.com.spdb.uds.background.socket.command.LoadUdsSystem;
 import cn.com.spdb.uds.core.master.plan.AbstractDispatcherPlan;
-import cn.com.spdb.uds.core.rpc.client.UdsRpcClient;
 import cn.com.spdb.uds.core.rpc.client.UdsRpcClientManager;
 import cn.com.spdb.uds.core.rpc.event.RpcCommand;
 import cn.com.spdb.uds.core.rpc.event.UdsRpcEvent;
 import cn.com.spdb.uds.db.DBManager;
 import cn.com.spdb.uds.db.bean.UdsSystemBean;
 import cn.com.spdb.uds.db.dao.UdsJobControlDao;
-import cn.com.spdb.uds.log.LogEvent;
-import cn.com.spdb.uds.log.UdsLogger;
 import cn.com.spdb.uds.utils.Symbol;
 import io.netty.util.internal.StringUtil;
 
@@ -62,55 +58,15 @@ public class HttpSystemConcurrentHandler extends AbstractHttpPostBodyWorkHandler
 		if (StringUtil.isNullOrEmpty(strategyPro)) {
 			bean.setStrategy_pro("");
 		}
-		switch (strategy) {
-		case 0:
-		case 3: {
-			bean.setStrategy((short) strategy);
-		}
-			break;
-		case 1: {
-			if (strategyPro.contains(Symbol.DOU_HAO) || strategyPro.contains(Symbol.GAN_TAN_HAO)) {
-				String[] names = strategyPro.split(Symbol.DOU_HAO + "|" + Symbol.GAN_TAN_HAO);
-				for (String name : names) {
-					name = name.trim();
-					UdsRpcClient client = UdsRpcClientManager.getInstance().getUdsRpcClient(name);
-					if (client == null) {
-						UdsLogger.logEvent(LogEvent.HTTP_ERROR, "UdsRpcClient IS NULL", strategy, name);
-					}
-				}
-				bean.setStrategy_pro(strategyPro);
-			}
-			bean.setStrategy((short) strategy);
-		}
-			break;
-		case 2: {
-			if (!strategyPro.matches("^[0-9,!]+$")) {
-				UdsLogger.logEvent(LogEvent.HTTP_ERROR, "strategyPro error", strategy, strategyPro);
-				return "存在配置序号不是数字";
-			}
-			if (strategyPro.contains(Symbol.DOU_HAO) || strategyPro.contains(Symbol.GAN_TAN_HAO)) {
-				String[] orderStrs = strategyPro.split(Symbol.DOU_HAO + "|" + Symbol.GAN_TAN_HAO);
-				for (String orderStr : orderStrs) {
-					orderStr = orderStr.trim();
-					short order;
-					try {
-						order = Short.parseShort(orderStr);
-					} catch (NumberFormatException e) {
-						UdsLogger.logEvent(LogEvent.HTTP_ERROR, "orderStr isnot short", strategy, orderStr);
-						return "配置序号不是机器";
-					}
-					UdsRpcClient client = UdsRpcClientManager.getInstance().getUdsRpcClient(order);
-					if (client == null) {
-						UdsLogger.logEvent(LogEvent.HTTP_ERROR, "UdsRpcClient IS NULL", strategy, order);
-					}
-				}
-				bean.setStrategy_pro(strategyPro);
-			}
-			bean.setStrategy((short) strategy);
-		}
-			break;
-		default:
-			return "策略没有配置";
+		/*
+		Extract Class
+		 */
+		StrategyChecker strategyChecker = new StrategyChecker();
+		Object object = strategyChecker.checker(strategy,bean,strategyPro);
+		if(object instanceof String){
+			String message = (String) object;
+		}else if(object instanceof UdsSystemBean){
+			bean = (UdsSystemBean) object;
 		}
 
 		UdsJobControlDao UdsJobControlDao = DBManager.getInstance().getDao(UdsJobControlDao.class);

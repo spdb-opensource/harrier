@@ -13,7 +13,6 @@ import java.util.Map;
 import cn.com.spdb.uds.UdsConstant;
 import cn.com.spdb.uds.background.http.HttpResultCode;
 import cn.com.spdb.uds.background.socket.InterfaceConsoleCommand;
-import cn.com.spdb.uds.core.bean.JobStatus;
 import cn.com.spdb.uds.db.DBManager;
 import cn.com.spdb.uds.db.bean.UdsJobBean;
 import cn.com.spdb.uds.db.dao.UdsJobBaseDao;

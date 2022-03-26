@@ -28,4 +28,9 @@ public class SeeMasterPlatformMap extends AbsstactConsoleCommand {
 
 	}
 
+	public StringBuffer writeLine(String msg, StringBuffer buffer) {
+		buffer.append(msg).append("\r\n");
+		return buffer;
+	}
+
 }

@@ -14,10 +14,10 @@ public abstract class AbsstactConsoleCommand implements InterfaceConsoleCommand 
 		return buffer.toString();
 	}
 
-	public StringBuffer writeLine(String msg, StringBuffer buffer) {
-		buffer.append(msg).append("\r\n");
-		return buffer;
-	}
-
 	public abstract void hanlder(String param, StringBuffer buffer);
+
+    public StringBuffer writeLine(String msg, StringBuffer buffer) {
+        buffer.append(msg).append("\r\n");
+        return buffer;
+    }
 }
