@@ -1,0 +1,237 @@
+/*
+
+#495060 515a6e 1c2438
+mode="horizontal"
+*/
+/* text-align: center; */
+/* background: #03399b; */
+/* background: #172c8f; #f5f6fa*/
+/* background: #5cadff */
+/* color: #000000; */
+/* background: rgb(67, 101, 163); */
+
+.ivu-table td, .ivu-table th {
+    height: 40px;
+}
+.ivu-table th {
+    color: #495060;
+    background: rgb(217, 222, 233);
+    
+}
+.ivu-table {
+	color: #515a6e;
+    font-size: 14px;
+    font-family: "Microsoft YaHei";
+}
+.ivu-form-item {
+    margin-bottom: 20px;
+    font-family: "Microsoft YaHei";
+}
+
+.ivu-breadcrumb {
+    font-size: 16px;
+    font-family: "Microsoft YaHei";
+}
+body {
+    font-size: 14px;
+    font-family: "Microsoft YaHei";
+}
+
+.ivu-form .ivu-form-item-label {
+    text-align: right;
+    vertical-align: middle;
+    float: left;
+    font-size: 14px;
+    color: #515a6e;
+    line-height: 1;
+    padding: 10px 12px 10px 0;
+    box-sizing: border-box;
+    font-family: "Microsoft YaHei";
+}
+
+.ivu-menu {
+    font-size: 16px;
+    font-family: "Microsoft YaHei";
+}
+
+
+
+.ivu-menu-submenu-title{
+    /* color: -webkit-gradient(linear, 0% 0%, 100% 0%, from(#0F6EF0), to(#0d4a99)); */
+    margin: 0;
+}
+.ivu-menu-horizontal {
+    height: 36px;
+    line-height: 36px;
+}
+.ivu-input,.ivu-select-input{
+    font-size: 14px;
+    font-family: "Microsoft YaHei";
+}
+.ivu-select-item{
+    font-size: 14px!important;
+    font-family: "Microsoft YaHei";
+}
+.ivu-checkbox-wrapper {
+    font-size: 14px;
+    font-family: "Microsoft YaHei";
+}
+.ivu-layout {
+    min-height: 50px;
+}
+.ivu-menu-horizontal .ivu-menu-submenu .ivu-select-dropdown {
+    max-height: 500px;
+    z-index: 700;
+}
+.ivu-select-dropdown {
+    max-height: 300px;
+    z-index: 800;
+}
+
+.ivu-dropdown-transfer {
+    z-index: 1000;
+}
+
+/* background: #03399b; 
+    background-image: linear-gradient(to right, #0850be 0%, #e60000 100%);
+    background-image: linear-gradient(to right, #0850be 0%, #97cff5 100%);
+    background-image: linear-gradient(135deg, #0850be 0%, #3498db 100%);
+    display: flex;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+*/
+.ivu-menu-primary {
+    /* background-image: linear-gradient(150deg, #03399b 0%,rgba(230,0,0,0.5) 50%, #3498db 100%); */
+    /* background-color: #03399b; */
+    background: transparent;
+    display: flex;
+}
+
+.logoTitle_m1 {
+    color: #fff;
+    white-space: nowrap;
+    text-align: center;
+    line-height: 28px;
+    margin: 0 0px;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+}
+.logoTitle_m2 {
+    color: #fff;
+    white-space: nowrap;
+    text-align: center;
+    line-height: 28px;
+    margin: 0 0px;
+    font-size: 16px;
+    font-family: "Microsoft YaHei";
+}
+.ivu-tree ul {
+    font-size: 14px;
+}
+.ivu-dropdown-item {
+    font-size: 14px!important;
+    padding: 5px 12px;
+    font-family: "Microsoft YaHei";
+}
+/*  */
+table .ivu-btn:focus {
+    box-shadow: 0 0 0 0px rgba(45,140,240,.2);
+}
+
+.ivu-date-picker {
+    width: 100%;
+}
+.ivu-form-item-content {
+    font-size: 14px;
+    font-family: "Microsoft YaHei";
+}
+.ivu-tabs {
+    overflow-x: hidden;
+    min-height: 500px;
+}
+
+.ivu-layout-header {
+    background-image: linear-gradient(150deg, #03399b 0%,rgba(230,0,0,0.5) 50%, #3498db 100%);
+    background-color: #03399b;
+    height: 60px; /*布局 头高度*/
+    display: flex;
+}
+.ivu-input-number-input {
+    font-size: 14px;
+    font-family: "Microsoft YaHei";
+}
+body {
+    font-family: Microsoft YaHei,\\5FAE\8F6F\96C5\9ED1,Arial,sans-serif;
+}
+/*mode="horizontal" */
+/*mode="vertical" */
+
+
+/*mode="vertical" */
+/* common*/
+/* custom row column cell class */
+
+
+
+::-webkit-scrollbar 
+{
+    width: 8px;
+    height: 8px;
+    background-color: #fff;
+}
+
+
+/* 滑轨*/
+::-webkit-scrollbar-track 
+{
+    -webkit-box-shadow:inset 0 0 6px rgba(252, 252, 252, 0.3);
+    border-radius: 3px;
+    background-color: #fff;
+}
+/*滑块*/
+::-webkit-scrollbar-thumb 
+{
+    -webkit-box-shadow:inset 0 0 6px rgba(250, 250, 250, 0.116);
+    border-radius: 3px;
+    background-color: rgba(148, 148, 149, 0.5);
+}
+
+.m-warn-con {
+    font-size: 16px;
+    line-height:24px;
+    color: #ed3f14;
+}
+.ivu-poptip-body-content-inner{
+    overflow: auto;
+    width: 300px;
+    word-break: break-word;
+}
+.ivu-tooltip-inner {
+    max-width: 300px;
+    width: 300px;
+    min-height: 34px;
+    padding: 8px 12px;
+    color: #fff;
+    text-align: left;
+    text-decoration: none;
+    background-color: rgba(70,76,91,1);
+    border-radius: 4px;
+    box-shadow: 0 1px 6px rgba(0,0,0,.2);
+    white-space: nowrap;
+    word-break: break-word;
+    
+}
+.fade-enter-active {
+    transition: opacity .5s;
+}
+.fade-enter {
+    opacity: 0;
+}
+.fade-leave-active {
+    opacity: 0;
+    transition: opacity .5s;
+}
+.fade-leave {
+    opacity: 1;
+}
+/* common*/
