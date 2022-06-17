@@ -20,7 +20,7 @@
 		<druid.version>1.1.10</druid.version>
 		<mybatis.version>3.5.7</mybatis.version>
 		<mybatis-spring.version>2.0.6</mybatis-spring.version>
-		<fastjson.version>1.2.76</fastjson.version>
+		<fastjson.version>1.2.83</fastjson.version>
 		<slf4j-api.version>1.7.32</slf4j-api.version>
 		<netty.version>4.1.66.Final</netty.version>
 		<baidu.rpc.version>3.5.19</baidu.rpc.version>
