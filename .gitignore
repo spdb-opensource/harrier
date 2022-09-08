@@ -1,2 +1,6 @@
+/harrier-api/logs
+/harrier-server/logs
+logs
+static
+dist
 /target/
-/logs/

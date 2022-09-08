@@ -1,0 +1,158 @@
+//公用的--具体的可以在里面单独声明
+@charset "utf-8";
+@margin: auto;
+@width: 1260px;
+@height: 96px;
+@position: relative;
+@color: #03346e;
+@fs: 16px;
+@fw: bold;
+@pb: 20px;
+@top: 0px;
+@left: 0px;
+@right: 0px;
+@bottom: 0px;
+@display: block;
+/*logo*/
+#login-header {
+    margin: @margin;
+    width: 100%;
+    height: 100vh;
+    // background: @color;
+}
+
+/*bg展示*/
+#login-main {
+    margin: @margin;
+    position: @position;
+    top: @top+96;
+    left: @left+0;
+    width: 100%;
+    // background: @color;
+}
+
+.jgx {
+    // color: @color;
+    color: #376eff;
+    text-align: center;
+    // font-size: @fs;
+    // font-size: 25px;
+    font-size: 3.2vmin;
+    font-weight: 500;
+    padding-bottom: @pb;
+    span {
+        @width: 0px;
+        @height: 0px;
+        width: @width+326;
+        height: @height+2;
+        display: @display;
+        position: @position;
+        top: @top+2;
+        right: @right+8;
+    }
+}
+
+.login {
+    @top: 0px;
+    @right: 0px;
+    @position: absolute;
+    @width: 0;
+    bottom: 10px;
+    top: @top+80;
+    margin: 0 auto;
+    width: 55%;
+    // height:38vh;
+}
+.sys-bar-logo {
+    position: absolute;
+    top: 3px;
+    z-index: 999;
+    left: 0px;
+    height: 60px;
+    margin-left: 20px;
+    background-repeat: no-repeat;
+}
+.sys-bar-logo-row {
+    height: 62px;
+}
+.sys-bar-logoline {
+    width: 10px;
+    position: absolute;
+    top: 3px;
+    left: 180px;
+    z-index: 999;
+    height: 60px;
+    background-repeat: no-repeat;
+}
+.sys-bar-title {
+    color: #fff;
+    width: 400px;
+    position: absolute;
+    top: 3px;
+    left: 200px;
+    z-index: 999;
+    height: 60px;
+    text-align: left;
+    line-height: 54px;
+    margin: 0 0px;
+    font-size: 24px;
+    letter-spacing: 0.1em;
+
+    background-repeat: no-repeat;
+}
+.note {
+    background: @color;
+    // background-image: linear-gradient(150deg, #03399b 0%,rgba(230,0,0,0.3) 50%, #3498db 100%);
+    background-image:url(~@/assets/images/login_bg01.jpg);
+    background-repeat: no-repeat; // 不重复平铺
+    background-size: cover;
+    -webkit-background-size: cover;
+    // -o-background-size: cover; 
+    background-position: center 0;
+}
+.sys-bar-outline {
+    border-bottom: 1px solid #225091;
+    position: absolute;
+    top: 60px;
+    width: 100%;
+    z-index: 998;
+}
+.login_old{
+    @top: 0px;
+    @right: 0px;
+    @position: absolute;
+    @width: 0;
+    bottom: 10px;
+    top: @top+80;
+    margin: 0 auto;
+    width: 55%;
+    &-con{
+        position: absolute;
+        right: 160px;
+        top: 50%;
+        transform: translateY(-60%);
+        width: 300px;
+        &-header{
+            font-size: 16px;
+            font-weight: 300;
+            text-align: center;
+            padding: 30px 0;
+        }
+        .form-con{
+            padding: 10px 0 0;
+        }
+        .login-tip{
+            font-size: 10px;
+            text-align: center;
+            color: #c3c3c3;
+        }
+    }
+}
+.registerForm {
+    margin-top: 50%;
+    margin-left: 18%;
+    height: 260px;
+    width: 350px;
+    background: #fff;
+    border-radius: 4px;
+}
