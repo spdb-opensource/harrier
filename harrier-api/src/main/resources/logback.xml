@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!-- Logback configuration. See http://logback.qos.ch/manual/index.html -->
+
+<configuration scan="true" scanPeriod="120 seconds"> <!--debug="true" -->
+	<property name="logs.root" value="logs" />
+	
+	<appender name="STDOUT"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>
+			%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+			</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<!-- api server logback config start -->
+	<appender name="MONITORLOGFILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.root}/monitor/harrier-monitor.log</file>
+<!-- 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter"> -->
+		<filter class="cn.spdb.harrier.common.log.MonitorLogFilter">
+		</filter>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${logs.root}/monitor/harrier-monitor.%d{yyyy-MM-dd_HH}.%i.log
+			</fileNamePattern>
+			<maxHistory>168</maxHistory>
+			<maxFileSize>64MB</maxFileSize>
+		</rollingPolicy>
+		<encoder>
+			<pattern>
+				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+			</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+	
+	<appender name="APPLOGFILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<filter class="cn.spdb.harrier.common.log.ApplicationLogFilter" />
+		<file>${logs.root}/app.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${logs.root}/app.%d{yyyy-MM-dd}.%i.log
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+			<maxFileSize>100MB</maxFileSize>
+			<!-- <totalSizeCap>30GB</totalSizeCap> -->
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+		</rollingPolicy>
+		<encoder>
+			<pattern>
+				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+			</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+
+	<root level="INFO">
+		<appender-ref ref="APPLOGFILE" />
+		<appender-ref ref="MONITORLOGFILE" />
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

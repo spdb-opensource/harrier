@@ -1,0 +1,111 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>cn.spdb.harrier</groupId>
+		<artifactId>harrier</artifactId>
+		<version>3.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>harrier-standalone-server</artifactId>
+
+	<dependencies>
+		<dependency>
+			<groupId>cn.spdb.harrier</groupId>
+			<artifactId>harrier-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>cn.spdb.harrier</groupId>
+			<artifactId>harrier-server</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>cn.spdb.harrier</groupId>
+			<artifactId>harrier-alarm</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<!-- 生成的jar中，不要包含pom.xml和pom.properties这两个文件 -->
+						<addMavenDescriptor>false</addMavenDescriptor>
+						<manifest>
+							<!-- 是否要把第三方jar加入到类构建路径 -->
+							<addClasspath>true</addClasspath>
+							<!-- 外部依赖jar包的最终位置 -->
+							<classpathPrefix>./lib/</classpathPrefix>
+							<!-- 指定配置文件目录，这样jar运行时会去找到同目录下的resources文件夹下查找 -->
+							<!-- 项目启动类 -->
+							<mainClass>cn.spdb.harrier.standalone.StandaloneServer
+							</mainClass>
+						</manifest>
+						<manifestEntries>
+							<Class-Path>./conf/</Class-Path>
+						</manifestEntries>
+					</archive>
+					<outputDirectory>${project.build.directory}</outputDirectory>
+					<!-- 打包时忽略的文件(也就是不打进jar包里的文件) -->
+					<excludes>
+						<exclude>*.yml</exclude>
+						<exclude>*.xml</exclude>
+						<exclude>*.properties</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>${maven-resource-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/conf
+							</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/main/resources</directory>
+									<includes>
+										<include>**/*.*</include>
+									</includes>
+								</resource>
+							</resources>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib
+							</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}</directory>
+									<includes>
+										<include>*.jar</include>
+									</includes>
+								</resource>
+							</resources>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

@@ -1,0 +1,433 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harrier-alarm
+  labels:
+    app: harrier-alarm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: harrier-alarm
+  template:
+    metadata:
+      name: harrier-alarm
+      labels:
+        app: harrier-alarm
+    spec:
+      volumes:
+        - name: harrier-config
+          configMap:
+            name: harrier-config
+            items:
+              - key: harrier.application.properties
+                path: harrier.application.properties
+              - key: harrier.datasource.properties
+                path: harrier.datasource.properties
+              - key: harrier.logback.xml
+                path: harrier.logback.xml
+      containers:
+      - name: harrier
+        image: ip:port/harrier:3.0
+        imagePullPolicy: Always
+        env:
+          - name: HARRIER_APP
+            value: alarm-server       
+        livenessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 200
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 2
+          successThreshold: 1
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 200
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 2
+          successThreshold: 1
+        ports:
+          - name: http
+            containerPort: 12345
+          - name: alarm
+            containerPort: 9373
+        volumeMounts:
+          - name: harrier-config
+            mountPath: /harrier/conf/application.properties
+            subPath: harrier.application.properties
+          - name: harrier-config
+            mountPath: /harrier/conf/datasource.properties
+            subPath: harrier.datasource.properties
+          - name: harrier-config
+            mountPath: /harrier/conf/logback.xml
+            subPath: harrier.logback.xml
+#        resources:
+#          requests:
+#            cpu: 200m
+#            memory: 1024Mi
+#          limits:
+#            cpu: 4000m
+#            memory: 4096Mi            
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harrier-master
+  labels:
+    app: harrier-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: harrier-master
+  template:
+    metadata:
+      name: harrier-master
+      labels:
+        app: harrier-master
+    spec:
+      volumes:
+        - name: harrier-config
+          configMap:
+            name: harrier-config
+            items:
+              - key: harrier.application.properties
+                path: harrier.application.properties
+              - key: harrier.datasource.properties
+                path: harrier.datasource.properties
+              - key: harrier.logback.xml
+                path: harrier.logback.xml
+      containers:
+      - name: harrier
+        image: ip:port/harrier:3.0
+        imagePullPolicy: Always
+        env:
+          - name: HARRIER_APP
+            value: master-server       
+        livenessProbe:
+          tcpSocket:
+            port: master
+          initialDelaySeconds: 200
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 2
+          successThreshold: 1
+        readinessProbe:
+          tcpSocket:
+            port: master
+          initialDelaySeconds: 200
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 2
+          successThreshold: 1
+        ports:
+          - name: master
+            containerPort: 9383
+        volumeMounts:
+          - name: harrier-config
+            mountPath: /harrier/conf/application.properties
+            subPath: harrier.application.properties
+          - name: harrier-config
+            mountPath: /harrier/conf/datasource.properties
+            subPath: harrier.datasource.properties
+          - name: harrier-config
+            mountPath: /harrier/conf/logback.xml
+            subPath: harrier.logback.xml
+#        resources:
+#          requests:
+#            cpu: 200m
+#            memory: 1024Mi
+#          limits:
+#            cpu: 4000m
+#            memory: 4096Mi      
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harrier-worker
+  labels:
+    app: harrier-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: harrier-worker
+  template:
+    metadata:
+      name: harrier-worker
+      labels:
+        app: harrier-worker
+    spec:
+      volumes:
+        - name: harrier-config
+          configMap:
+            name: harrier-config
+            items:
+              - key: harrier.application.properties
+                path: harrier.application.properties
+              - key: harrier.datasource.properties
+                path: harrier.datasource.properties
+              - key: harrier.logback.xml
+                path: harrier.logback.xml
+      containers:
+      - name: harrier
+        image: ip:port/harrier:3.0
+        imagePullPolicy: Always
+        env:
+          - name: HARRIER_APP
+            value: worker-server       
+        livenessProbe:
+          tcpSocket:
+            port: worker
+          initialDelaySeconds: 200
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 2
+          successThreshold: 1
+        readinessProbe:
+          tcpSocket:
+            port: worker
+          initialDelaySeconds: 200
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 2
+          successThreshold: 1
+        ports:
+          - name: worker
+            containerPort: 9393
+        volumeMounts:
+          - name: harrier-config
+            mountPath: /harrier/conf/application.properties
+            subPath: harrier.application.properties
+          - name: harrier-config
+            mountPath: /harrier/conf/datasource.properties
+            subPath: harrier.datasource.properties
+          - name: harrier-config
+            mountPath: /harrier/conf/logback.xml
+            subPath: harrier.logback.xml
+#        resources:
+#          requests:
+#            cpu: 200m
+#            memory: 1024Mi
+#          limits:
+#            cpu: 4000m
+#            memory: 4096Mi          
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harrier-config
+data:
+  harrier.datasource.properties: |
+    spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+    spring.datasource.url=
+    spring.datasource.username=
+    spring.datasource.password=
+    
+  harrier.application.properties: |
+    # server port
+    server.port=12345
+    # session config
+    server.servlet.session.timeout=7200
+    # servlet config
+    server.servlet.context-path=/harrier/
+    # time zone
+    spring.jackson.time-zone=GMT+8
+    # file size limit for upload
+    spring.servlet.multipart.max-file-size=1024MB
+    spring.servlet.multipart.max-request-size=1024MB
+    # enable response compression
+    server.compression.enabled=true
+    server.compression.mime-types=text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/xml
+    # max http post size
+    server.jetty.max-http-form-post-size=5000000
+    # messages encoding
+    spring.messages.encoding=UTF-8
+    # Authentication types (supported types: PASSWORD)
+    security.authentication.type=PASSWORD
+    
+    harrier.logs.step.prex=/logs/step/
+    
+    alarm.server.name=
+    alarm.role.name=harrier
+    alarm.role.group=k8s
+    alarm.listen.port=9373
+    
+    master.server.name=
+    master.role.name=harrier
+    master.role.group=k8s
+    master.listen.port=9383
+    
+    worker.server.name=
+    worker.role.name=harrier
+    worker.role.group=k8s
+    worker.listen.port=9393
+    
+    aws.s3.accessKey=
+    aws.s3.secretKey=
+    aws.s3.bucket=
+    aws.s3.enndpoint=
+    
+    mail.smtp.host=
+    mail.smtp.port=25
+    mail.user=
+    mail.passwd=
+    mail.sender=
+  harrier.logback.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration scan="true" scanPeriod="120 seconds">
+    	<property name="logs.root" value="logs" />
+        
+    	<appender name="STDOUT"
+    		class="ch.qos.logback.core.ConsoleAppender">
+    		<encoder>
+    			<pattern>
+    				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+    			</pattern>
+    			<charset>UTF-8</charset>
+    		</encoder>
+    	</appender>
+        
+    	<appender name="APPLOGFILE"
+    		class="ch.qos.logback.core.rolling.RollingFileAppender">
+    		<filter class="cn.spdb.harrier.common.log.ApplicationLogFilter" />
+    		<file>${logs.root}/app.log</file>
+    		<rollingPolicy
+    			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+    			<fileNamePattern>${logs.root}/app.%d{yyyy-MM-dd}.%i.log
+    			</fileNamePattern>
+    			<maxHistory>30</maxHistory>
+    			<maxFileSize>100MB</maxFileSize>
+    			<!-- <totalSizeCap>30GB</totalSizeCap> -->
+    			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+    		</rollingPolicy>
+    		<encoder>
+    			<pattern>
+    				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+    			</pattern>
+    			<charset>UTF-8</charset>
+    		</encoder>
+    	</appender>
+        
+    	<appender name="MASTERLOGFILE"
+    		class="ch.qos.logback.core.rolling.RollingFileAppender">
+    		<file>${logs.root}/master/harrier-master.log</file>
+    		<filter class="cn.spdb.harrier.common.log.MasterLogFilter">
+    			<level>INFO</level>
+    		</filter>
+    		<rollingPolicy
+    			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+    			<fileNamePattern>${logs.root}/master/harrier-master.%d{yyyy-MM-dd_HH}.%i.log
+    			</fileNamePattern>
+    			<maxHistory>168</maxHistory>
+    			<maxFileSize>200MB</maxFileSize>
+    		</rollingPolicy>
+    		<encoder>
+    			<pattern>
+    				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+    			</pattern>
+    			<charset>UTF-8</charset>
+    		</encoder>
+    	</appender>
+    
+    	<appender name="WORKERLOGFILE"
+    		class="ch.qos.logback.core.rolling.RollingFileAppender">
+    		<filter class="cn.spdb.harrier.common.log.WorkerLogFilter" />
+    		<file>${logs.root}/worker/harrier-worker.log</file>
+    		<rollingPolicy
+    			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+    			<fileNamePattern>${logs.root}/worker/harrier-worker.%d{yyyy-MM-dd}.%i.log
+    			</fileNamePattern>
+    			<maxHistory>30</maxHistory>
+    			<maxFileSize>100MB</maxFileSize>
+    			<!-- <totalSizeCap>30GB</totalSizeCap> -->
+    			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+    		</rollingPolicy>
+    		<encoder>
+    			<pattern>
+    				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+    			</pattern>
+    			<charset>UTF-8</charset>
+    		</encoder>
+    	</appender>
+    
+    
+    
+    	<appender name="TASKLOGFILE"
+    		class="ch.qos.logback.classic.sift.SiftingAppender">
+    		<filter class="cn.spdb.harrier.common.log.TaskLogFilter" />
+    		<Discriminator
+    			class="cn.spdb.harrier.common.log.TaskLogDiscriminator">
+    			<key>StepPath</key>
+    		</Discriminator>
+    		<sift>
+    			<appender name="FILE-TASK"
+    				class="ch.qos.logback.core.FileAppender">
+    				<file>${StepPath}</file>
+    				<encoder>
+    					<pattern>
+    						[%level] %date{yyyy-MM-dd HH:mm:ss.SSS}:[%line] - %message%n
+    					</pattern>
+    					<charset>UTF-8</charset>
+    				</encoder>
+    				<append>true</append>
+    			</appender>
+    		</sift>
+    	</appender>
+    
+    	<!-- api server logback config start -->
+    	<appender name="MONITORLOGFILE"
+    		class="ch.qos.logback.core.rolling.RollingFileAppender">
+    		<file>${logs.root}/monitor/harrier-monitor.log</file>
+    		<filter class="cn.spdb.harrier.common.log.MonitorLogFilter">
+    		</filter>
+    		<rollingPolicy
+    			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+    			<fileNamePattern>${log.root}/monitor/harrier-monitor.%d{yyyy-MM-dd_HH}.%i.log
+    			</fileNamePattern>
+    			<maxHistory>168</maxHistory>
+    			<maxFileSize>64MB</maxFileSize>
+    		</rollingPolicy>
+    		<encoder>
+    			<pattern>
+    				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+    			</pattern>
+    			<charset>UTF-8</charset>
+    		</encoder>
+    	</appender>
+    
+    	<appender name="ALARMLOGFILE"
+    		class="ch.qos.logback.core.rolling.RollingFileAppender">
+    		<file>${logs.root}/alarm/harrier-alarm.log</file>
+    		<filter class="cn.spdb.harrier.common.log.AlarmLogFilter">
+    			<level>INFO</level>
+    		</filter>
+    		<rollingPolicy
+    			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+    			<fileNamePattern>${logs.root}/alarm/harrier-alarm.%d{yyyy-MM-dd_HH}.%i.log
+    			</fileNamePattern>
+    			<maxHistory>168</maxHistory>
+    			<maxFileSize>200MB</maxFileSize>
+    		</rollingPolicy>
+    		<encoder>
+    			<pattern>
+    				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+    			</pattern>
+    			<charset>UTF-8</charset>
+    		</encoder>
+    	</appender>
+    
+    	<root level="INFO">
+    		<appender-ref ref="APPLOGFILE" />
+    		<appender-ref ref="MASTERLOGFILE" />
+    		<appender-ref ref="WORKERLOGFILE" />
+    		<appender-ref ref="TASKLOGFILE" />
+    		<appender-ref ref="MONITORLOGFILE" />
+    		<appender-ref ref="ALARMLOGFILE" />
+    		<appender-ref ref="STDOUT" />
+    	</root>
+    </configuration>    

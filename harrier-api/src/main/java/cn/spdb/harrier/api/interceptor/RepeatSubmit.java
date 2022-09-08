@@ -1,0 +1,33 @@
+package cn.spdb.harrier.api.interceptor;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import cn.spdb.harrier.api.enums.Status;
+
+/**
+ * 自定义注解防止表单重复提交
+ * 
+ * @author ruoyi
+ *
+ */
+@Inherited
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface RepeatSubmit
+{
+    /**
+     * 间隔时间(ms)，小于此时间视为重复提交
+     */
+    public int interval() default 5000;
+
+    /**
+     * 提示消息
+     */
+    public Status message() default Status.SUBMIT_AGAIN;
+}

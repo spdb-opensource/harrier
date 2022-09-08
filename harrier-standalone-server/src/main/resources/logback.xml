@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="120 seconds"> <!--debug="true" -->
+
+	<property name="logs.root" value="logs" />
+
+	<appender name="STDOUT"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>
+				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+			</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<appender name="APPLOGFILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<filter class="cn.spdb.harrier.common.log.ApplicationLogFilter" />
+		<file>${logs.root}/app.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${logs.root}/app.%d{yyyy-MM-dd}.%i.log
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+			<maxFileSize>100MB</maxFileSize>
+			<!-- <totalSizeCap>30GB</totalSizeCap> -->
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+		</rollingPolicy>
+		<encoder>
+			<pattern>
+				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+			</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+
+
+	<appender name="MASTERLOGFILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.root}/master/harrier-master.log</file>
+		<filter class="cn.spdb.harrier.common.log.MasterLogFilter">
+			<level>INFO</level>
+		</filter>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${logs.root}/master/harrier-master.%d{yyyy-MM-dd_HH}.%i.log
+			</fileNamePattern>
+			<maxHistory>168</maxHistory>
+			<maxFileSize>200MB</maxFileSize>
+		</rollingPolicy>
+		<encoder>
+			<pattern>
+				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+			</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<appender name="WORKERLOGFILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<filter class="cn.spdb.harrier.common.log.WorkerLogFilter" />
+		<file>${logs.root}/worker/harrier-worker.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${logs.root}/worker/harrier-worker.%d{yyyy-MM-dd}.%i.log
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+			<maxFileSize>100MB</maxFileSize>
+			<!-- <totalSizeCap>30GB</totalSizeCap> -->
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+		</rollingPolicy>
+		<encoder>
+			<pattern>
+				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+			</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+
+
+	<appender name="TASKLOGFILE"
+		class="ch.qos.logback.classic.sift.SiftingAppender">
+		<filter class="cn.spdb.harrier.common.log.TaskLogFilter" />
+		<Discriminator
+			class="cn.spdb.harrier.common.log.TaskLogDiscriminator">
+			<key>StepPath</key>
+		</Discriminator>
+		<sift>
+			<appender name="FILE-TASK"
+				class="ch.qos.logback.core.FileAppender">
+				<file>${StepPath}</file>
+				<encoder>
+					<pattern>
+						[%level] %date{yyyy-MM-dd HH:mm:ss.SSS}:[%line] - %message%n
+					</pattern>
+					<charset>UTF-8</charset>
+				</encoder>
+				<append>true</append>
+			</appender>
+		</sift>
+	</appender>
+
+
+
+	<!-- api server logback config start -->
+	<appender name="MONITORLOGFILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.root}/monitor/harrier-monitor.log</file>
+		<filter class="cn.spdb.harrier.common.log.MonitorLogFilter">
+		</filter>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${log.root}/monitor/harrier-monitor.%d{yyyy-MM-dd_HH}.%i.log
+			</fileNamePattern>
+			<maxHistory>168</maxHistory>
+			<maxFileSize>64MB</maxFileSize>
+		</rollingPolicy>
+		<encoder>
+			<pattern>
+				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+			</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<appender name="ALARMLOGFILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.root}/alarm/harrier-alarm.log</file>
+		<filter class="cn.spdb.harrier.common.log.AlarmLogFilter">
+			<level>INFO</level>
+		</filter>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${logs.root}/alarm/harrier-alarm.%d{yyyy-MM-dd_HH}.%i.log
+			</fileNamePattern>
+			<maxHistory>168</maxHistory>
+			<maxFileSize>200MB</maxFileSize>
+		</rollingPolicy>
+		<encoder>
+			<pattern>
+				%date{yyyy-MM-dd HH:mm:ss.SSS} [%level] %logger{96}:[%line] - %message%n
+			</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<root level="INFO">
+		<appender-ref ref="APPLOGFILE" />
+		<appender-ref ref="MASTERLOGFILE" />
+		<appender-ref ref="WORKERLOGFILE" />
+		<appender-ref ref="TASKLOGFILE" />
+		<appender-ref ref="MONITORLOGFILE" />
+		<appender-ref ref="ALARMLOGFILE" />
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>
