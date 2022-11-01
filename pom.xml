@@ -25,7 +25,7 @@
 		<poi.version>5.2.2</poi.version>
 		<oshi-core.version>3.5.0</oshi-core.version>
 		<jsp-2.1.version>6.1.14</jsp-2.1.version>
-		<commons-io.version>2.4</commons-io.version>
+		<commons-io.version>2.7</commons-io.version>
 		<guava.version>20.0</guava.version>
 		<commons-email.version>1.5</commons-email.version>
 		<commons-collections4.version>4.1</commons-collections4.version>
