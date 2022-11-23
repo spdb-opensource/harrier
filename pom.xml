@@ -57,7 +57,7 @@
 		<aws-java-sdk-s3.version>1.12.261</aws-java-sdk-s3.version>
 		<javax-mail.version>1.6.2</javax-mail.version>
 		<ganymed-ssh2.version>build210</ganymed-ssh2.version>
-		<postgresql.version>42.5.0</postgresql.version>
+		<postgresql.version>42.5.1</postgresql.version>
 	</properties>
 
 
