@@ -1,6 +1,7 @@
 package cn.spdb.harrier.server.master;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -529,8 +530,9 @@ public class MasterManagerService {
 
 	public Boolean sendJobExecutionContext(JobExecutionContext jobContext) {
 		Host host = jobContext.getHost();
-		if (ObjectUtils.isEmpty(host))
+		if (ObjectUtils.isEmpty(host)) {			
 			return false;
+		}
 		return masterRpc.getWorkClient(host).dispathcer(jobContext);
 	}
 
@@ -590,7 +592,7 @@ public class MasterManagerService {
 		jobMapper.updateByPrimaryKeySelective(jobContext.getUdsJob(), ExecutionStatus.DISPATCHER);
 		Optional<UdsJob> optional = jobMapper.selectByPrimaryKey(jobContext.getUdsJob().getId());
 		if (optional.isPresent()
-				&& Math.abs(optional.get().getUpdateTime().getSecond() - LocalDateTime.now().getSecond()) < 3
+				&& Duration.between(optional.get().getUpdateTime(), LocalDateTime.now()).getSeconds() < 30
 				&& optional.get().getServerName().equals(jobContext.getUdsJob().getServerName())) {
 			return true;
 		}
@@ -654,8 +656,19 @@ public class MasterManagerService {
 				if (!checkJobWinds(jobContext.getUdsJobConfig())) {
 					return;
 				}
-				conversionDispatcher(jobContext);
-				addDispatcherDealQueue(jobContext);
+				if (jobContext.getUdsJobConfig().getVirtualEnable()) {
+					jobContext.getUdsJob().setDispatcherTime(LocalDateTime.now());
+					jobContext.getUdsJob().setNumTimes(jobContext.getUdsJob().getNumTimes() + 1);
+					jobContext.getUdsJob().setServerName("");
+					jobContext.getUdsJob().setStartTime(LocalDateTime.now());
+					logger.info("job is virtual conversion success,jog:{}", jobContext);
+					conversionSuccess(jobContext);
+					conversionSuccessAfter(jobContext);
+					insertJobRecord(jobContext);
+				} else {
+					conversionDispatcher(jobContext);
+					addDispatcherDealQueue(jobContext);
+				}
 			}
 		}
 	}
@@ -763,8 +776,19 @@ public class MasterManagerService {
 			if (!checkJobWinds(targetJobContext.getUdsJobConfig())) {
 				continue;
 			}
-			conversionDispatcher(targetJobContext);
-			addDispatcherDealQueue(targetJobContext);
+			if (targetJobContext.getUdsJobConfig().getVirtualEnable()) {
+				targetJobContext.getUdsJob().setDispatcherTime(LocalDateTime.now());
+				targetJobContext.getUdsJob().setNumTimes(jobContext.getUdsJob().getNumTimes() + 1);
+				targetJobContext.getUdsJob().setServerName("");
+				targetJobContext.getUdsJob().setStartTime(LocalDateTime.now());
+				logger.info("job is virtual conversion success,jog:{}", targetJobContext);
+				conversionSuccess(targetJobContext);
+				conversionSuccessAfter(targetJobContext);
+				insertJobRecord(targetJobContext);
+			} else {
+				conversionDispatcher(targetJobContext);
+				addDispatcherDealQueue(targetJobContext);
+			}
 		}
 	}
 

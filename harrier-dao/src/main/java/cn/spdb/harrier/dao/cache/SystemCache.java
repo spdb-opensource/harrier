@@ -53,7 +53,8 @@ public class SystemCache {
 
 	public UdsSystem getUdsSystem(String platform, String system) {
 		ConcurrentHashMap<String, UdsSystem> platfromMap = hashMap.get(platform);
-		if (ObjectUtils.isEmpty(platfromMap)) {
+		UdsSystem udssystem=null;
+		if (ObjectUtils.isEmpty(platfromMap)||ObjectUtils.isEmpty((udssystem=platfromMap.get(system)))) {
 			Optional<UdsSystem> opt = udsSytemMapper.selectUdsSystem(platform, system);
 			if (opt.isPresent()) {
 				addUdsSytem(opt.get());
@@ -62,7 +63,7 @@ public class SystemCache {
 				return null;
 			}
 		}
-		return platfromMap.get(system);
+		return udssystem;
 	}
 
 	public UdsSystem getUdsSystemByUseful(String platform, String system) {

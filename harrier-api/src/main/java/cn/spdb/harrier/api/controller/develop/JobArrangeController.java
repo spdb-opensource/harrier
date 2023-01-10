@@ -11,10 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,6 +53,8 @@ public class JobArrangeController {
 	private IYamlManagerService yamlManagerService;
 	@Autowired
 	private IJobConfigChangeService jobConfigChangeService;
+	@Autowired
+	public Environment env;
 
 	/**
 	 * 分页查询作业编排表记录
@@ -203,7 +203,7 @@ public class JobArrangeController {
 	public void download(String platform, String systems, String job, Integer version, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		// 判断job工程目录是否存在，不存在则创建
-		File uploadFile = new File(JobDeployPath.UPLOAD_SCRIPT_PATH.getValue());
+		File uploadFile = new File(Objects.requireNonNull(env.getProperty("UPLOAD_SCRIPT_PATH")));
 		if (!uploadFile.exists()) {
 			uploadFile.mkdirs();
 		}
@@ -216,7 +216,7 @@ public class JobArrangeController {
 		}
 
 		// path是指欲下载的文件的路径
-		File compressFile = new File(JobDeployPath.COMPRESS_TEMP_PATH.getValue());
+		File compressFile = new File(Objects.requireNonNull(env.getProperty("COMPRESS_TEMP_PATH")));
 		if (!compressFile.exists()) {
 			compressFile.mkdirs();
 		}

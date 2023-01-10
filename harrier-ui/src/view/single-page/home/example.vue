@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import echarts from 'echarts'
+import * as echarts from 'echarts'
 import { on, off } from '@/libs/tools'
 export default {
   name: 'serviceRequests',

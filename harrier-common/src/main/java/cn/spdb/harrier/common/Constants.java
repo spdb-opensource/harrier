@@ -357,6 +357,7 @@ public final class Constants {
 	public static final String CODEFAIL = "codefail";
 	public static final String USERFAIL = "userfail";
 	public static final String PWDFAIL = "pwdfail";
+	public static final String INITIALPASSWORD = "Harrier";
 	
 	public static final String REGISTER_SWITCH = "register_switch";
 	public static final String REGIST_CAPTCHA_SWITCH = "register_captcha_switch";

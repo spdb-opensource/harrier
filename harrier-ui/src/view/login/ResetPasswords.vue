@@ -2,7 +2,7 @@
 <div>
   <Row type="flex" justify="center" align="middle" class="code-row-bg" style="margin-top:5%">
     <Col span="12" >
-      <Card :shadow="false" :padding="40" class="login">
+      <Card :shadow="false" :padding="40" class="login" style="background: rgb(255, 255, 255,0.9);">
         <Form ref="formBean" :model="formBean" :labelWidth="50" :rules="formRule">
           <Row>
             <!-- <p style="height: 32px;font-size:14px;text-align:left;font-weight: bold;">您好{{userName}}：</p> -->
@@ -294,12 +294,7 @@ export default {
       document.cookie = cookieString
     },
     Cancel () {
-      utils.logout(this.$router)
-      // this.handleLogOut().then(() => {
-      //   this.$router.push({
-      //     name: 'login'
-      //   })
-      // })
+      this.$router.push({ name: 'login' })
     }
   },
   mounted () {
@@ -312,3 +307,12 @@ export default {
   }
 }
 </script>
+<style>
+body {
+    background-image:url(~@/assets/images/login_background.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    -webkit-background-size: cover;
+    background-position: center 0;
+}
+</style>

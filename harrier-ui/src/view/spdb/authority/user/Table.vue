@@ -372,144 +372,48 @@ export default {
     },
     active: function () {
       const userIds = Array.from(this.selection, e => e.userId)
-      let params = { userIds: userIds.toString() }
+      let params = { userIds: userIds.toString(), isEnable: true }
       const activeConfig = {
         method: 'POST',
-        url: `/user/${userIds}/active`,
+        url: `/user/${userIds}/updateEnable`,
         data: params
       }
-      let authSystems = 'ROLE_ADMIN' // store.getters.getSystems
-      if (authSystems.indexOf('ROLE_ADMIN') == -1) {
-        if (userIds.length > 1) {
-          this.$Message.warning('请选择单个用户，仅系统管理员支持批量操作')
-        } else {
-          const msconfig = {
-            url: 'resource/metasystem',
-            method: 'GET',
-            params: { userId: userIds[0] }
-          }
-          this.$ajax(msconfig)
-            .then(res => {
-              if (res.data) {
-                for (let i = 0; i < res.data.length; i++) {
-                  if (authSystems.indexOf(res.data[i]) == -1 && res.data[i] != 'nullnull') {
-                    this.$Message.warning('该用户具有其他平台应用的权限，仅系统管理员可以操作该用户')
-                    return
-                  }
-                }
-                let param = authSystems.find(item => { if (item.indexOf('*') > -1) { return item } })
-                activeConfig.data.authps = param
-                this.loadingactive = true
-                this.$ajax(activeConfig)
-                  .then(resp => {
-                    this.loadingactive = false
-                    this.search()
-                  })
-              }
-            })
-        }
-      } else {
-        this.loadingactive = true
-        this.$ajax(activeConfig)
-          .then(resp => {
-            this.loadingactive = false
-            this.search()
-          })
-      }
+      this.loadingactive = true
+      this.$ajax(activeConfig)
+        .then(resp => {
+          this.loadingactive = false
+          this.search()
+        })
     },
     inactive: function () {
       const userIds = Array.from(this.selection, e => e.userId)
-      let params = { userIds: userIds.toString() }
+      let params = { userIds: userIds.toString(), isEnable: false }
       const inactiveConfig = {
         method: 'POST',
-        url: `/user/${userIds}/inactive`,
+        url: `/user/${userIds}/updateEnable`,
         data: params
       }
-      let authSystems = 'ROLE_ADMIN' // store.getters.getSystems
-      if (authSystems.indexOf('ROLE_ADMIN') == -1) {
-        if (userIds.length > 1) {
-          this.$Message.warning('请选择单个用户，仅系统管理员支持批量操作')
-        } else {
-          const msconfig = {
-            url: 'resource/metasystem',
-            method: 'GET',
-            params: { userId: userIds[0] }
-          }
-          this.$ajax(msconfig)
-            .then(res => {
-              if (res.data) {
-                for (let i = 0; i < res.data.length; i++) {
-                  if (authSystems.indexOf(res.data[i]) == -1 && res.data[i] != 'nullnull') {
-                    this.$Message.warning('该用户具有其他平台应用的权限，仅系统管理员可以操作该用户')
-                    return
-                  }
-                }
-                let param = authSystems.find(item => { if (item.indexOf('*') > -1) { return item } })
-                inactiveConfig.data.authps = param
-                this.loadinginactive = true
-                this.$ajax(inactiveConfig)
-                  .then(resp => {
-                    this.loadinginactive = false
-                    this.search()
-                  })
-              }
-            })
-        }
-      } else {
-        this.loadinginactive = true
-        this.$ajax(inactiveConfig)
-          .then(resp => {
-            this.loadinginactive = false
-            this.search()
-          })
-      }
+      this.loadinginactive = true
+      this.$ajax(inactiveConfig)
+        .then(resp => {
+          this.loadinginactive = false
+          this.search()
+        })
     },
     reset: function () {
       const userIds = Array.from(this.selection, e => e.userId)
       let params = { userIds: userIds.toString() }
       const resetConfig = {
         method: 'POST',
-        url: `/user/${userIds}/reset`,
+        url: `/user/resetPwd`,
         data: params
       }
-      let authSystems = 'ROLE_ADMIN' // store.getters.getSystems
-      if (authSystems.indexOf('ROLE_ADMIN') == -1) {
-        if (userIds.length > 1) {
-          this.$Message.warning('请选择单个用户，仅系统管理员支持批量操作')
-        } else {
-          const msconfig = {
-            url: 'resource/metasystem',
-            method: 'GET',
-            params: { userId: userIds[0] }
-          }
-          this.$ajax(msconfig)
-            .then(res => {
-              if (res.data) {
-                for (let i = 0; i < res.data.length; i++) {
-                  if (authSystems.indexOf(res.data[i]) == -1 && res.data[i] != 'nullnull') {
-                    this.$Message.warning('该用户具有其他平台应用的权限，仅系统管理员可以操作该用户')
-                    return
-                  }
-                }
-                let param = authSystems.find(item => { if (item.indexOf('*') > -1) { return item } })
-                resetConfig.data.authps = param
-                this.loadingreset = true
-                this.$ajax(resetConfig)
-                  .then(resp => {
-                    this.loadingreset = false
-                    this.search()
-                  })
-              }
-            })
-        }
-      } else {
-        this.loadingreset = true
-        this.$ajax(resetConfig)
-          .then(resp => {
-            this.loadingreset = false
-            this.search()
-          })
-      }
+      this.loadingreset = true
+      this.$ajax(resetConfig)
+        .then(resp => {
+          this.loadingreset = false
+          this.search()
+        })
     },
     checkAuth (opName, userId) {
       let authSystems = 'ROLE_ADMIN' // store.getters.getSystems

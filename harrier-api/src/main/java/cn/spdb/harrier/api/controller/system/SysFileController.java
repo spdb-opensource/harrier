@@ -45,20 +45,17 @@ public class SysFileController {
 	}
 
 	@RequestMapping(path = "selectFile", method = RequestMethod.GET)
-	public List<FileAtt> selectFile(String uri, String fileName, String order) {
+	public List<FileAtt> selectFile(String uri,String fileName,String order) {
 		return fileDisposeService.selectFile(URI.valueOf(uri), fileName, order);
 	}
 
-	@AccessLogAnnotation(isDbInstall = true, ignoreRequestArgs = { "request", "response" })
+	@AccessLogAnnotation(isDbInstall = true, ignoreRequestArgs = {"request", "response"})
 	@RequestMapping(path = "loadFile", method = RequestMethod.GET)
-	public void loadFile(HttpServletRequest request, HttpServletResponse response, String uri, Long streamId, Long pos,
-			Long size, String filename) {
-
+	public void loadFile(HttpServletRequest request, HttpServletResponse response,String uri, Long streamId, Long pos, Long size, String filename) {
 		streamId = new AtomicLong(1).incrementAndGet();
 		pos = 0L;
 		size = Constants.LOAD_BUFFER_SIZE;
 		FileMessage fileMessage = fileDisposeService.loadFile(URI.valueOf(uri), streamId, pos, size);
-
 		try {
 			response.reset();
 			response.addHeader("Access-Control-Allow-Credentials", "true");
@@ -69,7 +66,6 @@ public class SysFileController {
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();
 		}
-
 		try (OutputStream outputStream4Client = new BufferedOutputStream(response.getOutputStream())) {
 			outputStream4Client.write(fileMessage.getData());
 			outputStream4Client.flush();
@@ -81,8 +77,7 @@ public class SysFileController {
 
 	@AccessLogAnnotation(isDbInstall = true, ignoreRequestArgs = { "files" })
 	@RequestMapping(path = "uploadFile", method = RequestMethod.POST)
-	public FileMessage uploadFile(String uri, String path, Long streamId, Long pos,
-			@RequestParam("file") MultipartFile[] files) {
+	public FileMessage uploadFile(String uri, String path, Long streamId, Long pos, @RequestParam("file") MultipartFile[] files) {
 		streamId = new AtomicLong(1).incrementAndGet();
 		pos = 0L;
 		byte[] data = null;

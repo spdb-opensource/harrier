@@ -57,5 +57,9 @@ public interface ISysUserService {
 	String forgotPwd(Long userId, String userCode, String newPassword, String code);
 	
 	Map<String, Object> captchImage(String uuid);
+	
+	int updateEnable(Long[] userIds, Boolean isEnable);
+	
+	int resetPwd(Long[] userIds);
 
 }

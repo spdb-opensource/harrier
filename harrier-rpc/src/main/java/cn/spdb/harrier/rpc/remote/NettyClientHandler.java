@@ -33,17 +33,19 @@ public class NettyClientHandler extends ChannelDuplexHandler {
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		super.channelRead(ctx, msg);
-		RpcProtocol<?> rpcProtocol = (RpcProtocol<?>) msg;
-		if (rpcProtocol.getProtocolHeader().getEventType() == ProtocolEventType.COMPERESS_ERROR.getType()) {
-			logger.debug(ProtocolEventType.COMPERESS_ERROR.getDescription() + ":"
-					+ ctx.channel().remoteAddress().toString());
-			return;
+		if (msg instanceof RpcProtocol<?>) {			
+			RpcProtocol<Object> rpcProtocol = (RpcProtocol<Object>) msg;
+			if (rpcProtocol.getProtocolHeader().getEventType() == ProtocolEventType.COMPERESS_ERROR.getType()) {
+				logger.debug(ProtocolEventType.COMPERESS_ERROR.getDescription() + ":"
+						+ ctx.channel().remoteAddress().toString());
+				return;
+			}
+			RpcResponse response = (RpcResponse) rpcProtocol.getBody();
+			long reqId = rpcProtocol.getProtocolHeader().getRequestId();
+			RpcRequestCache requestCache = RpcRequestTable.get(reqId);
+			logger.warn("client:"+reqId);
+			ThreadPoolManager.getInstance().addExecute(() -> readHandler(response, requestCache, reqId));
 		}
-		RpcResponse response = (RpcResponse) rpcProtocol.getBody();
-		long reqId = rpcProtocol.getProtocolHeader().getRequestId();
-		RpcRequestCache requestCache = RpcRequestTable.get(reqId);
-		ThreadPoolManager.getInstance().addExecute(() -> readHandler(response, requestCache, reqId));
 	}
 
 	private void readHandler(RpcResponse response, RpcRequestCache requestCache, Long reqId) {

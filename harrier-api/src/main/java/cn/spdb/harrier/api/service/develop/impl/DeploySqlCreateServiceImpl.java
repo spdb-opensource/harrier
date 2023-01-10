@@ -43,7 +43,7 @@ public class DeploySqlCreateServiceImpl implements IDeploySqlCreate{
 					+ jobConfig.getPriority() + "', '" + jobConfig.getCallAgainMaxNum() + "', '" + jobConfig.getCallAgainWaitSec() + "', " + jobConfig.getCheckFrequency()
 					+ ", " + jobConfig.getCheckTimeTrigger() + ", " + jobConfig.getCheckStreamSelf() + ", " + jobConfig.isIgnoreError() + ", '" + jobConfig.getDes() + "');");
 			// uds_job_source
-			if(jobConfig.getStreamType() != null && jobConfig.getStreamType() == (int) JobDeployStatus.STREAM_SIGNAL.getValue()) {
+			if(jobConfig.getStreamType() != null && (jobConfig.getStreamType() == (int) JobDeployStatus.STREAM_SIGNAL.getValue() || jobConfig.getStreamType() == (int) JobDeployStatus.STREAM_HTTP.getValue())) {
 				jobSqlList.add("REPLACE INTO `uds_job_source` (`signals`, `platform`, `systems`, `job`, `enable`) VALUES( '" + jobConfig.getJob() + "', '" + jobConfig.getPlatform()
 				+ "', '" + jobConfig.getSystems() + "', '" + jobConfig.getJob() + "', '" + "1" + "');");			
 			}

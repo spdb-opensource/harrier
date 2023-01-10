@@ -20,7 +20,7 @@ public class ThreadPoolManager {
 
 	private ExecutorService executorService = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors() * 2,
 			Runtime.getRuntime().availableProcessors() * 4, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-			new ArrayBlockingQueue<Runnable>(WORK_QUEUE_SIZE));
+			new ArrayBlockingQueue<Runnable>(WORK_QUEUE_SIZE),new ThreadPoolExecutor.DiscardPolicy());
 
 	public void addExecute(Runnable task) {
 		executorService.submit(task);

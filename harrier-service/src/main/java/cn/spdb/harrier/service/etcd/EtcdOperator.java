@@ -29,6 +29,7 @@ public class EtcdOperator {
 	}
 
 	@Value("${harrier.etcd.endpoints:}")
+
 	private String endpoints;
 
 	

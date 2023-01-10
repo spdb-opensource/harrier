@@ -251,6 +251,27 @@ public interface DyJobArrangeMapper {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2022-01-20T14:40:36.492+08:00", comments="Source Table: dy_job_arrange")
+    default int update(DyJobArrange record) {
+        return update(c ->
+                c.set(platform).equalTo(record::getPlatform)
+                        .set(systems).equalTo(record::getSystems)
+                        .set(job).equalTo(record::getJob)
+                        .set(taskStatus).equalTo(record::getTaskStatus)
+                        .set(processStatus).equalTo(record::getProcessStatus)
+                        .set(syncStatus).equalTo(record::getSyncStatus)
+                        .set(startDate).equalTo(record::getStartDate)
+                        .set(endDate).equalTo(record::getEndDate)
+                        .set(version).equalTo(record::getVersion)
+                        .set(des).equalTo(record::getDes)
+                        .set(deployYaml).equalTo(record::getDeployYaml)
+                        .where(platform, isEqualTo(record::getPlatform))
+                        .and(systems, isEqualTo(record::getSystems))
+                        .and(job,isEqualTo(record::getJob))
+                        .and(version,isEqualTo(record::getVersion))
+        );
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2022-01-20T14:40:36.492+08:00", comments="Source Table: dy_job_arrange")
     default int updateByPrimaryKeySelective(DyJobArrange record) {
         return update(c ->
             c.set(platform).equalToWhenPresent(record::getPlatform)

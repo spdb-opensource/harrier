@@ -10,7 +10,7 @@ import org.apache.commons.lang3.ObjectUtils;
 
 import com.alibaba.fastjson.JSON;
 
-import cn.spdb.harrier.common.dynamicjava.DynamicClassEngine;
+import cn.spdb.harrier.common.dynamicjava.DynamicClassManager;
 import cn.spdb.harrier.common.utils.JSONUtils;
 import cn.spdb.harrier.server.entity.JobStepBean;
 
@@ -33,7 +33,7 @@ public class ClassTask extends AbstractTask {
 				return;
 			}
 			try {
-				clazz = DynamicClassEngine.getInstance().loadFromJavaFile(file);
+				clazz = DynamicClassManager.getInstance().loadFromJavaFile(file);
 				logger.info("class:{}", clazz.toString());
 			} catch (IOException e) {
 				logger.error("task class load error", e);
@@ -45,7 +45,7 @@ public class ClassTask extends AbstractTask {
 				return;
 			}
 			try {
-				clazz = DynamicClassEngine.getInstance().loadClass(file);
+				clazz = DynamicClassManager.getInstance().loadClass(file);
 				logger.info("class:{}", clazz.toString());
 			} catch (IOException e) {
 				logger.error("task class load error", e);

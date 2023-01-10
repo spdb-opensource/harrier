@@ -355,10 +355,11 @@ public interface UdsJobMapper {
 	}
 
 	default int invokeJob(String platform_,String systems_,String job_,LocalDate jobdate_,Integer multibatch_,Byte streamtype_) {
-		return update(c->c.set(UdsJobDynamicSqlSupport.lastStatus).equalTo("PENDING")
+		return update(c->c.set(UdsJobDynamicSqlSupport.lastStatus).equalTo(ExecutionStatus.PENDING.name())
 				.set(UdsJobDynamicSqlSupport.jobDate).equalTo(jobdate_)
 				.set(UdsJobDynamicSqlSupport.multiBatch).equalTo(multibatch_)
 				.set(UdsJobDynamicSqlSupport.streamType).equalTo(streamtype_)
+				.set(UdsJobDynamicSqlSupport.updateTime).equalTo(LocalDateTime.of(1970, 1, 1,0,0))
 				.where(platform, isEqualTo(platform_))
 				.and(systems, isEqualTo(systems_))
 				.and(job, isEqualTo(job_)));

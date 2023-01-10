@@ -1,47 +1,51 @@
 <template>
-  <div id="login-header" class="note">
-    <div>
-    <!-- <div class="sys-bar-logo">
+<div id="login-header" class="note">
+  <div class="sys-bar-logo">
       <Row class="sys-bar-logo-row">
-        <Col span="8" class="sys-bar-logo-row">
-         <img src="../../../static/img/logobg-white.png" />
-        </Col>
-        <!-- <Col offset="4" span="12">
-          <Row>
-            <div class="logoTitle_m1">浦发银行</div>
-            <div class="logoTitle_m2">SPD BANK</div>
-          </Row>
+        <Col offset="4" span="12">
         </Col>
       </Row>
-    </div> -->
-    <!-- <div class="sys-bar-logoline">
-      <img src="../../../static/img/logoline.png" />
-    </div> -->
-    <div class="sys-bar-title">
-      <div>{{ homeTitle }}</div>
     </div>
-      <Row style="height:100%;">
-     <Col span="1">
-        &nbsp;
-      </Col>
-       <Col span="14">
-            <div >
-              <img src="../../../static/img/login_bg_right.png" class="flip-horizontal">
-            </div>
-        </Col>
-      <Col span="9" >
-              <Card icon="log-in" title="欢迎登录" :bordered="false" class="login_old" :style="cardStyle" >
-                <div class="form-con">
-                  <login-form ref="loginForm" @on-success-valid="handleSubmit" :captchaSwitch="captchaSwitch"></login-form>
-                </div>
-                <Button type="text" size="large" style="float:left" @click="register()">注册</Button>
-                <Button type="text" size="large" style="float:right" @click="resetPasswords()">忘记密码</Button>
-              </Card>
-        </Col>
 
-        </Row>
-    </div>
-  </div>
+    <Row style="height:100%;">
+      <Col span="15">
+          &nbsp;
+      </Col>
+      <Col span="9" style="height:100%;opacity: 0.76;background: #FFFFFF;">
+        <div style="text-align:center;padding-top:25%">
+            <img src="../../../static/img/logo_harrier.png" width = "137px" height = "157px"/>
+            <div class="homeTitle">
+              {{ homeTitle }}
+            </div>
+        </div>
+        <Card :bordered="false" :shadow="false" :dis-hover="true" class="login">
+           <div class="form-con">
+              <login-form ref="loginForm" @on-success-valid="handleSubmit" :captchaSwitch="captchaSwitch"></login-form>
+           </div>
+           <div style="margin-top:3%;margin-bottom:10%">
+              <Button type="text" size="small" style="float:left;color: #0B1131;font-size:16px" @click="register()">注册</Button>
+              <Button type="text" size="small" style="float:right;color: #0B1131;font-size:16px" @click="resetPasswords()">忘记密码</Button>
+           </div> 
+              <!-- <Form ref="loginForm" :model="formBean" :rules="formRule">
+                <FormItem>
+                </FormItem>
+                 <FormItem prop="username">
+                    <Input type="text" size="large" v-model="formBean.username" icon="ios-person" placeholder="请输入用户名" ></Input>
+                </FormItem>
+                <FormItem prop="password">
+                  <Input type="password" size="large" v-model="formBean.password" icon="ios-lock" placeholder="请输入密码" >
+                  </Input>
+                </FormItem>
+              </Form>
+              <Button id="loginBtn" class="loginButten" :disabled="isClick" :long="true" @click="submit()" type="primary">{{login}}</Button>
+              <div style="margin-top:3%;margin-bottom:10%">
+                <Button type="text" size="small" style="float:left;color: #0B1131;font-size:16px" @click="register()">注册</Button>
+                <Button type="text" size="small" style="float:right;color: #0B1131;font-size:16px" @click="resetPasswords()">忘记密码</Button>
+              </div> -->
+            </Card>
+      </Col>
+    </Row>
+</div>
 </template>
 
 <script>
@@ -49,17 +53,26 @@ import LoginForm from '_c/login-form'
 import { mapActions } from 'vuex'
 import Main from '@/components/main'
 import utils from '@/common/utils'
+import { localRemove } from '@/libs/util'
+import router, { createRouter } from '@/router'
+import routers from '@/router/routers'
 // import axios from 'axios'
 export default {
   data () {
     return {
-      cardStyle: 'height:280px;margin-top:30%',
-      captchaSwitch: false,
-      homeTitle: 'Harrier',
+      formRule: {
+        username: [{ required: true, message: '请输入用户名！' }],
+        password: [{ required: true, message: '请输入密码！' }]
+      },
       note: {
         backgroundImage: "url('static/img/header.jpg')",
         backgroundRepeat: 'no-repeat'
+        // backgroundSize:"25px auto",
+        // marginTop: "5px",
       },
+      cardStyle: 'height:280px;margin-top:30%',
+      captchaSwitch: false,
+      homeTitle: '大数据中心批量监控系统',
       formBean: {},
       login: '登录',
       userPlatform: new Set(),
@@ -116,6 +129,8 @@ export default {
         }
         this.$store.dispatch('setUserToken', req.data)
         await this.getUser(userName)
+        localRemove('route')
+        router.matcher = createRouter(routers).matcher
         this.$router.push({
           name: this.$config.homeName
         })
@@ -223,5 +238,23 @@ export default {
 }
 .flip-horizontal {
   width: 90%;
+}
+.loginTitle {
+  font-family: FZLTZHUNHJW--GB1-0;
+  font-size: 35px;
+  color: #0B1131;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+.homeTitle {
+  font-family: FZLTCHJW--GB1-0;
+  font-size: 45px;
+  color: #0B1131;
+  letter-spacing: 0;
+  text-align: center;
+  font-weight: 550;
+}
+.loginButten {
+  background-image: linear-gradient(270deg, #6132fe  0%, #3b54f9 100%);
 }
 </style>

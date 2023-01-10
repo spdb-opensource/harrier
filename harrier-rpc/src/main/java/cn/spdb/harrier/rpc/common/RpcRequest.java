@@ -14,10 +14,6 @@ public class RpcRequest {
 	private Class<?>[] parameterTypes;
 	private Object[] parameters;
 
-//	private Byte eventType;
-//
-//	private Boolean ack;
-
 	public String getClassName() {
 		return className;
 	}
@@ -53,22 +49,6 @@ public class RpcRequest {
 	public String getHandlerMethName() {
 		return className + "." + methodName;
 	}
-
-//	public Byte getEventType() {
-//		return eventType;
-//	}
-//
-//	public void setEventType(Byte eventType) {
-//		this.eventType = eventType;
-//	}
-//
-//	public Boolean getAck() {
-//		return ack;
-//	}
-//
-//	public void setAck(Boolean ack) {
-//		this.ack = ack;
-//	}
 
 	public static RpcProtocol<RpcRequest> buildProtocol(RpcRequest request) {
 		return buildProtocol(request, CompressEnum.NO.getType());

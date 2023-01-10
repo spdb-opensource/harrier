@@ -670,7 +670,7 @@
 </template>
 
 <script>
-// import echarts from "echarts";
+// import * as echarts from "echarts";
 import utils from '@/common/utils'
 import store from '@/store/index'
 // const platforms = store.getters.getPlatforms
@@ -1521,7 +1521,6 @@ export default {
       this.$ajax(config)
         .then(resp => {
           if (resp.data && resp.data.length > 0) {
-            
             this.cuInfoFormBean = resp.data[0]
             console.log(this.cuInfoFormBean.sendParams)
             let oldSendType = JSON.parse(this.cuInfoFormBean.sendParams)

@@ -376,20 +376,25 @@
               <Col span="16">
                 <FormItem label="请选择协议:" >
                     <RadioGroup v-model='radioData' @on-change="checkRadio">
+                      <Radio label='local'>本地存储</Radio>
+                      <Radio label='nas'>本地共享存储</Radio>
                       <Radio label='aws'>对象存储</Radio>
-                      <Radio label='scp'>rpc</Radio>
-                      <Radio label='local'>本地</Radio>
+                      <Radio label='rpc'>rpc</Radio>
                     </RadioGroup>
                 </FormItem>
               </Col>
             </Row>
             <Row>
               <Col span="16">
+                <FormItem label="脚本部署路径:" style="cursor:pointer;" >
+                  <Input style="width:400px;" v-model='filePath' ></Input>
+                </FormItem>
+              </Col>
+              <Col span="16">
                 <FormItem label="导入文件名:" style="cursor:pointer;" >
-                  <Upload v-if="isShow" ref="importExcel" name="files" :before-upload="handleUpload" action="" >
+                  <Upload v-if="isShow" ref="importexcel" name="files" :before-upload="handleUpload" action="" >
                     <Input style="width:400px;" type="textarea" :format="['xlsx','xls']" :autosize="{minRows: 1,maxRows: 5}" v-model="files.length === 0? '' : files[0].name" placeholder="请选择文件"/>
                   </Upload>
-                  <Input style="width:400px;" v-if="!isShow" v-model='filePath' ></Input>
                 </FormItem>
               </Col>
               <Col span="8">
@@ -401,7 +406,7 @@
             </Row>
             <Row>
               <FormItem >
-                <div><font style='color: red;'>注：协议选择本地(local)时，请自行上传脚本文件，文件名请填写上传路径</font></div>
+                <div><font style='color: red;'>注：填写脚本部署路径时，请勿删除协议名！例如：local:///</font></div>
               </FormItem>
             </Row>
           </Form>
@@ -533,7 +538,7 @@ export default {
     }
     return {
       initFlag: 0,
-      isShow: false,
+      isShow: true,
       radioData: 'local',
       depColumns: [
         {
@@ -873,13 +878,9 @@ export default {
       } else {
         this.bindData()
       }
-      // this.queryCodeType()
       this.queryPlatform()
-      // this.queryNoticeObj()
       this.queryJobType()
       this.genCallAgainMaxNumData()
-      // this.queryServerityType()
-      // this.queryAlarmType()
     },
     /**
      * 如果传过来的有初始数据则进行数据绑定
@@ -902,7 +903,7 @@ export default {
       if (this.jobStepDrawerRecord.scriptPath) {
         this.filePath = this.jobStepDrawerRecord.scriptPath
       } else {
-        this.filePath = ''
+        this.filePath = 'local:///'
       }
       this.jobStepDrawer.uploadShow = true
     },
@@ -944,15 +945,21 @@ export default {
           this.jobStepList.push(tmp)
         })
       }
+      let jobStepTemp = []
+      if (this.jobStepList && this.jobStepList.length > 0) {
+        this.jobStepList.forEach(e => {
+        // 4@python3@null@$AUTO_HOME/APP/BDP/ADM/BDP_ADM_DTR_DAILY_RPT/bin/bdp_adm_dtr_daily_rpt0400.py@1 2
+          jobStepTemp.push(e.stepNum + '@' + e.operCmd + '@' + e.stepType + '@' + e.scriptPath + '@' + e.parameter + '@' + e.environments)
+        })
+        this.formBean.jobStep = jobStepTemp.join(',')
+      }
       this.jobStepDrawer.show = false
-      console.log(this.jobStepList)
     },
     handleRemove (index) {
       this.jobStepDrawer.data.list[index].status = 0
       this.jobStepDrawer.data.list.splice(index, 1)
     },
     parameterShow (item, index) {
-      console.log(item.parameter.length)
       if (item.parameter && item.parameter.length > 0) {
         this.jobStepDrawer.parameter.list = []
         item.parameter.split(' ').forEach(e => {
@@ -990,11 +997,9 @@ export default {
       this.jobStepDrawer.parameter.list.splice(index, 1)
     },
     envShow (item, index) {
-      console.log(item)
       item.environments = 'Password=?;name=?'
       if (item.environments) {
         this.jobStepDrawer.env.list = []
-        console.log(item.environments.split(';'))
         item.environments.split(';').forEach(e => {
           let tmp = {
             environments: e,
@@ -1107,33 +1112,29 @@ export default {
       return false
     },
     importExcel () {
-      if (this.radioData === 'local') {
-        this.jobStepDrawerRecord.scriptPath = this.filePath
-        this.jobStepDrawer.uploadShow = false
+      var formData = new FormData()
+      formData.append('fileType', this.fileType)
+      formData.append('platform', this.formBean.platform)
+      formData.append('systems', this.formBean.systems)
+      formData.append('job', this.formBean.job)
+      formData.append('version', 1)
+      this.jobStepDrawerRecord.scriptPath = this.filePath
+      if (this.files.length == 0 || this.files == null) {
+        this.$Message.warning('请选择导入文件')
       } else {
-        var formData = new FormData()
-        formData.append('fileType', this.fileType)
-        formData.append('platform', this.formBean.platform)
-        formData.append('systems', this.formBean.systems)
-        formData.append('job', this.formBean.job)
-        formData.append('version', 1)
-        if (this.files.length == 0 || this.files == null) {
-          this.$Message.warning('请选择导入文件')
-        } else {
-          for (const ele of this.files) {
-            formData.append('file', ele)
-          }
-          // formData.authps = systems
-          // String fileType, String platform, String systems, String job
-          // return
-          this.loadingStatus = true
-          this.$ajax.post('/jobattributes/upload', formData)
-            .then(resp => {
-              this.loadingStatus = false
-              this.files = []
-              this.jobStepDrawer.uploadShow = false
-            })
+        for (const ele of this.files) {
+          formData.append('file', ele)
         }
+        // formData.authps = systems
+        // String fileType, String platform, String systems, String job
+        // return
+        this.loadingStatus = true
+        this.$ajax.post('/jobattributes/upload', formData)
+          .then(resp => {
+            this.loadingStatus = false
+            this.files = []
+            this.jobStepDrawer.uploadShow = false
+          })
       }
       // })
     },
@@ -1152,45 +1153,8 @@ export default {
           tmpObj.jobDate = utils.fmtDate(this.formBean.jobDate, 'yyyy-MM-dd')
         }
         params.dyJobAttributes = JSON.stringify(tmpObj)
-        debugger
         params.jobStepList = JSON.stringify(this.jobStepList)
         params.depJobList = JSON.stringify(this.depJobList)
-        // let dyJobAttributes = {
-        //   callAgainMaxNum: 3,
-        //   callAgainWaitSec: 2,
-        //   checkFrequency: 0,
-        //   checkStreamSelf: 1,
-        //   checkTimeTrigger: 1,
-        //   ignoreError: 1,
-        //   job: 'BDP_ADM_DTR_DAILY_RPT',
-        //   jobDate: '2022-04-28',
-        //   jobFrequency: '1',
-        //   jobName: 'test',
-        //   jobType: 'D',
-        //   offsetDay: 1,
-        //   platform: 'BDP',
-        //   priority: '1',
-        //   sysytems: 'ADM',
-        //   stakStatus: 1,
-        //   timeWindow: '00:00-23:59',
-        //   virtualEnable: 1
-
-        // }
-        // let depJobList = [
-        //   { depPlatform: 'A', depSystems: 'A', depJob: 'A_A_A', depBatch: 2 },
-        //   { depPlatform: 'A', depSystems: 'A', depJob: 'A_A_A', depBatch: 1 }
-        // ]
-        // let jobStepList = [
-        //   {
-        //     environments: 'Password=?;name=?',
-        //     parameter: ' ${platform} ${systems} ${job} ${job_date} ${batch}',
-        //     stepNum: '1',
-        //     stepType: 'shell'
-        //   }
-        // ]
-        // params.dyJobAttributes = JSON.stringify(dyJobAttributes)
-        // params.jobStepList = JSON.stringify(jobStepList)
-        // params.depJobList = JSON.stringify(depJobList)
         let httpConfig = {
           url: RESOURCE_PATH,
           data: params
@@ -1204,12 +1168,10 @@ export default {
           httpConfig.method = 'POST'
           httpConfig.url = RESOURCE_PATH + '/add'
         }
-        console.log(httpConfig)
-        // return
         this.loading = true
         this.$ajax(httpConfig)
           .then(resp => {
-            this.cancel()
+            this.$router.push({ path: '/workflow/workflowmanage' })
           })
       })
     },
@@ -1235,17 +1197,20 @@ export default {
      * 返回到数据视图
      **/
     cancel () {
-      // let queryCache = { formBean: this.transData.formBean, currentPage: this.transData.currentPage, pageSize: this.transData.pageSize }
-      // this.$emit('switch', Object.assign({}, queryCache))
-      this.$router.push({
-        name: 'workflowmanage'
-      })
+      this.$router.push({ path: '/workflow/workflowmanage' })
     },
     checkRadio () {
+      this.isShow = true
       if (this.radioData === 'local') {
-        this.isShow = false
-      } else {
-        this.isShow = true
+        this.filePath = 'local:///'
+      } else if (this.radioData === 'nas') {
+        this.filePath = 'nas:///'
+      } else if (this.radioData === 'aws') {
+        this.filePath = 'aws:///'
+      } else if (this.radioData === 'rpc') {
+        this.filePath = 'spdb:///'
+      } else if (this.radioData === 'scp') {
+        this.filePath = 'scp:///'
       }
     }
   },

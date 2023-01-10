@@ -143,7 +143,7 @@ public class SshUtils {
 
 	public static void main(String[] args) {
 
-		SshUtils.upload(URI.valueOf("scp://user:pwd@ip"),
+		SshUtils.upload(URI.valueOf(""),
 				"D:\\gitdata\\harrier\\harrier-standalone-server\\target/lib.zip", "/home/uds");
 
 

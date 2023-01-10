@@ -1,5 +1,6 @@
 package cn.spdb.harrier.api.controller.develop;
 
+import cn.spdb.harrier.api.service.develop.IDeployScriptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,8 @@ public class JobDevelopController {
 	private IJobArrangeService jobArrangeService;
 	@Autowired
 	private IDeploySqlService deploySqlService;
+	@Autowired
+	private IDeployScriptService deployScriptService;
 	
 	/**
 	 * 部署
@@ -26,21 +29,26 @@ public class JobDevelopController {
 	 */
 	@PostMapping("/deploy")
 	public boolean deploy(DyJobArrange dyJobArrange) {
+		boolean deployStatus = false;
 		if(dyJobArrange != null) {
-			// 生成sql，执行部署
-			boolean isDeploySuccess = deploySqlService.deploySqlGenerate(dyJobArrange);
-			if(isDeploySuccess) {
+			// 生成sql，执行知识库部署
+			boolean isDeploySqlSuccess = deploySqlService.deploySqlGenerate(dyJobArrange);
+			// 脚本文件部署
+			boolean isDeployScriptSuccess = deployScriptService.deployScript(dyJobArrange);
+			if(isDeploySqlSuccess && isDeployScriptSuccess) {
 				// 修改部署状态为部署成功
 				dyJobArrange.setProcessStatus(JobDeployStatus.PROCESS_SUCCESS.getValue());
 				jobArrangeService.updateJobArrange(dyJobArrange);
+				deployStatus = true;
 			}else {
 				// 修改部署状态为部署失败
+				deploySqlService.rollBack(dyJobArrange);
 				dyJobArrange.setProcessStatus(JobDeployStatus.PROCESS_FAILED.getValue());
 				jobArrangeService.updateJobArrange(dyJobArrange);
+				deployStatus = false;
 			}
-			return isDeploySuccess;
 		}
-		return false;
+		return deployStatus;
 	}
 	
 	/**

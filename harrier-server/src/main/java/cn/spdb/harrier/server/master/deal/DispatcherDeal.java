@@ -99,7 +99,7 @@ public class DispatcherDeal implements Runnable, Deal {
 									masterService.insertJobRecord(jobContext);
 									dispatcherQueue.remove(jobContext);
 								} else {
-									logger.info("job dispatcher failure,job:{}", jobContext);
+									logger.error("job dispatcher failure,job:{}", jobContext);
 									masterService.decrementWeightAndJob(jobContext.getHost(), jobContext);
 									masterService.updateJobStatus(ExecutionStatus.DISPATCHER, jobContext.getPlatform(),
 											jobContext.getSystem(), jobContext.getJob());

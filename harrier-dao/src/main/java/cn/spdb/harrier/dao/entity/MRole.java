@@ -109,16 +109,4 @@ public class MRole {
     public void setRemark(String remark) {
         this.remark = remark == null ? null : remark.trim();
     }
-
-	public MRole(Integer roleId, String roleName, Boolean isEnable) {
-		super();
-		this.roleId = roleId;
-		this.roleName = roleName;
-		this.isEnable = isEnable;
-	}
-
-	public MRole() {
-		super();
-	}
-    
 }

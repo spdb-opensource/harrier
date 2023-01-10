@@ -123,7 +123,7 @@ public class WorkerManagerThread implements Runnable {
 
 	private void sendWorkingInfo() {
 		for (UdsServer udsServer : dbRegistryService.getUdsServerList()) {
-			if (udsServer.getNodeClusterType().equals(Constants.THREAD_NAME_MASTER_SERVER) || udsServer.getIsEnable()) {
+			if (udsServer.getNodeClusterType().equals(Constants.THREAD_NAME_MASTER_SERVER) && udsServer.getIsEnable()) {
 				MasterTransportServerInterfasce serverInterfasce = null;
 				try {
 					serverInterfasce = RpcClient.getInstance().create(MasterTransportServerInterfasce.class,

@@ -187,5 +187,13 @@ public class UdsJobServiceImpl implements UdsJobService {
 		return mapper2.listUpJobs(page, job);
 	}
 
+	@Override
+	public List<UdsJob> selectJobList(String platform, String systems) {
+		UdsJob udsjob = new UdsJob();
+		udsjob.setPlatform(platform);
+		udsjob.setSystems(systems);
+		return mapper.selectUdsJob(udsjob);
+	}
+
 	
 }

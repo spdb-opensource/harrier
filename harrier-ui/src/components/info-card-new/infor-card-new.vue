@@ -1,8 +1,8 @@
 <template>
   <Card :shadow="shadow" class="info-card-wrapper" :padding="0">
     <div class="content-con" :style="{background: color}">
-      <div class="left-area" style="display:table">
-        <img :src=" require(`../../assets/icons/${iconUrl}.png`)" style="width:72px;height:72px;margin:50% 20%"/>
+      <div class="left-area" style="display:table;width:36%">
+        <img :src=" require(`../../assets/icons/${iconUrl}.png`)" style="width:100%;max-width:72px;height:72px;margin:40% 20%"/>
       </div>
       <div class="right-area" :style="{width: rightWidth}">
         <div>

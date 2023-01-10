@@ -55,4 +55,14 @@ public class UdsServerServiceImpl implements UdsServerService {
 		return mapper.setEnable(serverName,is_enable);
 	}
 
+	@Override
+	public List<UdsServer> getAvailableWorker() {
+		return mapper.availableWorker();
+	}
+
+	@Override
+	public List<UdsServer> getAvailableMaster() {
+		return mapper.availableMaster();
+	}
+
 }

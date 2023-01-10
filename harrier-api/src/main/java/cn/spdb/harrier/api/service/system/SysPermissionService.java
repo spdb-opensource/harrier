@@ -1,13 +1,9 @@
 package cn.spdb.harrier.api.service.system;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.mybatis.dynamic.sql.SqlBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -15,16 +11,10 @@ import org.springframework.util.CollectionUtils;
 
 import cn.spdb.harrier.api.model.LoginUser;
 import cn.spdb.harrier.api.utils.SecurityUtils;
-import cn.spdb.harrier.common.utils.ObjectUtils;
 import cn.spdb.harrier.common.utils.StringUtils;
 import cn.spdb.harrier.common.utils.Symbol;
-import cn.spdb.harrier.dao.entity.MRole;
-import cn.spdb.harrier.dao.entity.MUserRole;
 import cn.spdb.harrier.dao.mapper.CustomSqlMapper;
-import cn.spdb.harrier.dao.mapper.MRoleDynamicSqlSupport;
 import cn.spdb.harrier.dao.mapper.MRoleMapper;
-import cn.spdb.harrier.dao.mapper.MUserRoleDynamicSqlSupport;
-import cn.spdb.harrier.dao.mapper.MUserRoleMapper;
 
 /**
  * @PreAuthorize("@HarrierPermission.hasPermissions(#platfrom,*,'R')")
@@ -40,22 +30,14 @@ public class SysPermissionService {
 	public static final String ROLE_SYSTEMS = "systems";
 
 	@Autowired
-	private MRoleMapper mRoleMapper;
-	@Autowired
-	private MUserRoleMapper mUserRoleMapper;
+	private CustomSqlMapper customSqlMapper;
+
 	@PostConstruct
 	private void cteatRole() {
-		List<MRole> list=mRoleMapper.select(c->c.where(MRoleDynamicSqlSupport.roleId,SqlBuilder.isIn(1,2,3)));
-		if(list.size()<3) {
-			mRoleMapper.delete(new Integer[] {1,2,3});
-			mRoleMapper.insertSelective(new MRole(1,"admin",true));
-			mRoleMapper.insertSelective(new MRole(2,"platform",true));
-			mRoleMapper.insertSelective(new MRole(3,"systems",true));
-		}
-		List<MUserRole> listR = mUserRoleMapper.select(c->c.where(MUserRoleDynamicSqlSupport.roleId,SqlBuilder.isEqualTo(1)).and(MUserRoleDynamicSqlSupport.userId,SqlBuilder.isEqualTo(1L)));
-		if(ObjectUtils.isEmpty(listR)) {
-			mUserRoleMapper.insertSelective(new MUserRole(1L,1));
-		}
+		String selectSql = "REPLACE INTO `m_role` (`role_id`,`role_name`,`create_user`,`update_user`,`is_enable`) VALUES(1,'admin','','',1)"
+				+ ",(2,'platform','','',1)," + "(3,'systems','','',1);";
+		customSqlMapper.execInsert(selectSql);
+		customSqlMapper.execInsert("REPLACE  INTO `m_user_role` (`user_id`, `role_id`) VALUES (1, 1);");
 	}
 
 	public boolean hasPermissions(String platfrom, String system, String permission) {

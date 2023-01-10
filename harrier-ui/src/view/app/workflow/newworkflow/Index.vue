@@ -6,7 +6,8 @@
 </template>
 
 <script>
-import MTable from '@/view/app/workflow/newworkflow/Table'
+// import MTable from '@/view/app/workflow/newworkflow/Table'
+import MTable from '@/view/app/workflow/workflowmanage/Form'
 
 export default {
   components: {

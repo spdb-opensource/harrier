@@ -10,8 +10,8 @@ import cn.spdb.harrier.rpc.common.RpcServiceHandler;
 @RpcServiceHandler("AlarmTransportServerInterfasce")
 public class AlarmTransportService implements AlarmTransportServerInterfasce {
 
-	private AlarmManger alarmManger = BeanContext.getBean(AlarmManger.class);
-	private AlarmSendManger alarmSendManger = BeanContext.getBean(AlarmSendManger.class);
+	private static AlarmManger alarmManger = BeanContext.getBean(AlarmManger.class);
+	private static AlarmSendManger alarmSendManger = BeanContext.getBean(AlarmSendManger.class);
 
 	@Override
 	public Boolean createAlarm(MAlarm alarm) {

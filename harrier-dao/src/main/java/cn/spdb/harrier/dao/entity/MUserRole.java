@@ -28,15 +28,4 @@ public class MUserRole {
     public void setRoleId(Integer roleId) {
         this.roleId = roleId;
     }
-
-	public MUserRole(Long userId, Integer roleId) {
-		super();
-		this.userId = userId;
-		this.roleId = roleId;
-	}
-
-	public MUserRole() {
-		super();
-	}
-	
 }

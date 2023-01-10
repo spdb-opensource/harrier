@@ -27,7 +27,7 @@
                   <div style="display:flex;text-align:center;padding:10px;">
                     <i-circle style="margin:auto;color:#FF8E16" stroke-color="#FF8E16" :percent="clusterstats.serverPercent" :size="80">
                       <span class="demo-Circle-inner" style="font-size:28px">{{clusterstats.serverPercent}}<span style="font-size:16px">%</span>
-                      </span> 
+                      </span>
                     </i-circle>
                     <div style="margin:auto">
                       <p><span style="font-size:18px">{{clusterstats.runservernum}}</span><span style="font-size:12px">/{{clusterstats.allservernum}}</span></p>
@@ -51,7 +51,7 @@
                       :arrow="majorNodeSetting.arrow"
                       >
                       <div>
-                        <div v-for="(item,index) in majorNodeList" :key="index" style="width:100%">         
+                        <div v-for="(item,index) in majorNodeList" :key="index" style="width:100%">
                           <CarouselItem>
                             <div style="display: inline-flex; text-align: center;width:49%;">
                               <info-circle color="#2589FF" :name="item[0].name" :cpuPercent="item[0].cpuPercent"
@@ -67,7 +67,7 @@
                       </div>
                     </Carousel>
                   </Col>
-                </Row>  
+                </Row>
               </Col>
             </Row>
             <Row :gutter="20" style="margin-top: 10px;margin-left:2%;">
@@ -76,16 +76,16 @@
                 <span class="circlr-dot" style="background-color:#15C75B"></span>集群计算资源总利用率</p>
               <Row class="circle-row" >
                 <Col :md="24" :lg="12" style="text-align:center;padding:5px">
-                  <i-circle :percent="clusterstats.cpuPercent" :size="50" stroke-color="#15C75B" > 
-                    <span class="demo-Circle-inner" style="color:#15C75B">{{clusterstats.cpuPercent}}%</span> 
+                  <i-circle :percent="clusterstats.cpuPercent" :size="50" stroke-color="#15C75B" >
+                    <span class="demo-Circle-inner" style="color:#15C75B">{{clusterstats.cpuPercent}}%</span>
                   </i-circle>
                   <p style="font-size:14px;font-weight: 400">cpu</p>
                   <p style="font-size: 12px;color: #B5BBCD;font-weight: 400;">{{clusterstats.usedclustercpu}}/{{clusterstats.allclustercpu}}</p>
 
                 </Col>
                 <Col :md="24" :lg="12" style="text-align:center;padding:5px">
-                    <i-circle :percent="clusterstats.memoryPercent" :size="50" stroke-color="#15C75B"> 
-                      <span class="demo-Circle-inner" style="color:#15C75B">{{clusterstats.memoryPercent}}%</span> 
+                    <i-circle :percent="clusterstats.memoryPercent" :size="50" stroke-color="#15C75B">
+                      <span class="demo-Circle-inner" style="color:#15C75B">{{clusterstats.memoryPercent}}%</span>
                     </i-circle>
                     <p style="font-size:14px;font-weight: 400">内存</p>
                     <p style="font-size: 12px;color: #B5BBCD;font-weight: 400;">{{clusterstats.usedclustermem}}/{{clusterstats.allclustermem}}</p>
@@ -107,7 +107,7 @@
                     :arrow="childNodeSetting.arrow"
                   >
                     <div>
-                      <div v-for="(item,index) in childNodeList" :key="index" style="width:100%">         
+                      <div v-for="(item,index) in childNodeList" :key="index" style="width:100%">
                         <CarouselItem  >
                           <div style="display: inline-flex; text-align: center;width:49%">
                             <info-circle color="#7B4CFE" :name="item[0].name" :cpuPercent="item[0].cpuPercent"
@@ -239,7 +239,7 @@
 
 <script>
 import utils from '@/common/utils'
-import echarts from 'echarts'
+import * as echarts from 'echarts'
 import InforCard from '_c/info-card-new'
 import InfoCircle from '_c/info-circle'
 import CountTo from '_c/count-to'
@@ -803,8 +803,12 @@ export default {
     },
     getTwoNumber (num) {
       var s = num + ''
-      var str = s.substring(0, s.indexOf('.') + 3)
-      return str
+      if (s.indexOf('.')) {
+        var str = s.substring(0, s.indexOf('.') + 3)
+        return str
+      } else {
+        return str
+      }
     },
     getMajorNodeList (majorNodeData) {
       for (let i = 0; i < majorNodeData.length; i = i + 2) {
@@ -864,7 +868,7 @@ export default {
           this.getNodeData(this.nodeList[this.value2])
         }
       }
-    } 
+    }
   },
   mounted () {
     this.init()

@@ -11,11 +11,11 @@ import cn.spdb.harrier.rpc.compress.CompressEnum;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RpcMethod {
 
-	int retries() default 1;
+	int retries() default ConsumerConfigConstant.DEFAULT_RETRIES;
 
-	boolean async() default false;
+	boolean async() default ConsumerConfigConstant.DEFAULT_SYNC;
 
-	int timeOut() default 3000;
+	int timeOut() default ConsumerConfigConstant.TIME_OUT;
 	
 	CompressEnum compressType() default CompressEnum.NO;
 	

@@ -226,4 +226,15 @@ public class SysUserServiceImpl implements ISysUserService {
 		result.put("uuid", uuid);
 		return result;
 	}
+
+	@Override
+	public int updateEnable(Long[] userIds, Boolean isEnable) {
+		return userMapper.updateEnable(userIds, isEnable);
+	}
+	
+	@Override
+	public int resetPwd(Long[] userIds) {
+		String password = SecurityUtils.encryptPassword(Constants.INITIALPASSWORD);
+		return userMapper.resetPwd(userIds, password);
+	}
 }

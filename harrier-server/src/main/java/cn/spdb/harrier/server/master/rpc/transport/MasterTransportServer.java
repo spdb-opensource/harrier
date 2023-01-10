@@ -24,7 +24,7 @@ import cn.spdb.harrier.server.script.command.Command;
 @RpcServiceHandler("MasterTransportServerInterfasce")
 public class MasterTransportServer implements MasterTransportServerInterfasce {
 
-	private MasterManagerService masterService = BeanContext.getBean(MasterManagerService.class);
+	private static MasterManagerService masterService = BeanContext.getBean(MasterManagerService.class);
 
 	@Override
 	public Boolean streamJobSignal(JobSignal jobSignal) {

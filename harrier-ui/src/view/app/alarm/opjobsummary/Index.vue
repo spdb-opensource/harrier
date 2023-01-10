@@ -4,10 +4,12 @@
     <MForm v-if="false" @switch="trans($event)" :transData="transData">
     </MForm>
     <br/>
+  <div style="background:#fff;padding:10px;border-radius: 10px">
     <MErrorlist v-if="true" @switch="trans($event)" :transData="transData"></MErrorlist>
     <MAlarmdetail v-if="transData.tabObj.alarmdetailTab" @switch="trans($event)" :transData="transData"></MAlarmdetail>
     <MJobdetail v-if="transData.tabObj.jobdetail" @switch="trans($event)" :transData="transData"></MJobdetail>
 		<MJobRecord v-if="transData.tabObj.jobRecord" @switch="trans($event)" :transData="transData"></MJobRecord>
+    </div>
   </div>
 </template>
 

@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.spdb.harrier.common.utils.NameThreadFactory;
 import cn.spdb.harrier.common.utils.URI;
 import cn.spdb.harrier.rpc.client.ConsumerConfig;
 import cn.spdb.harrier.rpc.client.RpcFuture;
@@ -51,6 +52,7 @@ public class NettyClient {
 
 	private final ConcurrentHashMap<URI, Channel> channelMap = new ConcurrentHashMap<URI, Channel>();
 
+	private int outTime = 5 * 60 * 1000;
 
 	public Channel getChannel(URI uri) {
 		Channel channel = channelMap.get(uri);
@@ -107,6 +109,21 @@ public class NettyClient {
 					}
 				});
 		isStarted.compareAndSet(false, true);
+		NameThreadFactory factory = new NameThreadFactory(this.getClass().getSimpleName() + "_out_time_channel");
+		factory.newDeamonThread(() -> {
+			while (isStarted.get()) {
+				try {
+					Thread.sleep(outTime);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				channelMap.entrySet().iterator().forEachRemaining(action -> {
+					if (!action.getValue().isActive()) {
+						channelMap.remove(action.getKey());
+					}
+				});
+			}
+		}).start();
 	}
 
 	public RpcResponse sendMsg(final URI uri, RpcProtocol<RpcRequest> protocol,ConsumerConfig consumerConfig) {
@@ -118,27 +135,25 @@ public class NettyClient {
 		rpcRequestCache.setHandlerMethName(handlerMethName);
 		Long reqId = protocol.getProtocolHeader().getRequestId();
 		RpcFuture future = null;
-		if (consumerConfig.getAsync() == false) {
+		if (Boolean.FALSE.equals(consumerConfig.getAsync())) {
 			future = new RpcFuture(request, reqId);
 			rpcRequestCache.setFuture(future);
 		}
 		RpcRequestTable.put(protocol.getProtocolHeader().getRequestId(), rpcRequestCache);
 		channel.writeAndFlush(protocol);
 		RpcResponse rpcResponse = null;
-		if (consumerConfig.getAsync() == true) {
+		if (Boolean.TRUE.equals(consumerConfig.getAsync())) {
 			rpcResponse = new RpcResponse();
 			rpcResponse.setStatus((byte) 0);
-			rpcResponse.setResult(null);
+			rpcResponse.setResult(true);
 			return rpcResponse;
 		}
 		try {
 			assert future != null;
 			rpcResponse = future.get(consumerConfig.getTimeOut(), TimeUnit.MILLISECONDS);
 		} catch (Exception e) {
-			logger.error("send msg error service name is {}", handlerMethName);
-			Thread.currentThread().interrupt();
+			logger.error("send msg error service name is {}", handlerMethName,e);
 		}
-
 		return rpcResponse;
 	}
 

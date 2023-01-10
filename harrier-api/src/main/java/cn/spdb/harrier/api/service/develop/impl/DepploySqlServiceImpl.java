@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.util.List;
 import java.sql.Statement;
 
+import cn.spdb.harrier.alarm.AlarmSendManger;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.Yaml;
@@ -19,7 +22,7 @@ import cn.spdb.harrier.dao.entity.DyJobArrange;
 
 @Service
 public class DepploySqlServiceImpl implements IDeploySqlService{
-	
+	private static final Logger logger = LoggerFactory.getLogger(DepploySqlServiceImpl.class);
 	// 获取sqlSession
 	@Autowired
 	private SpringDruidFactory springDruidFactory;
@@ -45,11 +48,11 @@ public class DepploySqlServiceImpl implements IDeploySqlService{
 					int[] sqlExecute = sqlExecute(newJobSql);
 					for(int i=0; i<newJobSql.size(); i++) {
 						if(sqlExecute[i] > 0) {
-							System.out.println("Sql: " + newJobSql.get(i) + " 执行成功，影响了" + sqlExecute[i] + "行数据;");
+							logger.info("Sql: " + newJobSql.get(i) + " 执行成功，影响了" + sqlExecute[i] + "行数据;");
 						}else if(sqlExecute[i] == Statement.SUCCESS_NO_INFO) {
-							System.out.println("Sql: " + newJobSql.get(i) + " 执行成功，影响的行数未知;");
+							logger.info("Sql: " + newJobSql.get(i) + " 执行成功，影响的行数未知;");
 						}else if(sqlExecute[i] == Statement.EXECUTE_FAILED) {
-							System.out.println("Sql: " + newJobSql.get(i) + " 执行失败;");
+							logger.info("Sql: " + newJobSql.get(i) + " 执行失败;");
 						}
 					}
 					return true;
@@ -61,11 +64,11 @@ public class DepploySqlServiceImpl implements IDeploySqlService{
 					int[] sqlExecute = sqlExecute(updateJobSql);
 					for(int i=0; i<updateJobSql.size(); i++) {
 						if(sqlExecute[i] > 0) {
-							System.out.println("Sql: " + updateJobSql.get(i) + " 执行成功，影响了" + sqlExecute[i] + "行数据;");
+							logger.info("Sql: " + updateJobSql.get(i) + " 执行成功，影响了" + sqlExecute[i] + "行数据;");
 						}else if(sqlExecute[i] == Statement.SUCCESS_NO_INFO) {
-							System.out.println("Sql: " + updateJobSql.get(i) + " 执行成功，影响的行数未知;");
+							logger.info("Sql: " + updateJobSql.get(i) + " 执行成功，影响的行数未知;");
 						}else if(sqlExecute[i] == Statement.EXECUTE_FAILED) {
-							System.out.println("Sql: " + updateJobSql.get(i) + " 执行失败;");
+							logger.info("Sql: " + updateJobSql.get(i) + " 执行失败;");
 						}
 					}
 					return true;
@@ -77,11 +80,11 @@ public class DepploySqlServiceImpl implements IDeploySqlService{
 					int[] sqlExecute = sqlExecute(deleteJobSql);
 					for(int i=0; i<deleteJobSql.size(); i++) {
 						if(sqlExecute[i] > 0) {
-							System.out.println("Sql: " + deleteJobSql.get(i) + " 执行成功，影响了" + sqlExecute[i] + "行数据;");
+							logger.info("Sql: " + deleteJobSql.get(i) + " 执行成功，影响了" + sqlExecute[i] + "行数据;");
 						}else if(sqlExecute[i] == Statement.SUCCESS_NO_INFO) {
-							System.out.println("Sql: " + deleteJobSql.get(i) + " 执行成功，影响的行数未知;");
+							logger.info("Sql: " + deleteJobSql.get(i) + " 执行成功，影响的行数未知;");
 						}else if(sqlExecute[i] == Statement.EXECUTE_FAILED) {
-							System.out.println("Sql: " + deleteJobSql.get(i) + " 执行失败;");
+							logger.info("Sql: " + deleteJobSql.get(i) + " 执行失败;");
 						}
 					}
 					return true;

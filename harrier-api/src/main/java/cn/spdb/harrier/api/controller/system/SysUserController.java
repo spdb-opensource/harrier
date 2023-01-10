@@ -271,4 +271,23 @@ public class SysUserController {
 	public String forgotPwd(Long userId, String userCode, String newPassword, String code) throws Exception {
 		return userInfoService.forgotPwd(userId, userCode, newPassword, code);
 	}
+
+	/**
+	 * 更新用户状态.
+	 */
+	@PostMapping(path = "{ids}/updateEnable")
+	@AccessLogAnnotation(isDbInstall = true)
+	public int updateEnable(@PathVariable(value = "ids") Long[] userIds, Boolean isEnable) throws Exception {
+		return userInfoService.updateEnable(userIds, isEnable);
+	}
+
+	/**
+	 * 重置密码.
+	 * 
+	 */
+	@PostMapping("/resetPwd")
+	@AccessLogAnnotation
+	public int resetPwd(Long[] userIds) throws Exception {
+		return userInfoService.resetPwd(userIds);
+	}
 }

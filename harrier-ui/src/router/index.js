@@ -10,24 +10,22 @@ import config from '@/config'
 import axiosIns from '@/common/ajax.js'
 const { homeName } = config
 
-
-
 Vue.use(Router)
-const router = new Router({
-  routes: [...routes, ...loadMenu()],
-  mode: 'hash'
-})
+// const router = new Router({
+//   routes: [...routes, ...loadMenu()],
+//   mode: 'hash'
+// })
 // const router = new Router({
 //   routes,
 //   mode: 'hash' // history
 //   // base: '/harrier' // http://localhost:8080/harrier
 // })
-// export const createRouter = (routers) => new Router({
-//   routes: routers,
-//   mode: 'hash' // history
-//   // base: '/harrier' // http://localhost:8080/harrier
-// })
-// const router = createRouter(routes)
+export const createRouter = (routers) => new Router({
+  routes: [...routes, ...loadMenu()],
+  mode: 'hash' // history
+  // base: '/harrier' // http://localhost:8080/harrier
+})
+const router = createRouter(routes)
 
 const LOGIN_PAGE_NAME = 'login'
 const turnTo = (to, access, next) => {

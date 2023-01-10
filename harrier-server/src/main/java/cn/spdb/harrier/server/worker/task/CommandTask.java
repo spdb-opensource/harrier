@@ -52,14 +52,15 @@ public class CommandTask extends AbstractTask {
 		}
 		processBuilder.redirectErrorStream(true);
 		List<String> command = new ArrayList<String>();
-//		if (OSUtils.isWindows()) {
-//			command.add("cmd");
-//			command.add("/c");
-//			command.add(jobStepBean.getRunCmd());
-//		} else 
+		if (OSUtils.isWindows()) {
+			command.add("cmd");
+			command.add("/c");
+			command.add(jobStepBean.getRunCmd());
+		} else 
 		if (OSUtils.isLinux()) {
-			command.add("sudo");
-//			command.add("-c");
+//			command.add("sudo");
+			command.add("bash");
+			command.add("-c");
 			command.add(jobStepBean.getRunCmd());
 		} else {
 			command.addAll(jobStepBean.getRunCmdList());

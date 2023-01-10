@@ -12,9 +12,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.Yaml;
 
@@ -23,7 +25,6 @@ import cn.spdb.harrier.api.model.JobStepConfig;
 import cn.spdb.harrier.api.model.JobYamlObject;
 import cn.spdb.harrier.api.service.develop.IJobArrangeService;
 import cn.spdb.harrier.api.service.develop.IYamlManagerService;
-import cn.spdb.harrier.api.utils.JobDeployPath;
 import cn.spdb.harrier.api.utils.JobDeployStatus;
 import cn.spdb.harrier.common.utils.CollectionUtils;
 import cn.spdb.harrier.dao.entity.DyJobArrange;
@@ -34,6 +35,9 @@ public class YamlManagerServiceImpl implements IYamlManagerService {
 
 	@Autowired
 	private IJobArrangeService jobArrangeService;
+
+	@Autowired
+	public Environment env;
 
 	private DyJobArrange dyJobArrange = new DyJobArrange();
 
@@ -98,7 +102,7 @@ public class YamlManagerServiceImpl implements IYamlManagerService {
 		String filePath = "";
 		Yaml yaml = new Yaml();
 		String dumpAsMap = yaml.dumpAsMap(jobYamlObject);
-		File uploadFile = new File(JobDeployPath.UPLOAD_SCRIPT_PATH.getValue());
+		File uploadFile = new File(Objects.requireNonNull(env.getProperty("UPLOAD_SCRIPT_PATH")));
 		if (!uploadFile.exists()) {
 			uploadFile.mkdirs();
 		}
