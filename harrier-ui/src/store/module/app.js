@@ -38,10 +38,10 @@ export default {
   },
   getters: {
     menues: state => state.menues,
-    // menuList: (state, getters, rootState) => getMenuByRouter(state.menues, rootState.user.access),
+    menuList: (state, getters, rootState) => getMenuByRouter(loadMenu(), state.menues, rootState.user.access),
     // menuList: (state, getters, rootState) => getMenuByRouter(routers, rootState.user.access),
     // 通过路由列表得到菜单列表
-    menuList: (state, getters, rootState) => getMenuByRouter(loadMenu(), rootState.user.access),
+    // menuList: (state, getters, rootState) => getMenuByRouter(loadMenu(), rootState.user.access),
     errorCount: state => state.errorList.length
   },
   mutations: {
@@ -92,16 +92,16 @@ export default {
     setHasReadErrorLoggerStatus (state, status = true) {
       state.hasReadErrorPage = status
     },
-    // updateMenuList (state, routes) {
-    //   router.matcher = createRouter([]).matcher
-    //   router.addRoutes(routes)
-    //   state.menues = routes
-    // }
-    // 接受前台数组，刷新菜单
     updateMenuList (state, routes) {
+      router.matcher = createRouter(routers).matcher
       router.addRoutes(routes)
-      state.menuList = routes
+      state.menues = routes
     }
+    // 接受前台数组，刷新菜单
+    // updateMenuList (state, routes) {
+    //   router.addRoutes(routes)
+    //   state.menuList = routes
+    // }
   },
   actions: {
     addErrorLog ({ commit, rootState }, info) {

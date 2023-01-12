@@ -214,7 +214,8 @@ public interface UdsServerMapper {
 		return update(c -> c.set(lastStart).equalToWhenPresent(record::getLastStart).set(updateTime)
 				.equalToWhenPresent(record::getUpdateTime).set(lastEnd).equalToWhenPresent(record::getLastEnd)
 				.set(isEnable).equalToWhenPresent(record::getIsEnable).set(para).equalToWhenPresent(record::getPara)
-				.where().and(ip, isEqualTo(record::getIp)).and(port, isEqualTo(record::getPort)));
+				.where().and(isEnable, isEqualTo(true)).and(ip, isEqualTo(record::getIp))
+				.and(port, isEqualTo(record::getPort)));
 	}
 
 	default int deleteByIpPortSelective(String ip_, int port_) {
@@ -229,38 +230,55 @@ public interface UdsServerMapper {
 		return select(c -> c.where(serverRoleName, isEqualTo(serverRoleName_),
 				and(serverRoleNameGroup, isEqualTo(serverRoleNameGroup_))).and(isEnable, isEqualTo(true)));
 	}
-	
+
 	@ResultMap("UdsServerResult")
 	@SelectProvider(type = SqlProviderAdapter.class, method = "select")
-	List<UdsServer> selectManyPage(SelectStatementProvider selectStatement,Page<UdsServer> page);
+	List<UdsServer> selectManyPage(SelectStatementProvider selectStatement, Page<UdsServer> page);
+
 	default Page<UdsServer> selectAll(Page<UdsServer> page, String servername) {
-		SelectStatementProvider selectStatement = SqlBuilder.select(selectList)
-				.from(udsServer)
-				.where(udsServer.serverName,isLikeWhenPresent(servername))
-				.build()
+		SelectStatementProvider selectStatement = SqlBuilder.select(selectList).from(udsServer)
+				.where(udsServer.serverName, isLikeWhenPresent(servername)).build()
 				.render(RenderingStrategies.MYBATIS3);
-		List<UdsServer> records = selectManyPage(selectStatement,page);
+		List<UdsServer> records = selectManyPage(selectStatement, page);
 		page.setRecords(records);
 		return page;
 	}
-	
-	default int setEnable(String serverName_,Boolean is_enable) {
-		UpdateStatementProvider updateStatement = SqlBuilder.update(udsServer)
-				.set(isEnable).equalToWhenPresent(is_enable)
-				.where(serverName, isEqualTo(serverName_))
-				.build()
+
+	default int setEnable(String serverName_, Boolean is_enable) {
+		UpdateStatementProvider updateStatement = SqlBuilder.update(udsServer).set(isEnable)
+				.equalToWhenPresent(is_enable).where(serverName, isEqualTo(serverName_)).build()
 				.render(RenderingStrategies.MYBATIS3);
 		return update(updateStatement);
-		
+
 	}
+
 	/*
 	 * 首页-统计主子节点资源
 	 */
-	default List<UdsServer> ServerResourceInfo(){
+	default List<UdsServer> ServerResourceInfo() {
+		SelectStatementProvider selectStatement = SqlBuilder.select(selectList).from(udsServer)
+				.where(udsServer.nodeClusterType, isLike("Master-Server"))
+				.or(udsServer.nodeClusterType, isLike("Worker-Server")).build().render(RenderingStrategies.MYBATIS3);
+		List<UdsServer> records = selectMany(selectStatement);
+		return records;
+	}
+
+	default List<UdsServer> availableWorker(){
+		SelectStatementProvider selectStatement = SqlBuilder.select(selectList)
+				.from(udsServer)
+				.where(udsServer.nodeClusterType,isLike("Worker-Server"))
+				.and(udsServer.isEnable, isEqualTo(true))
+				.build()
+				.render(RenderingStrategies.MYBATIS3);
+		List<UdsServer> records = selectMany(selectStatement);
+		return records;
+	}
+
+	default List<UdsServer> availableMaster(){
 		SelectStatementProvider selectStatement = SqlBuilder.select(selectList)
 				.from(udsServer)
 				.where(udsServer.nodeClusterType,isLike("Master-Server"))
-				.or(udsServer.nodeClusterType, isLike("Worker-Server"))
+				.and(udsServer.isEnable, isEqualTo(true))
 				.build()
 				.render(RenderingStrategies.MYBATIS3);
 		List<UdsServer> records = selectMany(selectStatement);

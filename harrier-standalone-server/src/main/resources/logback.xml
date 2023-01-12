@@ -157,4 +157,9 @@
 		<appender-ref ref="STDOUT" />
 	</root>
 
+	<logger name="logbackPrint" level="WARN" additivity="false">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="APPLOGFILE" />
+	</logger>
+
 </configuration>

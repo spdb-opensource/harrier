@@ -4,15 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +46,8 @@ public class JobAttributesController {
 	private IYamlManagerService yamlManagerService;
 	@Autowired
 	private IJobArrangeService jobArrangeService;
+	@Autowired
+	public Environment env;
 
 	/**
 	 * 根据id查询
@@ -162,9 +161,7 @@ public class JobAttributesController {
 
 	/**
 	 * 更新作业属性信息
-	 * 
-	 * @param id
-	 * @param dyJobAttributes
+	 * @param map
 	 * @return
 	 */
 	@PutMapping("/update")
@@ -214,10 +211,12 @@ public class JobAttributesController {
 
 	/**
 	 * 上传脚本文件
-	 * 
-	 * @param req
-	 * @param resp
 	 * @param files
+	 * @param fileType
+	 * @param platform
+	 * @param systems
+	 * @param job
+	 * @param version
 	 * @return
 	 * @throws Exception
 	 */
@@ -225,7 +224,9 @@ public class JobAttributesController {
 	@AccessLogAnnotation(isDbInstall = true, ignoreRequestArgs = { "files" })
 	public Map<String, Object> upload(@RequestParam("file") MultipartFile[] files, String fileType, String platform,
 			String systems, String job, Integer version) throws Exception {
-		return FileUtils.uploadFile(files, fileType, platform, systems, job, version);
+		// 上传路径
+		String uploadPath = Objects.requireNonNull(env.getProperty("UPLOAD_SCRIPT_PATH"));
+		return FileUtils.uploadFile(files, fileType, platform, systems, job, version, uploadPath);
 	}
 
 	/**
@@ -243,8 +244,9 @@ public class JobAttributesController {
 			throws Exception {
 		// 返回结果
 		Map<String, Object> res = new HashMap<String, Object>();
-		// 文件上传
-		File srcfile = FileUtils.uploadTar(file, fileType);
+		// 文件上传临时路径
+		String uploadDeployTempPath = Objects.requireNonNull(env.getProperty("UPLOAD_DEPLOY_TEMP_PATH"));
+		File srcfile = FileUtils.uploadTar(file, fileType, uploadDeployTempPath);
 		// 解压
 		String destpath = srcfile.getParent();
 		String password = "";

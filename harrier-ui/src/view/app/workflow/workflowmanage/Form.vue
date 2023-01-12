@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Form ref="alarmConfigForm" :model="formBean" class="work-flow" :label-width="200" :rules="formRule">
+    <Form ref="alarmConfigForm" :model="formBean" class="work-flow" :label-width="210" :rules="formRule">
       <Row type="flex" justify="center" align="middle">
         <Col span="20">
           <Row>
@@ -11,14 +11,14 @@
               <Row>
                 <Col span="10">
                   <FormItem prop="platform" label="平台名">
-                    <Select :disabled="isEdit" filterable v-model="formBean.platform" clearable>
+                    <Select :disabled="isEdit" filterable v-model="formBean.platform" clearable  @on-change="querySystem">
                       <Option v-for="item in platformData" :value="item.value" :key="item.value">{{ item.label }}</Option>
                     </Select>
                   </FormItem>
                 </Col>
-                <Col span="10">
+                <Col :offset="1" span="10">
                   <FormItem prop="systems" label="应用名">
-                    <Select :disabled="isEdit" v-model="formBean.systems" filterable clearable>
+                    <Select ref="refsystem" :disabled="isEdit" v-model="formBean.systems" filterable clearable>
                       <Option v-for="item in systemsData" :value="item.value" :key="item.key">{{ item.label }}</Option>
                     </Select>
                   </FormItem>
@@ -29,6 +29,14 @@
                   <FormItem prop="job" label="作业名">
                     <Input :disabled="isEdit" v-model="formBean.job"/>
                   </FormItem>
+                </Col>
+                <Col  span="1">
+                  <Poptip trigger="hover" title="作业命名规则" style="margin-top:5px" >
+                    <Icon type="md-help-circle" style="font-size:22px;margin-left:10px;cursor:pointer"></Icon>
+                    <div slot="content">
+                      平台名_系统名_表名_【作业类型：D/W/M/C，分别表示日作业/周作业/月作业/定时作业】
+                    </div>
+                  </Poptip>
                 </Col>
                 <Col span="10">
                   <FormItem prop="jobName" label="作业名中文">
@@ -47,15 +55,23 @@
               <Row>
                 <Col span="10">
                   <FormItem prop="jobType" label="作业类型">
-                    <Select v-model="formBean.jobType" filterable clearable>
+                    <Select v-model="formBean.jobType" @on-change="changeJobType" filterable clearable>
                       <Option v-for="item in jobTypeData" :value="item.value" :key="item.value">{{ item.label }}</Option>
                     </Select>
                   </FormItem>
                 </Col>
-                <Col span="10">
+                <Col :offset="1" span="10">
                   <FormItem prop="jobFrequency" label="作业频度" >
                     <Input v-model="formBean.jobFrequency" :disabled="disJobFrequency"></Input>
                   </FormItem>
+                </Col>
+                <Col  span="1">
+                  <Poptip trigger="hover" title="Corn表达式" style="margin-top:5px" >
+                    <Icon type="md-help-circle" style="font-size:22px;margin-left:10px;cursor:pointer"></Icon>
+                    <div slot="content">
+                       <img src="@/assets/images/corn.png" width="880"/>
+                    </div>
+                  </Poptip>
                 </Col>
               </Row>
               <Row>
@@ -64,7 +80,7 @@
                     <InputNumber style="width: 100%" :step="1" :editable="false" v-model="formBean.offsetDay"></InputNumber>
                   </FormItem>
                 </Col>
-                <Col span="10">
+                <Col :offset="1" span="10">
                   <FormItem prop="timeWindow" label="窗口执行时间">
                     <TimePicker format="HH:mm" type="timerange" v-model="formBean.timeWindow"></TimePicker>
                   </FormItem>
@@ -88,12 +104,15 @@
               <Row>
                 <Col span="10">
                   <FormItem prop="streamType" label="作业触发类型">
-                    <Input :disabled="isEdit" v-model="formBean.streamType"/>
+                    <!-- <Input :disabled="isEdit" v-model="formBean.streamType"/> -->
+                    <Select :disabled="isEdit" v-model="formBean.streamType" @on-change="changeStreamType" filterable clearable>
+                      <Option v-for="item in streamTypeData" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>
                   </FormItem>
                 </Col>
-                <Col span="10">
+                <Col :offset="1" span="10">
                   <FormItem prop="checkStreamSelf" label="是否启用stream file">
-                    <Select v-model="formBean.checkStreamSelf" filterable clearable>
+                    <Select v-model="formBean.checkStreamSelf" disabled filterable clearable>
                       <Option :value="0" :key="0">不采用</Option>
                       <Option :value="1" :key="1">采用</Option>
                     </Select>
@@ -103,20 +122,20 @@
               <Row>
                 <Col span="10">
                   <FormItem prop="checkTimeTrigger" label="检测是否采用时间触发">
-                    <Select v-model="formBean.checkTimeTrigger" filterable clearable>
+                    <Select v-model="formBean.checkTimeTrigger" disabled filterable clearable>
                       <Option :value="0" :key="0">不检测</Option>
                       <Option :value="1" :key="1">检测</Option>
                     </Select>
                   </FormItem>
-                </Col>             
-                <Col span="10">
+                </Col>
+                <Col :offset="1" span="10">
                   <FormItem prop="checkFrequency" label="是否检测时间">
                     <Select v-model="formBean.checkFrequency" filterable clearable>
                       <Option :value="0" :key="0">不检测</Option>
                       <Option :value="1" :key="1">检测</Option>
                     </Select>
                   </FormItem>
-                </Col>           
+                </Col>
               </Row>
             </Card>
           </Row>
@@ -134,11 +153,11 @@
                     </Select>
                   </FormItem>
                 </Col>
-                <Col span="10">
+                <Col :offset="1" span="10">
                   <FormItem prop="callAgainWaitSec" label="自动重调等待时间(秒)">
                     <InputNumber style="width: 100%" :min="1" :max="2592000" :step="1" v-model="formBean.callAgainWaitSec"/>
                   </FormItem>
-                </Col>            
+                </Col>
               </Row>
               <Row>
                 <Col span="10">
@@ -148,7 +167,7 @@
                       <Option :value="1" :key="1">忽视</Option>
                     </Select>
                   </FormItem>
-                </Col>                       
+                </Col>
               </Row>
             </Card>
           </Row>
@@ -166,13 +185,13 @@
                     </Select>
                   </FormItem>
                 </Col>
-                <Col span="10">
+                <Col :offset="1" span="10">
                   <FormItem prop="taskStatus" label="任务状态">
                     <Select filterable v-model="formBean.taskStatus" disabled clearable>
                       <Option v-for="item in taskStatusData" :value="item.value" :key="item.key">{{ item.label }}</Option>
                     </Select>
                   </FormItem>
-                </Col>            
+                </Col>
               </Row>
               <Row>
                 <Col span="10">
@@ -180,22 +199,24 @@
                     <DatePicker :transfer="true" type="date" parse="yyyy-MM-dd" format="yyyy-MM-dd" v-model="formBean.jobDate"></DatePicker>
                   </FormItem>
                 </Col>
-                <Col span="10">
-                  <FormItem prop="virtualEnable" label="作业是否执虚">
+                <Col :offset="1" span="10">
+                  <FormItem prop="virtualEnable" label="作业是否置虚">
                     <Select v-model="formBean.virtualEnable" filterable clearable>
                       <Option :value="1" :key="1">虚作业</Option>
                       <Option :value="0" :key="0">非虚作业</Option>
                     </Select>
                   </FormItem>
-                </Col>                   
+                </Col>
               </Row>
               <Row>
                 <Col span="10">
                   <FormItem prop="priority" label="作业执行优先级">
-                    <Input v-model="formBean.priority"/>
+                    <Select filterable v-model="formBean.priority" clearable>
+                      <Option v-for="item in priorityData" :value="item.value" :key="item.key">{{ item.label }}</Option>
+                    </Select>
                   </FormItem>
                 </Col>
-                <Col span="10">
+                <Col :offset="1" span="10">
                   <FormItem prop="des" label="描述" >
                     <Input v-model="formBean.des"></Input>
                   </FormItem>
@@ -212,7 +233,7 @@
               <Row>
                 <Col span="10">
                   <Button type="primary" @click="depJobConfig">依赖配置</Button>
-                </Col>          
+                </Col>
               </Row>
             </Card>
           </Row>
@@ -225,7 +246,7 @@
               <Row>
                 <Col span="10">
                   <Button type="primary" @click="jobStepConfig">脚本配置</Button>
-                </Col>          
+                </Col>
               </Row>
             </Card>
           </Row>
@@ -238,31 +259,42 @@
       <Button type="primary" icon="ios-trash-outline" @click="cancel">取消</Button>
     </div>
 
-    <Drawer
+    <Modal
       title="依赖配置"
       v-model="depJobDrawer.show"
       width="720"
       :mask-closable="false"
+      fullscreen
+      style="z-index: 999;!important"
       >
       <Form ref="depJobDrawerForm" :model="depJobDrawer.data" :label-width="100" :rules="depJobRuler">
         <Row :gutter="32">
             <Col span="12">
                 <FormItem prop="depPlatform" label="依赖平台" label-position="top">
-                    <Input v-model="depJobDrawer.data.depPlatform"/>
+                    <!-- <Input v-model="depJobDrawer.data.depPlatform"/> -->
+                    <Select filterable v-model="depJobDrawer.data.depPlatform" clearable  @on-change="queryDepSystem">
+                      <Option v-for="item in platformData" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>
                 </FormItem>
             </Col>
             <Col span="12">
                 <FormItem prop="depSystem" label="依赖应用" label-position="top">
-                    <Input v-model="depJobDrawer.data.depSystem">
-                    </Input>
+                    <!-- <Input v-model="depJobDrawer.data.depSystem">
+                    </Input> -->
+                    <Select ref="refsystem" v-model="depJobDrawer.data.depSystem" @on-change="queryDepJob" filterable clearable>
+                      <Option v-for="item in depSystemsData" :value="item.value" :key="item.key">{{ item.label }}</Option>
+                    </Select>
                 </FormItem>
             </Col>
         </Row>
         <Row :gutter="32">
             <Col span="12">
                 <FormItem prop="depJob" label="依赖作业" label-position="top">
-                  <Input v-model="depJobDrawer.data.depJob">
-                    </Input>
+                  <!-- <Input v-model="depJobDrawer.data.depJob"> -->
+                  <Select ref="refjob" v-model="depJobDrawer.data.depJob" filterable clearable>
+                      <Option v-for="item in depJobData" :value="item.value" :key="item.key">{{ item.label }}</Option>
+                  </Select>
+                    <!-- </Input> -->
                 </FormItem>
             </Col>
             <Col span="12">
@@ -283,26 +315,119 @@
             </Col>
         </Row>
       </Form>
-      <div class="drawer-footer">
+      <div slot="footer" class="drawer-footer">
         <Button style="margin-right: 8px" @click="depJobDrawer.show = false">取消</Button>
         <Button type="primary" @click="saveDepJob">保存</Button>
       </div>
-    </Drawer>
+    </Modal>
 
-    <Drawer
+    <Modal
       title="脚本配置"
       v-model="jobStepDrawer.show"
       width="80%"
+      fullscreen
       :mask-closable="false"
       >
-      <Row style="background:#d9dee9;padding:5px">
-        <Col span="4">
-          <span class="jobsetp-title">脚本模块</span>
+      <Row>
+        <Col style="background:#eee;padding:20px" span="6">
+          <Card style="background-color:#eeeee" shadow>
+            <p slot="title">
+              <Icon type="ios-bookmark"></Icon>
+              <span  style="font-size:16px">脚本类型 </span>
+            </p>
+            <!-- <Row style="background:#d9dee9;padding:5px">
+              <Col>
+                <span class="jobsetp-title">脚本模块</span>
+              </Col>
+            </Row> -->
+            <!-- <Row>
+            </Row> -->
+            <!-- <Col> -->
+              <Row>
+                <a v-for="item in stepTypeList" :key="item.key" class="jobsetp-tag" >
+                  <img :src="require(`../../../../assets/images/workflow/${item.imgUrl}.png`)" width="100" style="margin-left:1%" @click="handleAdd(item.key)"></img>
+                </a>
+              </Row>
+              <Row>
+                <a v-for="item in stepTypeList2" :key="item.key" class="jobsetp-tag" >
+                  <img :src="require(`../../../../assets/images/workflow/${item.imgUrl}.png`)" width="100" style="margin-left:1%" @click="handleAdd(item.key)"></img>
+                </a>
+              </Row>
+              <Row>
+                <a v-for="item in stepTypeList3" :key="item.key" class="jobsetp-tag" >
+                  <img :src="require(`../../../../assets/images/workflow/${item.imgUrl}.png`)" width="100" style="margin-left:1%" @click="handleAdd(item.key)"></img>
+                </a>
+              </Row>
+              <Row>
+                <a v-for="item in stepTypeList4" :key="item.key" class="jobsetp-tag" >
+                  <img :src="require(`../../../../assets/images/workflow/${item.imgUrl}.png`)" width="100" style="margin-left:1%" @click="handleAdd(item.key)"></img>
+                </a>
+              </Row>
+            <!-- </Col> -->
+          </Card>
         </Col>
+        <Col style="background:#eee;padding:20px" span="18">
+          <Card  shadow>
+            <Row style="background:#d9dee9;padding:5px">
+              <Col span="2" :offset="1">
+                <span class="jobsetp-title">序号</span>
+              </Col>
+              <Col span="2" :offset="1">
+                <span class="jobsetp-title">类型</span>
+              </Col>
+              <Col span="2" :offset="1">
+                <span class="jobsetp-title">脚本上传</span>
+              </Col>
+              <Col span="4" :offset="2">
+                <span class="jobsetp-title">脚本参数</span>
+              </Col>
+              <Col span="5" :offset="1">
+                <span class="jobsetp-title">环境参数</span>
+              </Col>
+            </Row>
+            <Row>
+               <Form ref="jobStepDrawerForm" :model="jobStepDrawer.data" :label-width="100" style="margin-top:2%">
+                <FormItem
+                  v-for="(item,index) in jobStepDrawer.data.list"
+                  v-if="item.status"
+                  :key="index"
+                  :label="'序号'+(index+1)"
+                  :prop="'list.'+index+'.value'"
+                  >
+                  <Row>
+                    <Col span="3" :offset="1">
+                      <span>{{item.operCmd}}</span>
+                    </Col>
+                    <Col span="2" :offset="1">
+                      <Button icon="ios-cloud-upload-outline" @click="uploadStepShow(item,index)">上传</Button>
+                    </Col>
+                    <Col span="5" :offset="1">
+                      <Input v-model="item.parameter" readonly @click.native="parameterShow(item,index)">
+                      </Input>
+                    </Col>
+                    <Col span="5" :offset="1">
+                      <Input v-model="item.environments" readonly @click.native="envShow(item,index)">
+                      </Input>
+                    </Col>
+                    <Col span="2" :offset="1">
+                      <Button @click="handleRemove(index)">删除</Button>
+                    </Col>
+                  </Row>
+                  <Divider/>
+                </FormItem>
+              </Form>
+            </Row>
+          </Card>
+        </Col>
+      </Row>
+      <!-- <Row style="background:#d9dee9;padding:5px"> -->
+        <!-- <Col span="4">
+          <span class="jobsetp-title">脚本模块</span>
+        </Col> -->
         <!-- <Col span="20">
       序号 脚本 脚本参数 环境参数
         </Col> -->
-        <Col span="1" :offset="1">
+        <!-- <Col span="1" :offset="1">
           <span class="jobsetp-title">序号</span>
         </Col>
         <Col span="2" :offset="1">
@@ -318,33 +443,36 @@
           <span class="jobsetp-title">环境参数</span>
         </Col>
       </Row>
-      <Row>
-        <Col span="4">
-          <!-- <div style="padding: 10px;text-align: center">
-            <Tag v-for="item in stepTypeData" style="margin-right:3%" :key="item" color="primary" :name="item" @click.native="handleAdd(item)" size="large">{{ item }}</Tag>
-          </div> -->
-          <div v-for="item in stepTypeData" :key="item" class="jobsetp-tag" >
-            <Tag color="primary" :name="item" @click.native="handleAdd(item)" size="large">{{ item }}</Tag>
+      <Row> -->
+        <!-- <Col span="4">
+          <div v-for="item in stepTypeList" :key="item.key" class="jobsetp-tag" >
+            <img :src="require(`../../../../assets/images/workflow/${item.imgUrl}.png`)" width="80" @click="handleAdd(item.key)"></img>
           </div>
-        </Col>
-        <Col span="20">
+          <div v-for="item in stepTypeList2" :key="item.key" class="jobsetp-tag" >
+            <img :src="require(`../../../../assets/images/workflow/${item.imgUrl}.png`)" width="80" @click="handleAdd(item.key)"></img>
+          </div>
+          <div v-for="item in stepTypeList3" :key="item.key" class="jobsetp-tag" >
+            <img :src="require(`../../../../assets/images/workflow/${item.imgUrl}.png`)" width="80" @click="handleAdd(item.key)"></img>
+          </div>
+        </Col> -->
+        <!-- <Col span="20"> -->
           <!-- 脚本执行顺序 执行命令 脚本类型 脚本执行路径 脚本执行所需参数
           stepNum operCmd stepType scriptPath parameter environments-->
-          <Form ref="jobStepDrawerForm" :model="jobStepDrawer.data" :label-width="100" style="margin-top:2%">
+          <!-- :rules="{required: true,message:'数据不能为空',trigger: 'blur'}" -->
+          <!-- <Form ref="jobStepDrawerForm" :model="jobStepDrawer.data" :label-width="100" style="margin-top:2%">
             <FormItem
               v-for="(item,index) in jobStepDrawer.data.list"
               v-if="item.status"
               :key="index"
               :label="'序号'+(index+1)"
               :prop="'list.'+index+'.value'"
-              :rules="{required: true,message:'数据不能为空',trigger: 'blur'}"
               >
               <Row>
                 <Col span="3" :offset="1">
                   <span>{{item.operCmd}}</span>
                 </Col>
                 <Col span="2" :offset="1">
-                  <Button icon="ios-cloud-upload-outline" @click="jobStepDrawer.uploadShow=true">上传</Button>
+                  <Button icon="ios-cloud-upload-outline" @click="uploadStepShow(item,index)">上传</Button>
                 </Col>
                 <Col span="5" :offset="1">
                   <Input v-model="item.parameter" readonly @click.native="parameterShow(item,index)">
@@ -358,15 +486,16 @@
                   <Button @click="handleRemove(index)">删除</Button>
                 </Col>
               </Row>
+              <Divider/>
             </FormItem>
-          </Form>
-        </Col>
-      </Row>
-      <div class="drawer-footer">
+          </Form> -->
+        <!-- </Col>
+      </Row> -->
+      <div slot="footer" class="drawer-footer">
         <Button style="margin-right: 8px" @click="jobStepDrawer.show = false">取消</Button>
         <Button type="primary" @click="saveJobStep">保存</Button>
       </div>
-    </Drawer>
+    </Modal>
 
     <Modal id="uploadOp" v-model="jobStepDrawer.uploadShow" title="脚本上传" width="50%" :mask-closable="false" :closable="false" >
       <div>
@@ -374,8 +503,27 @@
           <Form ref="importOpForm" :label-width="100" >
             <Row>
               <Col span="16">
+                <FormItem label="请选择协议:" >
+                    <RadioGroup v-model='radioData' @on-change="checkRadio">
+                      <Radio label='local'>本地存储</Radio>
+                      <Radio label='nas'>本地共享存储</Radio>
+                      <Radio label='aws'>对象存储</Radio>
+                      <Radio label='rpc'>rpc</Radio>
+                    </RadioGroup>
+                </FormItem>
+              </Col>
+            </Row>
+            <Row>
+              <Col span="16">
+                <FormItem label="脚本部署路径:" style="cursor:pointer;" >
+                  <Input style="width:400px;" v-model='filePath' >
+                    <span slot="prepend">{{filePathPre}}</span>
+                  </Input>
+                </FormItem>
+              </Col>
+              <Col span="16">
                 <FormItem label="导入文件名:" style="cursor:pointer;" >
-                  <Upload ref="importExcel" name="files" :before-upload="handleUpload" action="" >
+                  <Upload v-if="isShow" ref="importexcel" name="files" :before-upload="handleUpload" action="" >
                     <Input style="width:400px;" type="textarea" :format="['xlsx','xls']" :autosize="{minRows: 1,maxRows: 5}" v-model="files.length === 0? '' : files[0].name" placeholder="请选择文件"/>
                   </Upload>
                 </FormItem>
@@ -387,6 +535,11 @@
                 </div>
               </Col>
             </Row>
+            <!-- <Row>
+              <FormItem >
+                <div><font style='color: red;'>注：填写脚本部署路径时，请勿删除协议名！例如：local:///</font></div>
+              </FormItem>
+            </Row> -->
           </Form>
         </div>
       </div>
@@ -398,6 +551,7 @@
       v-model="jobStepDrawer.parameterShow"
       width="40%"
       :closable="false"
+      class="drawer-calss"
       >
         <Form ref="formDynamic" :model="jobStepDrawer.parameter" :label-width="80" style="width: 300px">
           <!-- :rules="{required: true, message: '参数数据不要为空', trigger: 'blur'}"> -->
@@ -436,6 +590,7 @@
       v-model="jobStepDrawer.envShow"
       width="40%"
       :closable="false"
+      class="drawer-calss"
       >
         <Form ref="formDynamic" :model="jobStepDrawer.env" :label-width="80" style="width: 300px">
           <FormItem
@@ -504,7 +659,7 @@ export default {
       }
     }
     const checkMultiBatch = (rule, value, callback) => {
-      if (value) {
+      if (value || value === 0) {
         if (!this.formBean.job) {
           callback(new Error('请先输入作业名'))
         } else {
@@ -516,6 +671,8 @@ export default {
     }
     return {
       initFlag: 0,
+      isShow: true,
+      radioData: 'local',
       depColumns: [
         {
           title: '依赖平台',
@@ -631,18 +788,90 @@ export default {
       fileType: '',
       formBean: {},
       loading: false,
-      platformData: [
-        { label: 'BDP', value: 'BDP' }
-      ],
-      systemsData: [
-        { label: 'ADM', value: 'ADM' }
-      ],
+      platformData: [],
+      systemsData: [],
+      depSystemsData: [],
+      depJobData: [],
       jobTypeData: [],
+      streamTypeData: [
+        { value: '1', label: '定时触发' },
+        { value: '2', label: '信号文件触发' },
+        { value: '3', label: 'HTTP请求触发' },
+        { value: '4', label: '依赖触发' }
+      ],
+      priorityData: [
+        { value: '100', label: 'L1' },
+        { value: '200', label: 'L2' },
+        { value: '300', label: 'L3' },
+        { value: '400', label: 'M1' },
+        { value: '500', label: 'M2' },
+        { value: '600', label: 'M3' },
+        { value: '700', label: 'H1' },
+		    { value: '800', label: 'H2' },
+        { value: '900', label: 'H3' }
+      ],
       isEdit: false,
       callAgainMaxNumData: [],
       stepTypeData: [
         // 'shell', 'python', 'python3', 'perl', 'http_get', 'http_post', 'java', 'cmd'
-        'SQL', 'JAVA', 'HTTP_POST', 'HTTP_GET', 'HTTP_DELETE', 'HTTP_PUT', 'HTTP_HEAD', 'CMD', 'SHELL', 'PYTHON', 'PYTHON3', 'PERL'
+        'SQL', 'JAVA', 'HTTP_POST', 'HTTP_GET', 'HTTP_DELETE', 'HTTP_PUT', 'HTTP_HEAD', 'CMD', 'SHELL',
+        'PYTHON', 'PYTHON3', 'PERL'
+      ],
+      stepTypeList: [
+        { key: 'SQL', imgUrl: 'SQL' },
+        { key: 'JAVA', imgUrl: 'JAVA' },
+        { key: 'HTTP_POST', imgUrl: 'POST' }
+        // { key: 'HTTP_GET', imgUrl: 'GET' }
+        // { key: 'HTTP_DELETE', imgUrl: 'DELETE' },
+        // { key: 'HTTP_PUT', imgUrl: 'PUT' },
+        // { key: 'HTTP_HEAD', imgUrl: 'HEAD' },
+        // { key: 'CMD', imgUrl: 'CMD' },
+        // { key: 'SHELL', imgUrl: 'SHELL' },
+        // { key: 'PYTHON', imgUrl: 'PYTHON2' },
+        // { key: 'PYTHON3', imgUrl: 'PYTHON3' },
+        // { key: 'PERL', imgUrl: 'PERL' }
+      ],
+      stepTypeList2: [
+        // { key: 'SQL', imgUrl: 'SQL' },
+        // { key: 'JAVA', imgUrl: 'JAVA' },
+        // { key: 'HTTP_POST', imgUrl: 'POST' },
+        { key: 'HTTP_GET', imgUrl: 'GET' },
+        { key: 'HTTP_DELETE', imgUrl: 'DELETE' },
+        { key: 'HTTP_PUT', imgUrl: 'PUT' }
+        // { key: 'HTTP_HEAD', imgUrl: 'HEAD' },
+        // { key: 'CMD', imgUrl: 'CMD' }
+        // { key: 'SHELL', imgUrl: 'SHELL' },
+        // { key: 'PYTHON', imgUrl: 'PYTHON2' },
+        // { key: 'PYTHON3', imgUrl: 'PYTHON3' },
+        // { key: 'PERL', imgUrl: 'PERL' }
+      ],
+      stepTypeList3: [
+        // { key: 'SQL', imgUrl: 'SQL' },
+        // { key: 'JAVA', imgUrl: 'JAVA' },
+        // { key: 'HTTP_POST', imgUrl: 'POST' },
+        // { key: 'HTTP_GET', imgUrl: 'GET' },
+        // { key: 'HTTP_DELETE', imgUrl: 'DELETE' },
+        // { key: 'HTTP_PUT', imgUrl: 'PUT' },
+        { key: 'HTTP_HEAD', imgUrl: 'HEAD' },
+        { key: 'CMD', imgUrl: 'CMD' },
+        { key: 'SHELL', imgUrl: 'SHELL' }
+        // { key: 'PYTHON', imgUrl: 'PYTHON2' },
+        // { key: 'PYTHON3', imgUrl: 'PYTHON3' },
+        // { key: 'PERL', imgUrl: 'PERL' }
+      ],
+      stepTypeList4: [
+        // { key: 'SQL', imgUrl: 'SQL' },
+        // { key: 'JAVA', imgUrl: 'JAVA' },
+        // { key: 'HTTP_POST', imgUrl: 'POST' },
+        // { key: 'HTTP_GET', imgUrl: 'GET' },
+        // { key: 'HTTP_DELETE', imgUrl: 'DELETE' },
+        // { key: 'HTTP_PUT', imgUrl: 'PUT' },
+        // { key: 'HTTP_HEAD', imgUrl: 'HEAD' },
+        // { key: 'CMD', imgUrl: 'CMD' },
+        // { key: 'SHELL', imgUrl: 'SHELL' },
+        { key: 'PYTHON', imgUrl: 'PYTHON2' },
+        { key: 'PYTHON3', imgUrl: 'PYTHON3' },
+        { key: 'PERL', imgUrl: 'PERL' }
       ],
       lastStatusData: [
         // Ready Done Runing Failed Pending Dispatcher
@@ -771,7 +1000,10 @@ export default {
           required: true,
           message: '请输入数据！'
         }]
-      }
+      },
+      jobStepDrawerRecord: {},
+      filePath: '',
+      filePathPre: ''
     }
   },
   methods: {
@@ -833,12 +1065,21 @@ export default {
         this.bindData()
       }
       // this.queryCodeType()
-      // this.queryPlatform()
       // this.queryNoticeObj()
+      this.queryPlatform()
       this.queryJobType()
       this.genCallAgainMaxNumData()
       // this.queryServerityType()
       // this.queryAlarmType()
+    },
+    queryPlatform () {
+      let platformList = this.$store.getters.getUserPlatform()
+      platformList.forEach(data => {
+        let tmp = {}
+        tmp.value = data
+        tmp.label = data
+        this.platformData.push(tmp)
+      })
     },
     /**
      * 如果传过来的有初始数据则进行数据绑定
@@ -846,18 +1087,118 @@ export default {
     bindData () {
       try {
         this.formBean = Object.assign({}, this.transData.initFormBean)
-        this.formBean.lastStatus = 'Done'
-        this.formBean.taskStatus = 1
-        this.formBean.callAgainMaxNum = 0
-        this.formBean.timeWindow = ['00:00', '23:59']
-        this.formBean.offsetDay = 0
-        this.formBean.callAgainWaitSec = 120
+        this.$set(this.formBean, 'lastStatus', 'Done')
+        this.$set(this.formBean, 'taskStatus', 1)
+        this.$set(this.formBean, 'callAgainMaxNum', 0)
+        this.$set(this.formBean, 'timeWindow', ['00:00', '23:59'])
+        this.$set(this.formBean, 'offsetDay', 0)
+        this.$set(this.formBean, 'callAgainWaitSec', 120)
+        this.$set(this.formBean, 'streamType', '4')
+        this.$set(this.formBean, 'virtualEnable', 0)
+        this.$set(this.formBean, 'multiBatch', 0)
+        this.$set(this.formBean, 'checkStreamSelf', 0)
+        this.$set(this.formBean, 'ignoreError', 0)
+        this.$set(this.formBean, 'jobDate', new Date())
+        this.$set(this.formBean, 'priority', '500')
       } catch (error) {
         console.error(error)
       }
     },
+
+    querySystem () {
+      this.systemsData = []
+      this.$refs.refsystem.setQuery('')
+      if (this.formBean.platform) {
+        let userSystemList = this.$store.getters.getUserSystem()
+        let userSystem = userSystemList[this.formBean.platform]
+        userSystem.forEach(data => {
+          let tmp = {}
+          tmp.value = data
+          tmp.label = data
+          this.systemsData.push(tmp)
+        })
+      }
+    },
+    queryDepSystem () {
+      this.depSystemsData = []
+      this.$refs.refsystem.setQuery('')
+      if (this.depJobDrawer.data.depPlatform) {
+        let userSystemList = this.$store.getters.getUserSystem()
+        let userSystem = userSystemList[this.depJobDrawer.data.depPlatform]
+        userSystem.forEach(data => {
+          let tmp = {}
+          tmp.value = data
+          tmp.label = data
+          this.depSystemsData.push(tmp)
+        })
+      }
+    },
+    queryDepJob () {
+      this.depJobData = []
+      this.$refs.refsystem.setQuery('')
+      if (this.depJobDrawer.data.depPlatform && this.depJobDrawer.data.depSystem) {
+        let params = {}
+        params.platform = this.depJobDrawer.data.depPlatform
+        params.systems = this.depJobDrawer.data.depSystem
+        let loadConfig = {
+          method: 'GET',
+          url: '/udsJob/selectJobList',
+          params: params
+        }
+
+        this.$ajax(loadConfig)
+          .then(resp => {
+            if (resp.status && resp.status === 200) {
+              resp.data.forEach(e => {
+                let tmp = {}
+                tmp.value = e.job
+                tmp.label = e.job
+                this.depJobData.push(tmp)
+              })
+            }
+          })
+      }
+    },
+    uploadStepShow (item, index) {
+      this.jobStepDrawerRecord = item
+      let path = this.jobStepDrawerRecord.scriptPath
+      if (path) {
+        let index = path.lastIndexOf(':////')
+        this.filePathPre = path.substring(0, index + 4)
+        this.filePath = path.substring(index + 4, path.length)
+        if (path.indexOf('local:///') != -1) {
+          this.radioData = 'local'
+        } else if (path.indexOf('nas:///') != -1) {
+          this.radioData = 'nas'
+        } else if (path.indexOf('aws:///') != -1) {
+          this.radioData = 'aws'
+        } else if (path.indexOf('spdb:///') != -1) {
+          this.radioData = 'rpc'
+        }
+      } else {
+        this.filePathPre = 'local:///'
+        this.radioData = 'local'
+      }
+      this.jobStepDrawer.uploadShow = true
+    },
+    changeStreamType () {
+      if (this.formBean.streamType === '2') {
+        this.$set(this.formBean, 'checkStreamSelf', 1)
+      } else {
+        this.$set(this.formBean, 'checkStreamSelf', 0)
+      }
+      // 作业出发类型如果是信号出发，是否启用stream file触发默认为采用，否则为不采用，这个不可选
+      // 检测是否采用时间触发在定时作业时默认为采用，否则为不采用，不可选
+    },
+    changeJobType () {
+      if (this.formBean.jobType === 'C') {
+        this.$set(this.formBean, 'checkTimeTrigger', 1)
+      } else {
+        this.$set(this.formBean, 'checkTimeTrigger', 0)
+      }
+    },
     jobStepConfig () {
-      if (this.transData.row.id) {
+      if (this.transData.row && this.transData.row.id) {
         this.depJobDrawer.data.depBatch = 0
         this.jobStepDrawer.data.list = []
         this.jobStepList.sort(utils.compare('index')).map(item => {
@@ -888,29 +1229,27 @@ export default {
             stepNum: index + 1,
             stepType: e.stepType,
             environments: e.environments,
-            parameter: e.parameter
+            parameter: e.parameter,
+            scriptPath: e.scriptPath
           }
           this.jobStepList.push(tmp)
         })
       }
-      debugger
       let tmparr = []
       if (this.jobStepList && this.jobStepList.length > 0) {
         this.jobStepList.forEach(e => {
         // 平台@应用@作业@批次
-          tmparr.push(e.operCmd + '@' + e.stepNum + '@' + e.stepType + '@' + e.environments + '@' + e.parameter)
+          tmparr.push(e.stepNum + '@' + e.operCmd + '@' + e.stepType + '@' + e.scriptPath + '@' + e.parameter + '@' + e.environments)
         })
         this.formBean.jobStep = tmparr.join(',')
       }
       this.jobStepDrawer.show = false
-      console.log(this.jobStepList)
     },
     handleRemove (index) {
       this.jobStepDrawer.data.list[index].status = 0
       this.jobStepDrawer.data.list.splice(index, 1)
     },
     parameterShow (item, index) {
-      console.log(item.parameter.length)
       if (item.parameter && item.parameter.length > 0) {
         this.jobStepDrawer.parameter.list = []
         item.parameter.split(' ').forEach(e => {
@@ -948,11 +1287,9 @@ export default {
       this.jobStepDrawer.parameter.list.splice(index, 1)
     },
     envShow (item, index) {
-      console.log(item)
       item.environments = 'Password=?;name=?'
       if (item.environments) {
         this.jobStepDrawer.env.list = []
-        console.log(item.environments.split(';'))
         item.environments.split(';').forEach(e => {
           let tmp = {
             environments: e,
@@ -988,9 +1325,7 @@ export default {
       this.jobStepDrawer.env.list.splice(index, 1)
     },
     depJobConfig () {
-      if (this.transData.row.id) {
-        this.depJobDrawer.data.depBatch = 0
-      }
+      this.$set(this.depJobDrawer.data, 'depBatch', 0)
       this.depJobDrawer.show = true
     },
     addDepJob () {
@@ -1071,6 +1406,7 @@ export default {
       formData.append('systems', this.formBean.systems)
       formData.append('job', this.formBean.job)
       formData.append('version', this.transData.row.version)
+      this.jobStepDrawerRecord.scriptPath = this.filePathPre + this.filePath
       if (this.files.length == 0 || this.files == null) {
         this.$Message.warning('请选择导入Excel')
       } else {
@@ -1104,6 +1440,7 @@ export default {
         if (tmpObj.jobDate) {
           tmpObj.jobDate = utils.fmtDate(this.formBean.jobDate, 'yyyy-MM-dd')
         }
+        debugger
         params.dyJobAttributes = JSON.stringify(tmpObj)
         params.jobStepList = JSON.stringify(this.jobStepList)
         params.depJobList = JSON.stringify(this.depJobList)
@@ -1148,8 +1485,6 @@ export default {
           data: params
         }
         httpConfig.contentType = 'json'
-        debugger
-        console.log(this.transData.row.id)
         if (this.transData.row.id) {
           httpConfig.method = 'PUT'
           httpConfig.data.id = tmpObj.id
@@ -1158,7 +1493,6 @@ export default {
           httpConfig.method = 'POST'
           httpConfig.url = RESOURCE_PATH + '/add'
         }
-        console.log(httpConfig)
         // return
         this.loading = true
         this.$ajax(httpConfig)
@@ -1177,15 +1511,6 @@ export default {
         this.callAgainMaxNumData.push(tmp)
       }
     },
-    queryPlatform () {
-      let loadConfig = {
-        method: 'GET',
-        url: '/udsSystem/listQuery'
-      }
-      this.$ajax(loadConfig)
-        .then(resp => {
-        })
-    },
     queryJobType () {
       this.jobTypeData = [
         { value: 'D', label: '每天执行' },
@@ -1198,8 +1523,27 @@ export default {
      * 返回到数据视图
      **/
     cancel () {
-      let queryCache = { formBean: this.transData.formBean, currentPage: this.transData.currentPage, pageSize: this.transData.pageSize }
-      this.$emit('switch', Object.assign({}, queryCache))
+      if (!this.transData.id) {
+        this.$router.push({ path: '/workflow/workflowmanage' })
+      } else {
+        let queryCache = { formBean: this.transData.formBean, currentPage: this.transData.currentPage, pageSize: this.transData.pageSize }
+        this.$emit('switch', Object.assign({}, queryCache))
+      }
+    },
+
+    checkRadio () {
+      this.isShow = true
+      if (this.radioData === 'local') {
+        this.filePathPre = 'local:///'
+      } else if (this.radioData === 'nas') {
+        this.filePathPre = 'nas:///'
+      } else if (this.radioData === 'aws') {
+        this.filePathPre = 'aws:///'
+      } else if (this.radioData === 'rpc') {
+        this.filePathPre = 'spdb:///'
+      } else if (this.radioData === 'scp') {
+        this.filePathPre = 'scp:///'
+      }
     }
   },
   /**
@@ -1220,6 +1564,12 @@ export default {
 
 </script>
 <style>
+  .drawer-calss .ivu-drawer-wrap  {
+      z-index: 3000 !important
+  }
+  .drawer-calss .ivu-drawer-mask {
+      z-index: 3000 !important
+  }
   .drawer-footer{
     width: 100%;
     position: absolute;
@@ -1239,6 +1589,8 @@ export default {
   .jobsetp-tag .ivu-tag{
     font-size: 14px;
     margin-top: 10%;
+    margin-left: 10%;
+    /* align-items: center; */
   }
   .work-flow .ivu-form-item-error-tip {
     white-space: nowrap;

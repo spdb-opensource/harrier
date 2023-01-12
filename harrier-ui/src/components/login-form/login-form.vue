@@ -1,26 +1,15 @@
 <template>
   <Form ref="loginForm" :model="form" :rules="rules" @keydown.enter.native="handleSubmit">
-    <FormItem prop="userName">
-      <Input v-model="form.userName" placeholder="请输入用户名">
-        <span slot="prepend">
-          <Icon :size="16" type="ios-person"></Icon>
-        </span>
-      </Input>
+    <FormItem prop="username">
+      <Input type="text" size="large"  v-model="form.userName" icon="ios-person" placeholder="请输入用户名" ></Input>
     </FormItem>
     <FormItem prop="password">
-      <Input type="password" v-model="form.password" placeholder="请输入密码">
-        <span slot="prepend">
-          <Icon :size="14" type="md-lock"></Icon>
-        </span>
-      </Input>
+      <Input type="password" size="large" v-model="form.password" icon="ios-lock" placeholder="请输入密码" ></Input>
     </FormItem>
     <FormItem prop="code" v-if="captchaSwitch">
             <div style="height: 32px;display: inline;">
 
-      <Input v-model="form.code" placeholder="验证码" style="width:170px;display:inline-table">
-        <span slot="prepend">
-          <Icon :size="14" type="ios-bug"></Icon>
-        </span>
+      <Input v-model="form.code" placeholder="验证码" style="width:170px;display:inline-table" icon="ios-bug">
       </Input>
         <img :src="codeUrl" @click="getCode" class="login-code-image" style="height:32px ;margin-bottom:-12px;margin-left:20px"/>
     </div>

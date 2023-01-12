@@ -56,6 +56,7 @@ import utils from '@/common/utils'
 import { mapActions } from 'vuex'
 // import { RSAKeyPair, encryptedString } from 'speed4j-front-commonjs'
 import env from '@/config'
+import { localRemove } from '@/libs/util'
 export default {
   data () {
     return {
@@ -83,6 +84,7 @@ export default {
     ]),
     logout () {
       // utils.logout(this.$router)
+      localRemove('route')
       this.handleLogOut().then(() => {
         this.$router.push({
           name: 'login'

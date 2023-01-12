@@ -1,19 +1,76 @@
 <template>
-<div id="login-header" class="note">
+<div id="login-header" class="background-image">
   <div>
+    <div>
+			<Row type="flex" justify="center" align="middle" class="code-row-bg" style="margin-top:3%">
+				<Col span="12" >
+					<Card icon="log-in" title="用户注册" :bordered="false" class="login_old" :style="[{height: (captchaSwitch ? '390px': '280px')},{marginTop: (captchaSwitch ? '5%': '10%')},{background: 'rgba(255, 255, 255, 0.9)'}]">
+          <Form ref="userForm" :label-width="10" :model="formBean" :rules="formRule">
+            <Col span="22">
+              <Form-Item prop="userCode">
+                <Input v-model="formBean.userCode" :disabled="isEdit">
+                  <span slot="prepend" style="display: inline-block;width:60px">账户：</span>
+                </Input>
+              </Form-Item>
+						</Col>
+            <Col span="22">
+              <Form-Item prop="userPwd">
+                <Input type='password' v-model="formBean.userPwd">
+                  <span slot="prepend" style="display: inline-block;width:60px">密码：</span>
+                </Input>
+              </Form-Item>
+						</Col>
+            <Col span="22">
+              <Form-Item prop="password">
+                <Input type="password" v-model="formBean.password">
+                  <span slot="prepend" style="display: inline-block;width:60px">再次输入：</span>
+                </Input>
+              </Form-Item>
+						</Col>
+            <Col span="22" v-if="captchaSwitch">
+              <Form-Item prop="userEmail">
+                <Input type="userEmail" v-model="formBean.userEmail">
+                  <span slot="prepend" style="display: inline-block;width:60px">邮箱:</span>
+                </Input>
+              </Form-Item>
+            </Col>
+            <Col span="16" v-if="captchaSwitch">
+              <FormItem prop="code">
+                <Input v-model="formBean.code">
+                  <span slot="prepend" style="display: inline-block;width:60px">验证码：</span>
+                </Input>
+              </FormItem>
+            </Col>
+						<Col span="6" v-if="captchaSwitch">
+              <FormItem>
+                <Button  type="primary" @click="getCode">{{codeMessage}}</Button>
+              </FormItem>
+            </Col>
+            <div>
+              <Button type="primary" :loading="loading" icon="md-add" @click="save()" style="float: right">保存</Button>
+              <Button type="primary" icon="ios-redo-outline" @click="cancel()" style=" margin-right: 15px;float: right;">取消</Button>
+            </div>
+          </Form>
+        </Card>
+				</Col>
+			</Row>
+		</div>
+
+<!-- 
     <div class="sys-bar-title">
       <div>Harrier</div>
     </div>
     <Row style="height:100%;">
-      <Col span="1">
-        &nbsp;
+      <Col span="15">
+          &nbsp;
       </Col>
-      <Col span="14">
-          <div >
-            <img src="../../../static/img/login_bg_right.png" class="flip-horizontal">
-          </div>
-      </Col>
-      <Col span="9" >
+      <Col span="9" style="height:100%;opacity: 0.76;background: #FFFFFF;">
+        <div style="text-align:center;padding-top:25%">
+            <img src="../../../static/img/logo_harrier.png" width = "137px" height = "157px"/>
+            <div class="homeTitle">
+              {{ homeTitle }}
+            </div>
+        </div>
         <Card icon="log-in" title="用户注册" :bordered="false" class="login_old" :style="[{height: (captchaSwitch ? '380px': '280px')},{marginTop: (captchaSwitch ? '25%': '30%')}]">
           <Form ref="userForm" :label-width="10" :model="formBean" :rules="formRule">
             <Col span="22">
@@ -63,7 +120,7 @@
           </Form>
         </Card>
       </Col>
-    </Row>
+    </Row> -->
   </div>
 </div>
 
@@ -297,5 +354,12 @@ export default {
 <style>
 #userRegisterForm .ivu-form-item-error-tip {
   width: 150px;
+}
+body {
+    background-image:url(~@/assets/images/login_background.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    -webkit-background-size: cover;
+    background-position: center 0;
 }
 </style>

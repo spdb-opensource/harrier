@@ -224,7 +224,7 @@ public abstract class AbstractEtcdRegistry implements HarrierRegistry{
 		return watch.watch(key, option, onNext);
 	}
 
-	public KeyValue getLeader(String electionName) {
+	public KeyValue getLeaderByEtcd(String electionName) {
 		Election election = etcdOperator.getElection();
 		ByteSequence electionNameKey = ByteSequence.from(electionName, StandardCharsets.UTF_8);
 		CompletableFuture<LeaderResponse> leaderfuture = election.leader(electionNameKey);

@@ -1,14 +1,10 @@
 package cn.spdb.harrier.rpc.remote;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.spdb.harrier.rpc.code.NettyDecoder;
-import cn.spdb.harrier.rpc.code.NettyEncoder;
-import cn.spdb.harrier.rpc.common.RpcRequest;
 import cn.spdb.harrier.rpc.config.NettyServerConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -17,10 +13,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.timeout.IdleStateHandler;
 
 public class NettyServer {
 
@@ -53,11 +47,7 @@ public class NettyServer {
 					.handler(new LoggingHandler(LogLevel.DEBUG)).childHandler(new ChannelInitializer<SocketChannel>() {
 						@Override
 						protected void initChannel(SocketChannel ch) throws Exception {
-							ch.pipeline().addLast("encoder", new NettyEncoder())
-									.addLast("decoder", new NettyDecoder(RpcRequest.class))
-									.addLast("server-idle-handler",
-											new IdleStateHandler(0, 0, 1000 * 180, TimeUnit.MILLISECONDS))
-									.addLast("server-handler", new NettyServerHandler());
+							ch.pipeline().addLast("choose", new NettyChooseSelectHandler());
 						}
 					});
 			ChannelFuture channelFuture = null;

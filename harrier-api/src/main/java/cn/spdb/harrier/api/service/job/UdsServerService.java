@@ -40,4 +40,16 @@ public interface UdsServerService {
      * 更新节点设置
      */
     int setEnable(String serverName,Boolean is_enable);
+
+    /**
+     * 获取可用的工作节点
+     * @return
+     */
+    List<UdsServer> getAvailableWorker();
+
+    /**
+     * 获取可用的主节点
+     * @return
+     */
+    List<UdsServer> getAvailableMaster();
 }

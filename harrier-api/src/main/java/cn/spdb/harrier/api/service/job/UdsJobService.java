@@ -68,6 +68,8 @@ public interface UdsJobService {
 	 */
 	int invokeJob(String platform,String systems,String job,LocalDate jobdate,Integer multibatch);
 
+	List<UdsJob> selectJobList(String platform, String systems);
+
 
 
 

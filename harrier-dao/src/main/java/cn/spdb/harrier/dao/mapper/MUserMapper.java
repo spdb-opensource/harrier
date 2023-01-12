@@ -296,4 +296,14 @@ public interface MUserMapper {
 		return selectUser(c -> c.where(userCode, isEqualTo(usercode_))
 				.and(isEnable, isEqualTo(true)));
 	}
+	
+	default int updateEnable(Long[] userIds, Boolean isEnable_) {
+		return update(c -> c.set(isEnable).equalTo(isEnable_)
+				.where(userId, isIn(userIds)));
+	}
+	
+	default int resetPwd(Long[] userIds, String password) {
+		return update(c -> c.set(userPwd).equalTo(password)
+				.where(userId, isIn(userIds)));
+	}
 }

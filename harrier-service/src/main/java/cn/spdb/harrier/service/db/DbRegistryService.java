@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.apache.commons.compress.utils.OsgiUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +32,13 @@ import cn.spdb.harrier.common.utils.Stopper;
 import cn.spdb.harrier.dao.entity.UdsServer;
 import cn.spdb.harrier.dao.mapper.UdsServerMapper;
 import cn.spdb.harrier.service.registry.HarrierRegistry;
+import cn.spdb.harrier.service.registry.SubscribeListener;
+import cn.spdb.harrier.service.registry.WatchEvent;
 
 @Component
 public class DbRegistryService implements Runnable, HarrierRegistry {
 
-	private Logger logger = LoggerFactory.getLogger(DbRegistryService.class);
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private List<SubscribeListener> list = new ArrayList<SubscribeListener>();
 
@@ -268,10 +269,10 @@ public class DbRegistryService implements Runnable, HarrierRegistry {
 		this.watcherTime = watcherTime;
 	}
 
-	public UdsServer getMaster() {
+	public UdsServer getLeader(String nodeClusterType) {
 		UdsServer tmp = null;
 		for (UdsServer udsServer : getUdsServerList()) {
-			if (udsServer.getNodeClusterType().equals(Constants.THREAD_NAME_MASTER_SERVER)) {
+			if (udsServer.getNodeClusterType().equals(nodeClusterType)) {
 				if (!udsServer.getIsEnable()) {
 					continue;
 				}
@@ -283,19 +284,12 @@ public class DbRegistryService implements Runnable, HarrierRegistry {
 		return tmp;
 	}
 
+	public UdsServer getMaster() {
+		return getLeader(Constants.THREAD_NAME_MASTER_SERVER);
+	}
+
 	public UdsServer getAlarm() {
-		UdsServer tmp = null;
-		for (UdsServer udsServer : getUdsServerList()) {
-			if (udsServer.getNodeClusterType().equals(Constants.THREAD_NAME_ALARM_SERVER)) {
-				if (!udsServer.getIsEnable()) {
-					continue;
-				}
-				if (ObjectUtils.isEmpty(tmp) || tmp.getId() > udsServer.getId()) {
-					tmp = udsServer;
-				}
-			}
-		}
-		return tmp;
+		return getLeader(Constants.THREAD_NAME_ALARM_SERVER);
 	}
 
 }

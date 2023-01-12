@@ -11,6 +11,10 @@ public class DynamicClassLoader extends URLClassLoader {
 	public DynamicClassLoader(ClassLoader parent) {
 		super(new URL[0], parent);
 	}
+	
+	public DynamicClassLoader(URL[] urls,ClassLoader parent) {
+		super(urls, parent);
+	}
 
 	public Class<?> loadClass(String fullName, JavaClassObject javaClassObject) {
 		byte[] classData = javaClassObject.getBytes();

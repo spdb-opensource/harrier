@@ -78,6 +78,11 @@ public class UdsJobController {
 		result.put("total", pageinfo.getTotal());
 		return result;
 	}
+	
+	@GetMapping("/selectJobList")
+	public List<UdsJob> selectJobList(String platform, String systems) {
+		return service.selectJobList(platform,systems);
+	}
 
 	/**
 	 * 作业列表-查询作业详情

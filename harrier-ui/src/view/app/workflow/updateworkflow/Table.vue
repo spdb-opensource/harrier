@@ -19,14 +19,17 @@
                   </Col>
                   <Col span="4">
                     <Form-Item prop="systems" label="应用名">
-                      <Select ref="refsystem" :disabled="isEdit" v-model="formBean.systems" filterable clearable>
+                      <Select ref="refsystem" :disabled="isEdit" v-model="formBean.systems" @on-change="queryJob" filterable clearable>
                       <Option v-for="item in systemsData" :value="item.value" :key="item.key">{{ item.label }}</Option>
                       </Select>
                     </Form-Item>
                   </Col>
                   <Col span="8">
                     <Form-Item prop="job" label="作业名">
-                      <Input  v-model="formBean.job"/>
+                      <!-- <Input  v-model="formBean.job"/> -->
+                      <Select ref="refjob" v-model="formBean.job" filterable clearable>
+                        <Option v-for="item in jobData" :value="item.value" :key="item.key">{{ item.label }}</Option>
+                      </Select>
                     </Form-Item>
                   </Col>
                   <Col span="4">
@@ -35,7 +38,7 @@
                         <Option v-for="item in taskStatusData" :value="item.value" :key="item.key">{{ item.label }}</Option>
                       </Select>
                     </FormItem>
-                  </Col>    
+                  </Col>
                   <Col :offset="1" span="4">
                     <div class="spdb-toolbar">
                       <Button type="primary" icon="ios-search" @click="generateJobArrange">生成编排信息</Button>
@@ -69,6 +72,7 @@ export default {
     return {
       platformData: [],
       systemsData: [],
+      jobData: [],
       ctrlDisable: true,
       isEdit: false,
       formBean: {},
@@ -87,7 +91,23 @@ export default {
         opt: [10, 50, 100]
       },
       ruleValidate: {
-      },
+        platform: [{
+          required: true,
+          message: '请输入数据！'
+        }],
+        systems: [{
+          required: true,
+          message: '请输入数据！'
+        }],
+        job: [{
+          required: true,
+          message: '请输入数据！'
+        }],
+        taskStatus: [{
+          required: true,
+          message: '请输入数据！'
+        }]
+      }
     }
   },
   watch: {
@@ -121,6 +141,31 @@ export default {
           tmp.label = data
           this.systemsData.push(tmp)
         })
+      }
+    },
+    queryJob () {
+      this.jobData = []
+      this.$refs.refsystem.setQuery('')
+      if (this.formBean.platform && this.formBean.systems) {
+        let params = {}
+        params.platform = this.formBean.platform
+        params.systems = this.formBean.systems
+        let loadConfig = {
+          method: 'GET',
+          url: '/udsJob/selectJobList',
+          params: params
+        }
+        this.$ajax(loadConfig)
+          .then(resp => {
+            if (resp.status && resp.status === 200) {
+              resp.data.forEach(e => {
+                let tmp = {}
+                tmp.value = e.job
+                tmp.label = e.job
+                this.jobData.push(tmp)
+              })
+            }
+          })
       }
     },
     /**
@@ -163,7 +208,7 @@ export default {
 		 * 查询
 		 **/
     generateJobArrange () {
-      let params = {platform: this.formBean.platform, systems: this.formBean.systems, job: this.formBean.job, taskStatus: this.formBean.taskStatus}
+      let params = { platform: this.formBean.platform, systems: this.formBean.systems, job: this.formBean.job, taskStatus: this.formBean.taskStatus }
       // Object.assign(params, this.formBean)
       let httpConfig = {
         method: 'GET',
@@ -173,7 +218,7 @@ export default {
 
       this.$ajax(httpConfig)
         .then(resp => {
-          
+          this.$router.push({ path: '/workflow/workflowmanage' })
         })
     }
   },
@@ -182,7 +227,7 @@ export default {
 	 **/
   mounted () {
 		 this.init()
-     this.queryPlatform()
+    this.queryPlatform()
   }
 }
 </script>

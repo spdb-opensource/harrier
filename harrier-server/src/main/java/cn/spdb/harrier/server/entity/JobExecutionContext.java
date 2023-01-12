@@ -259,6 +259,7 @@ public class JobExecutionContext implements Serializable {
 		putGlobalParam("${systems}", getSystem());
 		putGlobalParam("${date}", getJobDate());
 		putGlobalParam("${batche}", udsJob.getMultiBatch().toString());
+		putGlobalParam("${signal}",String.format("%d@%s_%s.dir", udsJob.getMultiBatch(),getJob(),getJobDate()));
 	}
 
 	public void putGlobalParam(String key, String value) {

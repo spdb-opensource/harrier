@@ -11,13 +11,13 @@ public class JavaClassObject extends SimpleJavaFileObject {
 
 	protected final ByteArrayOutputStream bosArrayOutputStream = new ByteArrayOutputStream();
 
-	protected JavaClassObject(URI uri, Kind kind) {
-		super(uri, kind);
-	}
-
 	public static JavaClassObject buildJavaClassObject(String name, Kind kind) {
 		URI uri = URI.create("file:///" + name.replace(".", "/") + kind.extension);
 		return new JavaClassObject(uri, kind);
+	}
+	
+	protected JavaClassObject(URI uri, Kind kind) {
+		super(uri, kind);
 	}
 
 	public byte[] getBytes() {

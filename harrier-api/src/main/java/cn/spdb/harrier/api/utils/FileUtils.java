@@ -44,19 +44,17 @@ public class FileUtils {
 	 * @param destFilename destination file name
 	 */
 
-	public static void copyFile(MultipartFile file, String destFilename) {
-		try {
-
+	public static void copyFile(File file, String destFilename) {
+		try (FileInputStream fileinput1 = new FileInputStream(file)) {
 			File destFile = new File(destFilename);
 			File destParentDir = new File(destFile.getParent());
 
 			if (!destParentDir.exists()) {
 				destParentDir.mkdirs();
 			}
-
-			Files.copy(file.getInputStream(), Paths.get(destFilename));
+			Files.copy(fileinput1, Paths.get(destFilename));
 		} catch (IOException e) {
-			logger.error("failed to copy file , {} is empty file", file.getOriginalFilename(), e);
+			logger.error("failed to copy file , {} is empty file", file.getName(), e);
 		}
 	}
 
@@ -100,28 +98,29 @@ public class FileUtils {
 	}
 
 	/**
-	 *@param destFileName 压缩后的文件名
-	 * @param files 需要压缩的目录名
+	 * @param destFileName 压缩后的文件名
+	 * @param files        需要压缩的目录名
 	 */
 	public static void doArchiver(String destFileName, File... files) {
-        File destFile = new File(destFileName);
- 
-        try (FileOutputStream fileOutputStream = new FileOutputStream(destFile);
-             BufferedOutputStream bufferedWriter = new BufferedOutputStream(fileOutputStream);
-             TarArchiveOutputStream tar = new TarArchiveOutputStream(bufferedWriter)) {
- 
-            tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
- 
-            for (File file : files) {
-                addTarArchiveEntryToTarArchiveOutputStream(file, tar, "");
-            }
-        } catch(IOException e) {
-        	logger.error("destFile compress failed: {}", destFile.getName());
-        }
-    }
+		File destFile = new File(destFileName);
+
+		try (FileOutputStream fileOutputStream = new FileOutputStream(destFile);
+				BufferedOutputStream bufferedWriter = new BufferedOutputStream(fileOutputStream);
+				TarArchiveOutputStream tar = new TarArchiveOutputStream(bufferedWriter)) {
+
+			tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+
+			for (File file : files) {
+				addTarArchiveEntryToTarArchiveOutputStream(file, tar, "");
+			}
+		} catch (IOException e) {
+			logger.error("destFile compress failed: {}", destFile.getName());
+		}
+	}
 
 	/**
 	 * 添加压缩
+	 * 
 	 * @param file
 	 * @param tar
 	 * @param prefix
@@ -167,7 +166,8 @@ public class FileUtils {
 				new BufferedInputStream(new FileInputStream(srcfile)))) {
 			TarArchiveEntry tae = null;
 			while ((tae = tais.getNextTarEntry()) != null) {
-				File f = new File(destpath + "/" + srcfile.getName().substring(0, srcfile.getName().indexOf(".tar")) + "/" + tae.getName());
+				File f = new File(destpath + "/" + srcfile.getName().substring(0, srcfile.getName().indexOf(".tar"))
+						+ "/" + tae.getName());
 				if (tae.isDirectory()) {
 					f.mkdirs();
 				} else {
@@ -205,11 +205,11 @@ public class FileUtils {
 	 * @return
 	 */
 	public static Map<String, Object> uploadFile(MultipartFile[] files, String fileType, String platform,
-			String systems, String job, Integer version) {
+			String systems, String job, Integer version, String uploadPath) {
 		Map<String, Object> res = new HashMap<String, Object>();
 		if (!ArrayUtils.isEmpty(files)) {
 			// 判断job工程目录是否存在，不存在则创建
-			File uploadFile = new File(JobDeployPath.UPLOAD_SCRIPT_PATH.getValue());
+			File uploadFile = new File(uploadPath);
 			if (!uploadFile.exists()) {
 				uploadFile.mkdirs();
 			}
@@ -221,8 +221,9 @@ public class FileUtils {
 					if (fileType != null) {
 						// 上传路径
 						String realPath = "";
-						if (("python".equalsIgnoreCase(fileType)) || ("perl".equalsIgnoreCase(fileType)) || ("shell".equalsIgnoreCase(fileType))
-								|| ("sql".equalsIgnoreCase(fileType)) || ("python3".equalsIgnoreCase(fileType))) {
+						if (("python".equalsIgnoreCase(fileType)) || ("perl".equalsIgnoreCase(fileType))
+								|| ("shell".equalsIgnoreCase(fileType)) || ("sql".equalsIgnoreCase(fileType))
+								|| ("python3".equalsIgnoreCase(fileType))) {
 							realPath = autoHome + "/APP/" + platform + "/" + systems + "/" + job + "/bin";
 						} else {
 							realPath = autoHome + "/APP/unknown";
@@ -276,10 +277,9 @@ public class FileUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static File uploadTar(MultipartFile file, String fileType)
-			throws Exception {
+	public static File uploadTar(MultipartFile file, String fileType, String uploadDeployTempPath) throws Exception {
 		// 判断job工程目录是否存在，不存在则创建
-		File uploadProject = new File(JobDeployPath.UPLOAD_DEPLOY_TEMP_PATH.getValue());
+		File uploadProject = new File(uploadDeployTempPath);
 		if (!uploadProject.exists()) {
 			uploadProject.mkdirs();
 		}

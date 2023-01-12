@@ -19,8 +19,8 @@ public enum JobDeployStatus {
 	// 作业触发类型
 	STREAM_JOB("作业触发", 0),
 	STREAM_CRON("定时触发", 1),
-	STREAM_SIGNAL("信号文件触发", 2);
-	
+	STREAM_SIGNAL("信号文件触发", 2),
+	STREAM_HTTP("http请求触发", 3);
 	
 	
 	private JobDeployStatus(String key, Integer value) {

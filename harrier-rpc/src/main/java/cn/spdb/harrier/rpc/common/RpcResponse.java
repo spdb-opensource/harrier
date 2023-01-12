@@ -5,7 +5,6 @@ public class RpcResponse {
 	private Byte status;
 	private String msg;
 	private Object result;
-//	private Byte eventType;
 
 
 	public String getMsg() {
@@ -31,13 +30,5 @@ public class RpcResponse {
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
-
-//	public Byte getEventType() {
-//		return eventType;
-//	}
-//
-//	public void setEventType(Byte responseType) {
-//		this.eventType = responseType;
-//	}
 
 }

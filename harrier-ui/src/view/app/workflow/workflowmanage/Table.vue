@@ -7,7 +7,7 @@
             <Form-Item prop="platform" label="平台名" >
               <Select filterable v-model="formBean.platform" @on-change="querySystem" clearable>
                 <Option v-for="item in platformData" :value="item.value" :key="item.value" :label="item.value">{{ item.label }}</Option>
-              </Select>            
+              </Select>
             </Form-Item>
           </Col>
           <Col span="3">
@@ -27,7 +27,9 @@
               <Input  v-model="formBean.version"/>
             </Form-Item>
           </Col>
-          <Col :offset="1" span="10">
+        </Row>
+        <Row>
+           <Col span="10">
             <div class="spdb-toolbar">
               <Button type="primary" icon="ios-search" @click="search">查询</Button>
               <Button type="primary" icon="md-close" @click="clear">清除查询</Button>
@@ -225,14 +227,15 @@ export default {
           render: (h, { column, index, row }) => {
             // row.taskStatus 1->新增；2->变更；3->下线 4->上线完成
             // row.taskStatus = 2
-            console.log(row.processStatus)
             let col = '#03399b'
             let text = '上线'
             let iconStyle = 'md-arrow-round-up'
+            let disable = false
             if (row.processStatus === 3) {
               col = 'red'
               text = '下线'
               iconStyle = 'md-arrow-round-down'
+              disable = true
             } else {
               col = 'green'
             }
@@ -241,11 +244,10 @@ export default {
               h('Poptip', {
                 props: {
                   content: '编辑',
-                  // theme: 'light',
                   transfer: true,
                   width: '50px',
-                  // title: '编辑',
                   trigger: 'hover'
+
                 },
                 class: {
                   poptipContentInner: true
@@ -253,9 +255,8 @@ export default {
               }, [
                 h('Button', { // 编辑
                   props: {
-                    icon: 'md-create'
-                  // shape: 'circle',
-                  // type: 'primary'
+                    icon: 'md-create',
+                    disabled: disable
                   },
                   style: {
                     marginRight: '5px',
@@ -269,7 +270,7 @@ export default {
                   on: {
                     click: () => {
                       let queryCache = { formBean: this.formBean, currentPage: this.page.current, pageSize: this.page.size }
-                      this.$emit('switch', Object.assign({}, { row: row }, queryCache)) // 提交form事件，在parent中显示form
+                      this.$emit('switch', Object.assign({}, { row: row, id: row.id }, queryCache)) // 提交form事件，在parent中显示form
                     }
                   }
                 }, '')
@@ -356,7 +357,8 @@ export default {
               }, [
                 h('Button', { // 删除：只删除dy_job_arrange
                   props: {
-                    icon: 'md-trash'
+                    icon: 'md-trash',
+                    disabled: disable
                   // shape: 'circle',
                   // type: 'primary'
                   },
@@ -446,7 +448,8 @@ export default {
               }, [
                 h('Button', { // 版本切换
                   props: {
-                    icon: 'md-repeat'
+                    icon: 'md-repeat',
+                    disabled: disable
                   // shape: 'circle',
                   // type: 'primary'
                   },
@@ -564,7 +567,7 @@ export default {
       let httpConfig = {
         method: 'GET',
         url: RESOURCE_PATH + '/loadJobArrangesByVersion',
-        params: { platform:this.versionOp.platform, systems: this.versionOp.systems, job: this.versionOp.job, version: version }
+        params: { platform: this.versionOp.platform, systems: this.versionOp.systems, job: this.versionOp.job, version: version }
       }
       this.$ajax(httpConfig)
         .then(resp => {
@@ -721,7 +724,7 @@ export default {
       })
     },
     handleUpload: function (file) {
-      var fileExtension = (file.name).match(/\.([0-9a-z]+)(?:[\?#]|$)/i);
+      var fileExtension = (file.name).match(/\.([0-9a-z]+)(?:[\?#]|$)/i)
       if (fileExtension.pop() !== 'tar') {
         this.$Message.warning('您上传的不是工程压缩包！')
         return false
@@ -758,7 +761,7 @@ export default {
           })
       }
       // })
-    },    
+    },
     /**
 		 * 数据复选事件
 		 **/
@@ -790,8 +793,8 @@ export default {
 	 * 视图挂载
 	 **/
   mounted () {
-     this.init()
-     this.queryPlatform()
+    this.init()
+    this.queryPlatform()
   }
 }
 </script>

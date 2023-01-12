@@ -12,7 +12,7 @@ import cn.spdb.harrier.server.worker.exec.TaskExecuteRunnable;
 @RpcServiceHandler("WorkTransportServerInterface")
 public class WorkTransportServer implements WorkTransportServerInterface {
 
-	private WorkerManagerThread workerManagerThread = BeanContext.getBean(WorkerManagerThread.class);
+	private static WorkerManagerThread workerManagerThread = BeanContext.getBean(WorkerManagerThread.class);
 
 	@Override
 	public Boolean dispathcer(JobExecutionContext jobExecutionContext) {

@@ -19,7 +19,7 @@ import './assets/css/monitor.css'
 // import Axios from 'axios'
 import axiosIns from './common/ajax.js'
 import { setToken } from '@/libs/util'
-import echarts from 'echarts'
+import * as echarts from 'echarts'
 // import STreeTable from '_c/s-tree-table'
 // 实际打包时应该不引入mock
 /* eslint-disable */

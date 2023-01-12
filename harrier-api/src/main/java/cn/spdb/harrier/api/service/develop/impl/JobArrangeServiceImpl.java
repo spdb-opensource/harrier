@@ -50,7 +50,7 @@ public class JobArrangeServiceImpl implements IJobArrangeService {
 
 	@Override
 	public Integer updateJobArrange(DyJobArrange dyJobArrange) {
-		return dyJobArrangeMapper.updateByPrimaryKey(dyJobArrange);
+		return dyJobArrangeMapper.update(dyJobArrange);
 	}
 
 	@Override
